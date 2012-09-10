@@ -1,6 +1,7 @@
 hosted images
 try deploying, to test css/js includes
 tags/categories
+comments
 import existing posts
     dates, titles, code snippets, images, quotes
 re-style, look for cool examples
