@@ -1,0 +1,15 @@
+---
+layout: default
+title: Chase Seibert | blog
+---
+
+<h2>Posts</h2>
+<ul>
+    {% for post in site.posts %}
+        <li>
+            {{ post.date|date_to_string }}
+            <a href="{{ post.url }}">{{ post.title }}</a>
+        </li>
+    {% endfor %}
+</ul>
+
