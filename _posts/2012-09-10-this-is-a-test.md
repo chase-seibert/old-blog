@@ -8,4 +8,4 @@ def lol(foobar):
    print foober
 {% endhighlight %}
 
-<img src="/images/0416761-R1-029-13.jpg">
+<img src="{{ site.baseurl }}/images/0416761-R1-029-13.jpg">

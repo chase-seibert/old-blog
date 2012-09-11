@@ -8,7 +8,7 @@ title: Chase Seibert | blog
     {% for post in site.posts %}
         <li>
             {{ post.date|date_to_string }}
-            <a href="{{ post.url }}">{{ post.title }}</a>
+            <a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a>
         </li>
     {% endfor %}
 </ul>
