@@ -1,11 +1,7 @@
 ---
-layout: default
-title: This is so cool
+layout: post
+title: This is another test
+tags: test
 ---
 
-{% highlight python %}
-def lol(foobar):
-   print foober
-{% endhighlight %}
-
-<img src="{{ site.baseurl }}/images/0416761-R1-029-13.jpg">
+This is another test page!

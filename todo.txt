@@ -1,4 +1,3 @@
-tags/categories - related posts
 comments
 import existing posts
     dates, titles, code snippets, images, quotes
