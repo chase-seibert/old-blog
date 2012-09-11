@@ -1,6 +1,4 @@
-hosted images
-try deploying, to test css/js includes
-tags/categories
+tags/categories - related posts
 comments
 import existing posts
     dates, titles, code snippets, images, quotes
