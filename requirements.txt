@@ -1,0 +1,3 @@
+django
+html2text
+BeautifulSoup
