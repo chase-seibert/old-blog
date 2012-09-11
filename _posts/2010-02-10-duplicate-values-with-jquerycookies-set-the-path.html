@@ -1,0 +1,38 @@
+---
+layout: post
+title: duplicate values with jQuery.cookies (set the path!)
+tags: 
+---
+
+<blockquote>A program should follow the "Law of Least Astonishment". What is this law? It is simply that the program should always respond to the user in the way that astonishes him least. - Geoffrey James, <a href="http://www.canonical.org/~kragen/tao-of-programming.html#book4">The Tao of Programming</a></blockquote>
+
+<p>
+I recently ran into an astonishing behaviour in an API I was using, namely the official <a href="http://plugins.jquery.com/project/cookie">jQuery cookie plug-in</a>. But first, a little background on cookies.
+</p>
+
+<p>
+Now, I've been writing web-apps that use cookies for about 15 years. But I had no idea that cookies could be associated with specific paths. <a href="http://www.quirksmode.org/js/cookies.html">Quirksmode</a> (as usual) gives the low-down:
+</p>
+
+<blockquote>The path gives you the chance to specify a directory where the cookie is active. So if you want the cookie to be only sent to pages in the directory cgi-bin, set the path to /cgi-bin. Usually the path is set to /, which means the cookie is valid throughout the entire domain.</blockquote>
+
+<p>
+The fact that it defaults to "/" is why I would venture to guess that relatively few developers are aware of this option. After all, in 99% of the cases, cookies are used to persist a session, which you want to be valid at the domain or sub-domain level, but invariant bellow that. 
+</p>
+
+<p>
+The jQuery cookie plug-in, however, inexplicably defaults the path to the actual path of the URL you're at. This forces you to set default the path to "/" <span style="font-style:italic;">manually</span>, a fact that the top-level "documentation", which only exists in the form of <a href="http://plugins.jquery.com/files/jquery.cookie.js.txt">comments in the code</a>, exacerbates by showing the initial example without the path:
+</p>
+
+<pre name="code" class="javascript">
+ * @example $.cookie('the_cookie', 'the_value');
+ * @desc Set the value of a cookie
+</pre>
+
+<p>
+Of course, you would probably spend 20 minutes or so tearing you're hair out about why cookies were not persisting properly. Finally, you would use Firebug to inspect the actual request/response pairs, and realise that there are multiple values of "the_cookie" being passed for each request. In fact, what virtually everyone using this API will want to do is the following:
+</p>
+
+<pre name="code" class="javascript">
+ $.cookie('the_cookie', 'the_value', { path: "/" });
+</pre>

@@ -1,0 +1,70 @@
+---
+layout: post
+title: Django&#58; exclude some views from middleware
+tags: django
+---
+
+<p>
+In my Django applications, I tend to use custom middleware extensively for common tasks. I have middleware that logs page runtime, middleware that sets context that most views will end up needing anyway, and middleware that copies the HTTP_REFERRER header from an entry page into the session scope for use later in the session.
+</p>
+
+<p>
+At some point, I inadvertently created a middleware class invalidated the browser cache for certain views. Typically, just wrapping a view in @cache_control(max_age=3600) is enough to have the browser cache that view for an hour. But if you do something innocuous like <a href="http://groups.google.com/group/django-users/browse_thread/thread/bba0b8e29d80f2df">evaluate request.user.is_authenticated()</a> in a middleware class, then Django will set the Vary: Cookie header, invalidating the cache. 
+</p>
+
+<p>
+In my case, what I really wanted was a decorator that I could attach to a view that would skip my custom middleware, like an exclude list. Of course, you could just attach your middleware explicitly to each view that needs it, but that's needless code repetition if a middleware should wrap almost all views. You could also change each of your middleware classes to exclude particular views by URL, but you might end up having to alter many different middleware classes with that logic.
+</p>
+
+<p>
+As another option, you can use the following decorator/middleware pair to short-circuit the middleware execution of any view, for any middleware defined in your settings file AFTER this one.
+</p>
+
+<pre name="code" class="python">
+""" Allows short-curcuiting of ALL remaining middleware by attaching the
+@shortcircuitmiddleware decorator as the TOP LEVEL decorator of a view.
+
+Example settings.py:
+
+MIDDLEWARE_CLASSES = (
+    'django.middleware.common.CommonMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+
+    # THIS MIDDLEWARE
+    'myapp.middleware.shortcircuit.ShortCircuitMiddleware',
+
+    # SOME OTHER MIDDLE WARE YOU WANT TO SKIP SOMETIMES
+    'myapp.middleware.package.MostOfTheTimeMiddleware',
+
+    # MORE MIDDLEWARE YOU WANT TO SKIP SOMETIMES HERE
+)
+
+Example view to exclude from MostOfTheTimeMiddleware (and any subsequent):
+
+@shortcircuitmiddleware
+def myview(request):
+    ...
+
+"""
+
+def shortcircuitmiddleware(f):
+    """ view decorator, the sole purpose to is 'rename' the function
+    '_shortcircuitmiddleware' """
+    def _shortcircuitmiddleware(*args, **kwargs):
+        return f(*args, **kwargs)
+    return _shortcircuitmiddleware
+
+class ShortCircuitMiddleware(object):
+    """ Middleware; looks for a view function named '_shortcircuitmiddleware'
+    and short-circuits. Relies on the fact that if you return an HttpResponse
+    from a view, it will short-circuit other middleware, see:
+    https://docs.djangoproject.com/en/dev/topics/http/middleware/#process-request
+     """
+    def process_view(self, request, view_func, view_args, view_kwargs):
+        if view_func.func_name == "_shortcircuitmiddleware":
+            return view_func(request, *view_args, **view_kwargs)
+        return None
+</pre>

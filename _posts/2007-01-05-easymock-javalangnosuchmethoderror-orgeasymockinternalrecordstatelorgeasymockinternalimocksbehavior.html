@@ -1,0 +1,21 @@
+---
+layout: post
+title: EasyMock java.lang.NoSuchMethodError&#58; org.easymock.internal.RecordState.(Lorg/easymock/internal/IMocksBehavior;)
+tags: java, easymock
+---
+
+<p>
+Mysterious Error #5578:
+</p>
+
+<pre name="code" class="java">
+java.lang.NoSuchMethodError: org.easymock.internal.RecordState.(Lorg/easymock/internal/IMocksBehavior;)V
+at org.easymock.internal.MocksControl.reset(MocksControl.java:51)
+at org.easymock.internal.MocksControl.(MocksControl.java:26)
+at org.easymock.EasyMock.createControl(EasyMock.java:77)
+at org.easymock.EasyMock.createMock(EasyMock.java:43)
+</pre>
+
+<p>
+Solution? Change the import order easymock.jar and easymockclassextension.jar.
+</p>

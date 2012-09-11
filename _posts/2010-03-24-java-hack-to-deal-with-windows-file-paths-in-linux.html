@@ -1,0 +1,70 @@
+---
+layout: post
+title: Java hack to deal with Windows file paths in Linux
+tags: java
+---
+
+<p>
+Say you have a large legacy ColdFusion app on top of Java that runs on Windows. File access is done both via java.io.File and by CFFILE (which in turn also uses java.io.File), but not centralised in any way into a single file access library. Further, say you have file paths both hard-coded in the code, and also in a database.
+</p>
+
+<p>
+In other words, the file paths themselves cannot change. They could be either local or remote Windows file paths, such as "c:\temp\file.txt" or "\\server\share\file.txt ".
+</p>
+
+<p>
+How would you run this application on Linux without changing the code?
+</p>
+
+<p>
+First, I tried running the application in <a href="http://www.winehq.org/">WINE</a>. This worked surprisingly well. WINE actually has awesome <a href="http://www.winehq.org/docs/winedev-guide/x3062">path conversion</a>, including UNC support.
+</p>
+
+<p>
+Don't want to run WINE? I have another solution. It's actually possible to implement your own version of java.io.File, and have the classloader pick up your version when the JVM starts. The tricky part is that since your class needs to actually be named java.io.File, you can't just extend Sun's java.io.File. 
+</p>
+
+<p>
+However, you can download the code for java.io.File from the <a href="http://java.sun.com/javase/downloads/index.jsp">JDK</a>, and make modifications as needed.
+</p>
+
+<pre name="code" class="java">
+
+ // added to each constructor
+ pathname = translate(pathname);
+
+ ...
+
+ private static Pattern regexDriveLetter = Pattern.compile("^[a-zA-Z]:");
+ private static Pattern regexSlashes = Pattern.compile("\\\\");
+ private static Pattern regexUnc = Pattern.compile("^//");
+ 
+ public static String translate(String pathname) {
+  
+  if (pathname == null) {
+      return null;
+  }
+  
+  pathname = regexDriveLetter.matcher(pathname).replaceAll("");
+  pathname = regexSlashes.matcher(pathname).replaceAll("/");
+  pathname = regexUnc.matcher(pathname).replaceAll("/mnt/");
+  return pathname;
+ }
+
+</pre>
+
+<p>
+The regular expression rules convert "c:\temp\text.txt" to "/temp/text.txt", and "\\fileserver\userfiles\test.txt" to "/mnt/fileserver/userfiles/test.txt", but of course you can customize them to do anything you like.
+</p>
+
+<p>
+To load your java.io.File when the JVM starts, just compile it into a JAR, and add "-Xbootclasspath/p:javafilehack.jar" to your java command-line. <a href="http://java.sun.com/j2se/1.3/docs/tooldocs/solaris/java.html">Xbootclasspath/p</a> simply places your JAR at the head of the line when the classpath is processed.
+</p>
+
+<p>
+I'm not saying I recommend this approach. If you can modify the legacy code to support Linux file paths, that would be far better. If that's not an option, I would say that the WINE approach is more maintainable. With the Java hack, you would need to merge your changes separately into each version of the JVM you want to run, due to the serialVersionUID if nothing else.
+</p>
+
+<p>
+I'm working on a compromise solution using <a href="http://en.wikipedia.org/wiki/Aspect-oriented_programming">AoP</a>. I'll keep you posted.
+</p>

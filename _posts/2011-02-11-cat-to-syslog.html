@@ -1,0 +1,14 @@
+---
+layout: post
+title: cat to syslog
+tags: 
+---
+
+<p>
+Ever wanted to submit the results of regular command-line tools to syslog? <a href="http://www.cyberciti.biz/tips/howto-linux-unix-write-to-syslog.html">Logger</a> lets you do that. Here is an example of logging CPU load and vmstat into to a centralized syslog server.
+</p>
+
+<pre name="code" class="bash">
+cat /proc/loadavg |logger -p local7.info -t "load-cpu"
+vmstat |tail -n +3 |logger -p local7.info -t "load-vmstat"
+</pre>

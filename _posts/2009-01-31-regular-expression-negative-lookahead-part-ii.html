@@ -1,0 +1,84 @@
+---
+layout: post
+title: Regular Expression&#58; Negative Lookahead Part II
+tags: regex
+---
+
+<p>
+<a href='http://bitkickers.blogspot.com/2009/01/regular-expression-negative-lookahead.html'>When we left off</a>, I had set out to replace any ampersand outside a CDATA segment with the XML encoded version. Instead of ditching the regex approach and using a lenient DOM parser, I chose to escalate the ugly hack even further! The helpful folks over at <a href='http://stackoverflow.com/questions/462831/regular-expression-to-escape-html-ampersands-while-respecting-cdata'>stack overflow</a> had a ready made solution:
+</p>
+
+<pre name="code" class="xml:nocontrols">
+    &amp;(?!(?:[a-zA-Z][a-zA-Z0-9]*|#\d+);)(?!(?&gt;(?:(?!&lt;!\[CDATA\[|\]\]&gt;).)*)\]\]&gt;)
+</pre>
+
+<p>
+I think this is self-explanatory. See you next time!
+</p>
+
+<p>
+OK, maybe not. I don't know about you, but I certainly didn't grok that when I first saw it, or even an hour later. I think it helps to start with a simplified example. Instead of CDATA, let's say that the start token is "a", and the end token is "b". So, we would want the following matches:
+</p>
+
+<pre>
+ <font color=navy><b>&</b></font> 
+ <font color=navy><b>&</b></font> a b
+ a b <font color=navy><b>&</b></font>
+
+ a & b a
+ &
+ b
+ a & & b
+</pre>
+
+</p>
+My idea was to match any "&" that's not followed by a "b" without an "a" in between. The smallest regex I could come up with for this case is:
+</p>
+
+<pre name="code" class="xml:nocontrols">
+    &amp;(?![^a]*b)
+</pre>
+
+<p>
+The only piece that might be news to the regex journeyman is the "(?!" syntax. This is a <a href='http://www.regular-expressions.info/lookaround.html'>negative look ahead</a>. In other words, this regex won't match an ampersand if it's not followed by a match for "[^a]*b". It works like a charm, but it's cheating. The solution is so simple because we're taking large advantage of a hidden assumption: that the start token specifically is exactly one character.
+</p>
+
+<p>
+The "[^a]*" means any string of characters that is NOT "a". When you try to extend this to literal strings (such as "&lt;![CDATA["), you will find that the only way to negate a literal is the aforementioned "(?!" syntax. Also, you must escape certain characters so they are evaluated as literals. 
+</p>
+
+<pre name="code" class="xml:nocontrols">
+    (?!&lt;!\[CDATA\[)
+</pre>
+
+<p>
+The "b" token would simply be the literal. If we simply replace "a" and "b", we get:
+</p>
+
+<pre name="code" class="xml:nocontrols">
+    &amp;(?!(?!&lt;!\[CDATA\[)*\]\]&gt;)
+</pre>
+
+<p>
+Now, we have two look around clauses, which is confusing. But the bigger problem is that this <a href='http://www.rubular.com/regexes/5949'>doesn't actually work</a>. This is because the (?!) clause itself isn't matching anything; it's a zero-width token. To actually progress the matching, we need to throw good old ".*" in there. But don't want the expanding match to include the look ahead clause, so we wrap the look ahead and the "." in it's own set:
+</p>
+
+<pre name="code" class="xml">
+    &amp;(?!((?!&lt;!\[CDATA\[).)*\]\]&gt;)
+</pre>
+
+<p><i>
+Note: this regex requires that the optional flag <a href='http://www.regular-expressions.info/dot.html'>period matches newlines</a> is set to TRUE. This is not the default. You can also replace the lone "." in the regex with "(.|\s)".
+</i></p>
+
+<p>
+That's the basic idea, anyway. The stack overflow script has some other stuff in it. It starts with "&amp;(?!(?:[a-zA-Z][a-zA-Z0-9]*|#\d+);)", which is an attempt to not match ampersands that are already part of an XML encoded value. That's not necessary for my case, but nice to have. Their CDATA clause is also slightly different. But it's all just optimizations. Maybe we can explore this in a later post. For my part, I'll stick with the shorter, slightly more readable version at the cost of performance.
+</p>
+
+<p>
+Still no word on a fix from HotJobs to actually return valid XML from their web-service.
+</p>
+
+<p><i>
+This post made possible by the excellent utility <a href='http://www.regexbuddy.com/'>RegexBuddy</a>. Highly recommended.
+</i></p>

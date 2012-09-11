@@ -1,0 +1,145 @@
+---
+layout: post
+title: Django/Haystack&#58; latitude/longitude radius search w/ SOLR
+tags: solr, lucene, django, haystack
+---
+
+<p>
+<a href="http://haystacksearch.org/">Haystack</a> is a great indexed search framework for Django. Getting started is easy, and it includes many data types and facets out of the box. However, one data type it does not do natively is location based search. Specifically, I wanted to do radius searching based on latitude and longitude. GIS search is coming, but it could be a little while:
+</p>
+
+<blockquote>
+There aren't words to express how badly I want to incorporate 
+geospatial search. However, I'm waiting on Solr 1.5's official 
+implementation, as well as seeing if the Xapian folks land their GIS 
+branch. I haven't pursued the third-party options because it makes the 
+setup more complex and there's no guarantees on compatibility, which 
+increase my support headaches. 
+   - <a href="http://groups.google.com/group/django-haystack/browse_thread/thread/f88d625679941d77">Daniel, Haystack Google Group</a>
+</blockquote>
+
+<p>
+In the meantime, you can use <a href="http://www.jteam.nl/news/spatialsolr">one</a> of <a href="https://github.com/outoftime/solr-spatial-light">several</a> SOLR extensions, or you can just do it yourself. Here is a very basic, but functional, implementation.
+</p>
+
+<p>
+First, I introduce a custom index field "GeoPointField" on my SearchIndex model, mapped to some existing fields in my Django ORM that store latitude and longitude as float values.
+</p>
+
+<pre name="code" class="python">
+class GeoPointField(indexes.CharField):
+
+    def __init__(self, **kwargs):
+        kwargs[&quot;default&quot;] = &quot;000000000000000&quot;
+        super(GeoPointField, self).__init__(**kwargs)
+
+    def convert(self, value):
+        return geo2solr(value)
+
+class JobIndex(indexes.SearchIndex):
+
+    text = indexes.CharField(document=True, use_template=True, template_name=&quot;search/index/job_text.txt&quot;)
+    latitude = GeoPointField(model_attr=&quot;location__latitude&quot;, null=True)
+    longitude = GeoPointField(model_attr=&quot;location__longitude&quot;, null=True)
+
+    def index_queryset(self):
+        return Job.objects.all()
+
+site.register(Job, JobIndex)
+</pre>
+
+<p>
+What's the deal with that default of "000000000000000"? Because everything is a string in SOLR, I have decided to encode lat/long as a string between "000000000000000" and "999999999999999". The actual "geo2solr" algorithm for the mapping can be arbitrary, as long as the outputs maintain relative comparability when compared as strings. i.e., a > b implies that geo2solr(a) > geo2solr(b). 
+</p>
+
+<pre name="code" class="python">
+def geo2solr(lat_or_long):
+    &quot;&quot;&quot; Converts a floating point latitude or longitude to a string for the SOLR index.
+    The string representations need to be str-comparable to each other. Ie,
+    04235863500 &lt; 05000000000
+
+    Negative values are handled by adding 180 to everything (Longitude is +/- 180)
+
+    &gt;&gt;&gt; geo2solr(42.35863500)
+    &#39;000022235863500&#39;
+
+    &gt;&gt;&gt; geo2solr(-42.35863500)
+    &#39;000013764136500&#39;
+
+    &gt;&gt;&gt; geo2solr(&#39;42.35863500&#39;)
+    &#39;000022235863500&#39;
+
+    &gt;&gt;&gt; geo2solr(&#39;-179.35863500&#39;)
+    &#39;000000064136500&#39;
+
+    &gt;&gt;&gt; geo2solr(0)
+    &quot;000018000000000&quot;
+
+    &gt;&gt;&gt; geo2solr(None)
+
+    &gt;&gt;&gt; geo2solr(&quot;foobar&quot;)
+
+    &gt;&gt;&gt; geo2solr(50000)
+
+    &quot;&quot;&quot;
+    try:
+        value = float(lat_or_long)
+        if -180 &lt;= abs(value) &lt;= 180:
+            return str(int((value + 180) * 100000000)).rjust(15, &quot;0&quot;)
+    except TypeError:
+        pass
+    except ValueError:
+        pass
+    return None
+</pre>
+
+<p>
+To do the actual radius search part requires a way to calculate the radius range in my geo-coded units, and a SearchForm/FacetedSearchForm to perform that search.
+</p>
+
+<pre name="code" class="python">
+def geo_radius(lat, long, miles=50):
+    &quot;&quot;&quot; Given a latitude and longitude (as floats), returns two offsets, one
+    for latitude and one for longitude, that defines a radius (in miles)
+    around the location.
+
+    Uses Haversine formula: http://en.wikipedia.org/wiki/Haversine_formula
+    http://blog.fedecarg.com/2009/02/08/geo-proximity-search-the-haversine-equation/
+
+    Note: long is not actually used. This is correct. Longitude distance is also
+    based on latitude in Haversine.
+
+    &gt;&gt;&gt; geo_radius(53.754842, -2.708077)
+    (0.7246376811594203, 1.2256204746052668)
+
+    &quot;&quot;&quot;
+    return Decimal(miles / 69.0), Decimal(miles / abs(math.cos(math.radians(lat)) * 69.0))
+
+class LocationRadiusSearchForm(FacetedSearchForm):
+
+    q = forms.CharField(required=False)
+    location = ChoiceField(required=False)
+
+    def search(self):
+        sqs = super(LocationRadiusSearchForm, self).search()
+        try:
+            location_name = self.cleaned_data.get(&quot;location&quot;)
+            location = Location.objects.get(name=location_name)
+            if location:
+                lat_offset, long_offset = geo_radius(location.latitude, location.longitude)
+                sqs = sqs.filter_and(
+                    latitude__range=[
+                        geo2solr(location.latitude - lat_offset),
+                        geo2solr(location.latitude + lat_offset)],
+                    longitude__range=[
+                        geo2solr(location.longitude - long_offset),
+                        geo2solr(location.longitude + long_offset)])
+        except Exception:
+            pass
+
+        return sqs
+</pre>
+
+<p>
+That's it! This will generated SOLR queries like "longitude:[000005666355690 TO 000005849715509] AND latitude:[000021705248731 TO 000021850176268]"
+</p>

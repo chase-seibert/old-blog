@@ -1,0 +1,82 @@
+---
+layout: post
+title: Easier Development with Unobtrusive JavaScript
+tags: 
+---
+
+<p>
+<a href="http://en.wikipedia.org/wiki/Unobtrusive_JavaScript">Unobtrusive JavaScript</a> is a poorly defined umbrella term. It's generally agreed to encompass:
+</p>
+
+<ul>
+<li>Separating behavior from content, much like <a href="http://www.alistapart.com/articles/separation/">separating style from content</a>.</li>
+<li>Avoiding browser specific javascript bugs.</li>
+<li>Supporting browsers without javascript.</li>
+</ul>
+
+<p>
+My definition is a little more simple. Make your pages functional in plain HTML.
+</p>
+
+<p>
+Now, there is a good amount of grumbling from the peanut gallery on this issue. Here are some common objections, and rebuttals. 
+</p>
+
+<blockquote>The year is 2009. Everyone has javascript. This is a waste of time.</blockquote>
+
+<p>
+Actually, 5% of users <a href="http://www.w3schools.com/browsers/browsers_stats.asp">don't have javascript</a>. You can break these users down into the following groups:
+</p>
+
+<ul>
+<li>Really old browsers</li>
+<li>Users with disabilities (think screen-readers)</li>
+<li><a href="http://noscript.net/">NoScript</a> users. <a href="http://en.wikipedia.org/wiki/Cross-site_scripting">XSS</a> is now <span style="font-weight:bold;">the</span> most exploited attack vector. Knowledgeable users may choose to opt-out.</li>
+<li>Googlebot. If you want Google to index your site (hint: yes), then your content needs to be available with javascript disabled.</li>
+</ul>
+
+<blockquote>I don't know how. It seems hard.</blockquote>
+
+<p>
+It's really not. It's just taking separation to the next level. You're already separating HTML from CSS (you ARE doing that, right?), now just pull the javascript out, too. Ie, instead of this:
+</p>
+
+<pre name="code" class="html">
+&lt;a href="javascript: nextPage();" style="font-weight: bold; color: red;"&gt;Next Page&lt;/a&gt;
+</pre>
+
+<p>
+Do this (nod to <a href="http://www.alistapart.com/articles/behavioralseparation">A List Apart</a>):
+</p>
+
+<pre name="code" class="html">
+&lt;a href="thisPage.php?page=2"&gt;Next Page&lt;/a&gt;
+</pre>
+
+<pre name="code" class="css">
+A { font-weight: bold; color: red; }
+</pre>
+
+<pre name="code" class="javascript">
+// using jQuery
+$("a:contains(Next Page)").click(function() {
+ nextPage();
+ return false;
+});
+</pre>
+
+<p>
+You've allowed for graceful degradation without javascript; the user will simply be redirected to the next page. You have allowed for enhanced functionality with the Ajax call if javascript is available. Plus, you've separated your style, content and behavior. How do you reduce code duplication? Simply have nextPage() make an Ajax call to the href of the A tag (no need to specify the URL again), and get the new content. Then merge the new content into the existing page. More on this next time.
+</p>
+
+<blockquote>I can't implement this feature without javascript. It's not possible.</blockquote>
+
+<p>
+Typically these are UI tasks. For example, a <a href="http://www.google.com/webhp?complete=1&hl=en">Google suggest</a> auto-complete. That drop down is flatly impossible without javascript, yes. But Google itself works just fine without this feature. This is graceful degradation. 
+</p>
+
+<blockquote>Won't I end up writing two versions of the site, one with javascript, and one without? That's a lot of extra code.</blockquote>
+
+<p>
+Not if you're smart about it. This is where Unobtrusive JavaScript comes in. Writing Ajax apps can actually be <span style="font-style:italic;">easier</span> with Unobtrusive JavaScript. Tune in next time for a practical discussion.
+</p>

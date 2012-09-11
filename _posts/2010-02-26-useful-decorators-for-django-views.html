@@ -1,0 +1,85 @@
+---
+layout: post
+title: useful decorators for Django views
+tags: 
+---
+
+<p>
+Python implements a light version of <a href="http://en.wikipedia.org/wiki/Aspect-oriented_programming">aspect oriented</a> programming via
+<a href="http://www.artima.com/weblogs/viewpost.jsp?thread=240808">decorators</a>. I find myself using them often, specifically for Django views. Here are a few of my favourites.
+</p>
+
+<p>
+This first one enforces that requests coming into the view are coming from localhost. This can be useful if you are creating REST APIs that are for internal use only. Of course, you should also hide these views via Apache for added security. 
+</p>
+
+<pre name="code" class="python">
+"""When added to a view, requires that the request came from localhost.
+Used as an added security measure to make sure that remote users cannot
+call REST APIs designed to be called from the Java back-end. """
+
+def localhost(f):
+    """Requires that a view be invoked from localhost only."""
+    
+    def new_f(*args, **kwargs):
+        request = args[0]
+        if request.META["REMOTE_ADDR"] != "127.0.0.1":
+            raise Exception("This URL is only invokable by localhost.")  
+        return f(*args, **kwargs)                
+    return new_f
+</pre>
+
+<p>
+This next one sends the view back to the referrer. This can be useful to prevent the using from refreshing a page with a FORM POST.
+</p>
+
+<pre name="code" class="python">
+"""
+A view decorator that sends the user back to the last page after the view
+logic executes. Useful for actions that don't change the page the user is 
+looking at. One example is clicking on a link to mark a message as read.
+The messages view is refreshed, with that item marked as read.
+"""
+
+from django.http import HttpResponseRedirect
+
+def back_to_referrer(f):
+    
+    def new_f(*args, **kwargs):        
+        f(*args, **kwargs)
+        request = args[0]
+        return HttpResponseRedirect(request.META["HTTP_REFERER"])
+            
+    return new_f
+</pre>
+
+<p>
+The last one wraps a view in a try/catch that will redirect the user to a custom error page if the exception is a sub-class of a "UserException". I use this custom exception type to denote any error that the user themselves can resolve.
+</p>
+
+<pre name="code" class="python">
+def usererror(f):
+    
+    def new_f(*args, **kwargs):
+        
+        try:
+            return f(*args, **kwargs)
+        except (
+            UserException
+            ), (error):
+    
+            return render_to_response("usererror.html", {
+                "message": str(error)
+                })  
+            
+    return new_f
+
+class UserException(Exception):
+    """Python does not support interfaces, but that's what this is."""     
+    state = None
+    
+class NoEmailAddressError(UserException):        
+    def __str__(self):
+        return "You don't have an email address filled out on your profile." 
+
+</pre>

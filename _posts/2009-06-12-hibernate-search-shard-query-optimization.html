@@ -1,0 +1,137 @@
+---
+layout: post
+title: Hibernate Search - Shard Query Optimization
+tags: hibernate, lucene, hibernate search
+---
+
+<p>
+Hibernate Search shards allow you to break down your index data into separate Lucene directories. Typically, indexes would be broken down either into N equals chunks (using a hashing algorithm), or by some logical criteria (customer, location, etc). The former was done for performance; smaller indexes mean faster indexing. The later was typically done to make customers feel better.
+</p>
+
+<p>
+In my current project, we have another reason. We're breaking down indexes by customer, but for purely technical reasons. Separate indexes are more robust; if you have a fatal corruption of an index, now you only have to re-index a fraction of your data. The other is speed. Since there is no reason for searches to be cross-customer, why not take advantage of smaller indexes for query performance?
+</p>
+
+<p>
+Unfortunately, Hibernate Search defaults to searching ALL the shards, and then merging the result sets. While some of this can be done in parallel, in the end the search is much slower than before. While this strategy is necessary in the hashing case, it's needlessly wasteful in the customer case. 
+</p>
+
+<p>
+Granted, the customer case was definitely not the initial shard use case. But it did get enough demand to warrant a new JIRA issue, <a href="http://opensource.atlassian.com/projects/hibernate/browse/HSEARCH-251">HSEARCH-251</a>.
+</p>
+
+<p>
+I actually got to work with the Hibernate Search maintainers to provide this functionality. 
+</p>
+
+<pre>
+http://anonsvn.jboss.org/repos/hibernate/search/trunk
+Revision: 16755
+Author: epbernard
+Date: 8:43:09 PM, Wednesday, June 10, 2009
+Message:
+HSEARCH-251 Query on a shard subset based on a filter activation
+----
+Modified : /search/trunk/src/main/docbook/en-US/modules/configuration.xml
+Modified : /search/trunk/src/main/docbook/en-US/modules/query.xml
+Modified : /search/trunk/src/main/java/org/hibernate/search/filter/ChainedFilter.java
+Added : /search/trunk/src/main/java/org/hibernate/search/filter/FullTextFilterImplementor.java
+Added : /search/trunk/src/main/java/org/hibernate/search/filter/ShardSensitiveOnlyFilter.java
+Modified : /search/trunk/src/main/java/org/hibernate/search/query/FullTextFilterImpl.java
+Modified : /search/trunk/src/main/java/org/hibernate/search/query/FullTextQueryImpl.java
+Modified : /search/trunk/src/main/java/org/hibernate/search/store/IdHashShardingStrategy.java
+Modified : /search/trunk/src/main/java/org/hibernate/search/store/IndexShardingStrategy.java
+Modified : /search/trunk/src/main/java/org/hibernate/search/store/NotShardedStrategy.java
+Modified : /search/trunk/src/test/java/org/hibernate/search/test/configuration/UselessShardingStrategy.java
+Added : /search/trunk/src/test/java/org/hibernate/search/test/shards/CustomerShardingStrategy.java
+Added : /search/trunk/src/test/java/org/hibernate/search/test/shards/CustomerShardingStrategyTest.java
+</pre>
+
+<p>
+You can download the latest build now, and give it a shot. Here is an example of how to use the new feature.
+</p>
+
+<p>
+Here is your entity, with the filter defined.
+</p>
+
+<pre name="code" class="java">
+@Indexed(index="Email")
+// this "impl" is only a flag, not the actual filter class
+@FullTextFilterDef(name="shard", impl=ShardSensitiveOnlyFilter.class) 
+public class Email {
+...
+</pre>
+
+<p>
+Here is the filter.
+</p>
+
+<pre name="code" class="java">
+public class ShardFilter {
+  
+    private Integer index;
+
+    public void setIndex(Integer setIndex) {
+        this.index = setIndex;
+    }
+
+    @Key
+    public FilterKey getKey() {
+        StandardFilterKey key = new StandardFilterKey();
+        key.addParameter(index);
+        return key;
+    }
+
+    @Factory
+    public Filter getFilter() {        
+  Query query = new TermQuery(new Term("index", index.toString()));
+        return new CachingWrapperFilter(new QueryWrapperFilter(query));
+    } 
+
+}
+</pre>
+
+<p>
+Here is your indexing strategy, which implements the new method getDirectoryProvidersForQuer(). From here, you can define which shards a given Filter could possibly return data from.
+</p>
+
+<pre name="code" class="java">
+public class SpecificShardingStrategy extends IdHashShardingStrategy { 
+
+ @Override
+ public DirectoryProvider&lt;?&gt;[] getDirectoryProvidersForQuery(FullTextFilterImplementor[] filters) {
+    
+  FullTextFilter filter = getFilter(filters, "shard");
+  if (filter == null) {
+   return getDirectoryProvidersForAllShards();
+  }
+  else {
+   return new DirectoryProvider[] { getDirectoryProvidersForAllShards()[Integer.parseInt(filter.getParameter("index").toString())] };
+  }
+ }
+
+ private FullTextFilter getFilter(FullTextFilterImplementor[] filters, String name) {
+  for (FullTextFilterImplementor filter: filters) {
+   if (filter.getName().equals(name)) return filter;
+  }
+  return null;
+ } 
+
+}
+</pre>
+
+<p>
+Finally, here is the actual search code.
+</p>
+
+<pre name="code" class="java">
+FullTextSession fts = Search.getFullTextSession( s );
+QueryParser parser = new QueryParser("id", new StopAnalyzer() );
+FullTextQuery fullTextQuery = fts.createFullTextQuery( parser.parse( "body:message" ) );
+fullTextQuery.enableFullTextFilter("shard").setParameter("index", 0);
+</pre>
+
+<p>
+Of course, there are many more ways to shard the cat. For example, the filter could be on customerID, region, etc. Thanks to the Hibernate Search team for incorporating my code!
+</p>

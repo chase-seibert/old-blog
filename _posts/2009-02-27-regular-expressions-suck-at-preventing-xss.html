@@ -1,0 +1,79 @@
+---
+layout: post
+title: Regular Expressions Suck at Preventing XSS
+tags: xss, security
+---
+
+<p>
+Depending on <a href="http://www.owasp.org/index.php/Top_10_2007">who</a> you <a href="http://attrition.org/pipermail/vim/2006-September/001032.html">listen</a> to, XSS is now the <a href="http://www.darkreading.com/security/app-security/showArticle.jhtml?articleID=208804050">top</a> computer security vulnerability, having passed the venerable SQL injection in 2007. If you're a developer, especially a web developer, and you DON'T know what XSS is, stop reading right now and start <a href="http://www.google.com/search?q=XSS">Googling</a>.
+</p>
+
+<blockquote>
+Cross-site scripting (XSS) is a type of computer security vulnerability typically found in web applications which allow code injection by malicious web users into the web pages viewed by other users. - <a href="http://en.wikipedia.org/wiki/Cross-site_scripting">Wikipedia</a>
+</blockquote>
+
+<p>
+Typically, the injection takes the form of javascript code. How does this code get injected into your site? There are a myriad of ways; HTML is ubiquitous these days. On the application I work on, the easiest vector is email. 
+</p>
+
+<p>
+We have a web-based email system. Users get an email, usually in HTML, and we display it inside our web application. It's a classic input validation problem; we're essentially presenting user generated content directly to the user, unfiltered. Well, not quite. Even from the beginning, we did some basic regex validation. The base case for XSS is via a SCRIPT tag, so we try to strip those. I am a big fan of regular expressions; they are great. But in this case, it's like beating off a mugger with a wet noodle.
+</p>
+
+<p>
+Many other systems need to do the same thing. See Jeff Atwood's <a href="http://www.codinghorror.com/blog/archives/001172.html">solution</a> for Stack Overflow, where they allow HTML formatted code snippets to be submitted by the users. He's not alone; <a href="http://shiflett.org/blog/2007/mar/allowing-html-and-preventing-xss">developers</a> all <a href="http://snipplr.com/view/9596/secure-advanced-better-faster-function-for-removestrip-tagsantixss/">seem</a> to initially <a href="http://stackoverflow.com/questions/24723/best-regex-to-catch-xss-cross-site-scripting-attack-in-java">gravitate</a> to regular expressions for this task.
+</p>
+
+<p>
+I contest that you really, really don't want to do this with regular expressions. Regular expressions are <a href="http://oubliette.alpha-geek.com/2003/12/31/do_not_do_not_parse_html_with_regexs">notoriously bad</a> at parsing HTML, <a href="http://wiki.tcl.tk/4164">XML</a> or any nested tag language. You don't want to be a <a href="http://sandersn.com/blog/index.php?title=avoid_casual_parsing&more=1&c=1&tb=1&pb=1">casual parser</a>, especially when you're trying to strictly enforce security. They also suck at parsing email addresses, a topic I plan to cover later.
+</p>
+
+<p>
+The key is that you're not just protecting against valid, vanilla HTML. You're protecting against anything that a browser can understand, and anything it can mis-understand. <span style="font-style:italic;">Browsers can be tricked into producing valid DOM from invalid HTML quite easily. </span> Browsers <span style="font-style:italic;">love</span> rending crap invalid HTML; they even take pride in it.
+</p>
+
+<p>
+For example, see this list of <a href="http://ha.ckers.org/xss.html">obfuscated XSS attacks</a>. Are you prepared to tailor a regex to prevent this real world attack on <a href="http://www.greymagic.com/security/advisories/gm005-mc/">Yahoo and Hotmail</a> on IE6/7/8?
+</p>
+
+<pre name="code" class="html">
+   &lt;HTML&gt;&lt;BODY&gt;
+   &lt;?xml:namespace prefix="t" ns="urn:schemas-microsoft-com:time"&gt;
+   &lt;?import namespace="t" implementation="#default#time2"&gt;
+   &lt;t:set attributeName="innerHTML" to="XSS&amp;lt;SCRIPT DEFER&amp;gt;alert(&amp;quot;XSS&amp;quot;)&amp;lt;/SCRIPT&amp;gt;"&gt;
+   &lt;/BODY&gt;&lt;/HTML&gt;
+</pre>
+
+<p>
+How about this attack that works on IE6? 
+</p>
+
+<pre name="code" class="html">
+    &lt;TABLE BACKGROUND="javascript:alert('XSS')"&gt;
+</pre>
+
+<p>
+How about attacks that are not listed on this site? The problem with Jeff's approach is that it's not a whitelist, as claimed. It's only stripping <span style="font-style:italic;">well-behaved</span> tags. We want to strip malicious tags! As someone on <a href="http://refactormycode.com/codes/333-sanitize-html#refactor_13642">this page</a> adeptly notes:
+</p>
+
+<blockquote>
+The problem with it, is that the html must be clean. There are cases where you can pass in hacked html, and it won't match it, in which case it'll return the hacked html string as it won't match anything to replace. This isn't strictly whitelisting.
+</blockquote>
+
+<p>
+Why use a regex to parse HTML at all? Use a damn parser! I would suggest a purpose built tool like <a href="http://www.owasp.org/index.php/Category:OWASP_AntiSamy_Project">AntiSamy</a>. It works by actually parsing the HTML, and then traversing the DOM and removing anything that's not in the <span style="font-style:italic;">configurable</span> whitelist. The major difference is the ability to gracefully handle malformed HTML. I hear you complaining about performance already. To that, I would simply ask whether you feel that HTML rendering time significantly impacts the users perception of performance in their regular browsing. Yeah, I didn't think so. You can spare a few extra milliseconds to do this correctly.
+</p>
+
+<p>
+The best part is that AntiSamy actually unit tests for all the XSS attacks on the above site. Ant it's damn easy to use:
+</p>
+
+<pre name="code" class="java">
+    public String toSafeHtml(String html) throws ScanException, PolicyException {
+
+        Policy policy = Policy.getInstance(POLICY_FILE);
+        AntiSamy antiSamy = new AntiSamy();
+        CleanResults cleanResults = antiSamy.scan(html, policy);
+        return cleanResults.getCleanHTML().trim();
+    }
+</pre>

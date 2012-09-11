@@ -1,0 +1,52 @@
+---
+layout: post
+title: Python class attributes are evaluated on declaration
+tags: django, python
+---
+
+<p>
+In Python, class attributes are evaluated and put into memory when the class is defined (or imported). For example, if you run the following code in an interactive interpreter, it will print out "Something __init__() called":
+</p>
+
+<pre name="code" class="python">
+class Something:
+    def __init__(self):
+        print &quot;Something __init__() called&quot;
+
+class UsesSomething:
+    field = Something()
+</pre>
+
+<p>
+This surprised me, even though I've been coding almost entirely in Python for two years. I expected the print statement to execute if I instantiated a UsesSomething object, but I did not expect it to execute by simply declaring the class definition. In practice, the declaration is likely to be when you import the module containing the code.
+</p>
+
+<p>
+This came up in a <a href="http://stackoverflow.com/questions/8944403/why-are-form-field-init-methods-being-called-on-django-startup">real world scenario</a> when my Django app suddenly began taking a lot longer to start up. On a hunch, I started removing imports from urls.py until I found the one that was causing the slowness. Then I started removing code in that module, until I traced the problem to something like the following:
+</p>
+
+<pre name="code" class="python">
+class MyForm(ModelForm):
+    class Meta:
+        model = MyModel
+    field1 = MyChoiceField()
+
+class MyChoiceField(ChoiceField):
+    def __init__(self, choices=(), required=True, widget=None, label=None,
+             initial=None, help_text=None, *args, **kwargs):
+    super(ChoiceField, self).__init__(required, widget, label, initial,
+                                      help_text, *args, **kwargs)     
+    self.choices = [(m.id, m.name) for m in ReallyLargeTableModel.objects.all()] 
+</pre>
+
+<p>
+For me, this was a pretty standard pattern. I had a custom field that was pulling its set of valid choices from the database. As the full ReallyLargeTableModel data set got larger and larger, it eventually got larger than the maximum size our caching back-end would store, and thus the query started getting run every time the run time started up.
+</p>
+
+<p>
+In this case, it's not hard to work around. Simply removing the list comprehension will allow Django to hold off on running the query until it actually requests the choices property (ie, when the field is displayed to the user). Alternatively, you could pass the data in from the MyForm constructor, which I gather is more idiomatic anyway. 
+</p>
+
+<p>
+Solutions are besides the point. In this case, the important take away is to be aware that class attributes will be evaluated on import, NOT when they are instantiated. So you want to avoid heavy weight operations or external dependencies in class attribute definitions.
+</p>

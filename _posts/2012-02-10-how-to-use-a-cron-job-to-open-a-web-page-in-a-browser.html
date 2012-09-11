@@ -1,0 +1,37 @@
+---
+layout: post
+title: How to use a cron job to open a web page in a browser
+tags: cron
+---
+
+<p>
+At work, I have a set of long-term goals I'm supposed to be making progress on over the year. As a way to remind myself about them, I have a <a href="http://en.wikipedia.org/wiki/Cron">cron job </a>setup to open the URL with the goals on them every morning.
+</p>
+
+<p>
+First, you need to create a bash script to open a webpage. Note that I'm setting the display so that when cron runs the job behind the scenes, it knows which display to use. I'm also using <a href="http://portland.freedesktop.org/xdg-utils-1.0/xdg-open.html">xdg-open</a>, which will open a URL (or any document) in the currently registered application. In my case, that's Chrome.
+</p>
+
+<pre name="code" class="bash">
+#!/bin/bash
+export DISPLAY=:0
+xdg-open https://docs.google.com/document/d/some_document_id
+</pre>
+
+<p>
+I saved this as ~/bin/outcomes.sh. Next, you need to make it executable.
+</p>
+
+<pre name="code" class="bash">
+chmod +x ~/bin/outcomes.sh
+</pre>
+
+
+<p>
+Finally, you need to schedule it in cron. Here is the syntax for running it every morning at 8AM.
+</p>
+
+<pre name="code" class="bash">
+&gt;crontab -e
+* 8 * * * /home/chase/bin/outcomes.sh
+</pre>

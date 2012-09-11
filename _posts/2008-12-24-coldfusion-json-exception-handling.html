@@ -1,0 +1,54 @@
+---
+layout: post
+title: ColdFusion JSON Exception Handling
+tags: javascript, coldfusion
+---
+
+<p>When calling a ColdFusion end-point from an Ajax call, the caller is expecting a certain format. In my projects, that's usually JSON. Regardless, it would be nice if the caller could assume a constant format, even for exceptions.</p>
+
+<p>Typically, when an exception is generated in ColdFusion, the server auto-generates an HTML description of the exception. The assumption is that a developer or an end-user will be looking at the resulting HTML.</p>
+
+<p>But in our case, the caller is a script, and parsing that HTML would be a chore. Instead, we can leverage ColdFusion's CFERROR tag to make sure that even exceptions generate valid JSON. Then, the caller can handle the exception data, possibly merging the information into the UI.</p>
+
+<p>You can setup an exception handler for you JSON API calls as follows. You would typically include this on an individual API page, or in the Application.cfm above all your APIs.</p>
+
+<pre name="code" class="html">
+&lt;CFERROR type=&quot;exception&quot; template=&quot;JSONExceptionSerializer.cfm&quot;&gt;
+</pre>
+
+<p>Here is an example of how to handle the exception and format the results. You could also use a JSON library such as CFJSON or the tool that comes with CF8 to do the formatting.</p>
+
+<pre name="code" class="html">
+&lt;CFSETTING showdebugoutput=&quot;no&quot; enablecfoutputonly=&quot;yes&quot;&gt;
+
+&lt;CFHEADER statuscode=&quot;500&quot; statustext=&quot;&quot;&gt;
+
+&lt;CFCONTENT reset=&quot;true&quot;&gt;
+&lt;CFOUTPUT&gt;
+    {
+        error: {
+            message: &quot;#JSStringFormat(Error.message)#&quot;,
+            template: &quot;#Error.TagContext[1].template#&quot;,
+            line: &quot;#Error.TagContext[1].line#&quot;,
+            type: &quot;#Error.RootCause.type#&quot;,
+            stacktrace: &quot;#JSStringFormat(Error.StackTrace)#&quot;
+        }
+    }
+&lt;/CFOUTPUT&gt;
+&lt;CFEXIT&gt;
+</pre>
+
+<i>JSStringFormat() ensures that string content inside the JSON elements is properly escaped.</i>
+
+<p>Extending this method, you can also manually throw exception in your ColdFusion code. For example, if the user is not logged in on the back-end, instead of doing this:</p>
+
+<pre name="code" class="html">
+&lt;CFOUTPUT&gt;Error: not logged in!&lt;/CFOUTPUT&gt;
+&lt;CFEXIT&gt;
+</pre>
+
+You can simply throw an exception.
+
+<pre name="code" class="html">
+&lt;CFTHROW message=&quot;Not logged in!&quot;&gt;
+</pre>

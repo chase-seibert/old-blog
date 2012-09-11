@@ -1,0 +1,69 @@
+---
+layout: post
+title: Django CSRF verification failed in IE IFRAME
+tags: p3p, csrf, django
+---
+
+<p>
+I ran into an interesting issue with the <a href="https://docs.djangoproject.com/en/dev/ref/contrib/csrf/">Django's CSRF</a> (<a href="http://en.wikipedia.org/wiki/Cross-site_request_forgery">cross site request forgery</a>) protection this week. Some users were reporting seeing the dreaded "CSRF verification failed. Request aborted." error trying to submit a particular form. Unable to reproduce the issue myself, we finally learned that this was happening when coming from LinkedIn.
+</p>
+
+<img src="https://lh4.googleusercontent.com/-xdk2BwkOlFU/Tft1624pJGI/AAAAAAAALdw/oYl3KUxBiLo/s800/Screenshot-Now%252520Hiring%25253A%252520Sr.%252520Database%252520Analyst%252520in%252520Redwood%252520City%25252C%252520CA%252520%25257C%252520Share%252520on%252520LinkedIn%252520-%252520Mozilla%252520Firefox.png" alt="Forbidden. CSRF verification failed. Request aborted."/>
+
+<p>
+Digging deeper, it turns out only to happen in IE (6/7/8/9), and only in an IFRAME, like the one LinkedIn is using for their framebar. After some research, it was revealed that IE6 added a <a href="http://msdn.microsoft.com/en-us/library/ms537343.aspx">security feature</a> to block all <a href="http://en.wikipedia.org/wiki/HTTP_cookie#Privacy_and_third-party_cookies">third party cookies</a> by default, which includes any pages in an IFRAME on a different domain than the top level parent. There are a few options for work-arounds.
+</p>
+
+<h3>Work around #1: Framebusting</h3>
+
+<p>
+You can use javascript to "break out" of the IFRAME, essentially replacing the top level window with yourself. There are various techniques, but I like the simple:
+</p>
+
+<pre name="code" class="javascript">if(top != self) top.location.replace(location);
+</pre>
+
+<p>
+However, this won't work if you want to allow IFRAMEs in somecases, say from your own domain(s). The code could quickly become brittle if you were to hard-code a whitelist of development/demo/qa/prod domains, or weak if you hard-code a blacklist. Also, it's fairly easy to intentionally break a frame buster. In the end, if you get into an <a href="http://stackoverflow.com/questions/958997/frame-buster-buster-buster-code-needed">arms race</a> with a framer, <a href="http://www.codinghorror.com/blog/2009/06/we-done-been-framed.html">you will lose</a>.
+</p>
+
+<h3>Work around #2: x-frame-options</h3>
+
+<p>
+Newer browsers actually have a mechanism to dis-allow framing your site all together, via the <a href="https://developer.mozilla.org/en/the_x-frame-options_response_header">x-frame-options HTTP header</a>. This is great, but only works on newish browsers, and is somewhat coarsely grained. You can only make an exception for same domain IFRAMEs, not arbitrary domains. Also, the user experience kind of blows; it looks like an error to the end-user.
+</p>
+
+<img src='https://lh6.googleusercontent.com/-_XPiDYZZcYg/TTnPz7ol06I/AAAAAAAALaU/f9ABuJQyrsA/s800/x-frame-options.png'>
+
+<br><br>
+
+<h3>Work around #3: P3P</h3>
+
+<p>
+You can send a HTTP header to tell the browser to allow third-party cookies in this instance. This uses the <a href="http://www.w3.org/P3P/">P3P standard</a>. However, it should be noted that you're essentially making legally binding claims about how you handle user data. For example, the smallest change you can make that will notify IE to allow third-party by default is:
+</p>
+
+<pre name="code" class="bash">
+vim /etc/apache2/sites-available/default
+
+# add the following
+Header append P3P "CP=\"CAO PSA OUR\""
+
+ln -s /etc/apache2/mods-available/headers.load /etc/apache2/mods-enabled/headers.load
+service apache2 restart
+</pre>
+
+<p>
+Here is a quick rundown of what <a href="http://www.p3pwriter.com/LRN_111.asp">legal claims</a> you're making in this case.
+<ul>
+<li>CAO - Identified Contact Information and Other Identified Data: access is given to identified online and physical contact information as well as to certain other identified data.</li>
+<li>PSA - Information may be used to create or build a record of a particular individual or computer that is tied to a pseudonymous identifier, without tying identified data.</li>
+<li>OUR - Ourselves and/or entities acting as our agents or entities for whom we are acting as an agent (can access the data).</li>
+</ul>
+</p>
+
+<h3>Work around #4: Custom CSRF error page</h3>
+
+<p>
+This isn't really a work-around, and should probably be done anyway. But Django gives you the ability to define a <a href="https://docs.djangoproject.com/en/dev/ref/settings/#std:setting-CSRF_FAILURE_VIEW">custom error page</a> for CSRF validation errors, where could could tell the user what the problem is, and maybe have them to a manual frame break.
+</p>

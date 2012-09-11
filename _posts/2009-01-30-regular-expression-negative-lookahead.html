@@ -1,0 +1,62 @@
+---
+layout: post
+title: Regular Expression&#58; Negative Lookahead
+tags: regex
+---
+
+<blockquote>
+People understand instinctively that the best way for computer programs to communicate with each other is for each of the them to be strict in what they emit, and liberal in what they accept. The odd thing is that people themselves are not willing to be strict in how they speak and liberal in how they listen. You'd think that would also be obvious. Instead, we're taught to express ourselves. (<a href='http://oreilly.com/catalog/opensources/book/larry.html'>Larry Wall</a>)
+</blockquote> 
+
+<p>
+Sometimes, you need to be <i>really</i> liberal in what you accept. For example, take the <a href='http://developer.yahoo.com/hotjobs/resume_search_user_guide/'>HotJobs API</a>. Even thought it's ostensibly a standards based REST web-service, it likes to return slightly invalid XML sometimes. Of course, slightly invalid XML is like being partially pregnant, so any decent XML parser will simply bomb.
+<p>
+
+<p>
+What do you do? I guess you try to apply pressure on HotJobs to get their shit together. Good luck with that. In the meantime, I have to meet an end of the week deadline, and no one wants to hear the "sucky vendor" excuse. So, you improvise.
+</p>
+
+<p>
+The XML like string in question looks like the following, sanitized for the weak-kneed:
+</p>
+
+<pre name="code" class="xml">
+ &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+ &lt;Resume&gt;
+  &lt;Title&gt;Supreme ruler &amp; all around nice guy&lt;/Title&gt;
+  &lt;ResumeText&gt;
+   &lt;![CDATA[
+    ...
+    some skills & some more skills
+    ...
+    font-family: &amp;#039;Wingdings&amp;#039;, &amp;#039;Arial&amp;#039;;&quot;&gt;&lt;span style=&quot; font-family: &amp;#039;Times New Roman&amp;#039;, &amp;#039;Arial&amp;#039;;
+    ...
+    lots of shit MS-WORD html
+    ...
+   ]]&gt;
+  &lt;/ResumeText&gt;
+ &lt;/Resume&gt;
+</pre>
+
+<p>
+Now, the problem here is that little ampersand (&) guy in the Title tag. You have to <a href='http://www.w3.org/TR/xhtml1/guidelines.html#C_12'>encode that thing</a> inside regular XML nodes. In CDATA segments, it's fine. That's what CDATA is for. If you save this as a .xml file and open it in Firefox, IE or XML Spy, you will get a giant error message about what an awful person you are.
+
+<p>
+Now, what the hell? If you actually used an XML parser to generate this in the first place, this would never have happened. XML parsers produce valid XML. Thus, you didn't use an XML parser. It's probably hand-assembled with string concatenation. You're a tool, thanks a lot.
+</p>
+
+<p>
+Now, on my end this is not a theoretical problem. I don't know of any XML parser that will even attempt to generate a valid XML Document object from this data. Xerxes certainly won't.  Sure, I could try to parse the data manually, but I'm going to pretend you didn't suggest that.
+</p>
+
+<p>
+My complete hack solution was to do a string replacement and substitute "&amp;amp;" for all "&" characters. That results in perfectly valid XML, at least until the next invalid character you run into, such as "<", ">", etc. That's why it's a hack.
+</p>
+
+<p>
+An additional problem, which escaped me until the code was actually in production, was that it was doing the hack translation even for properly encoded ampersands! For example, see the data inside the CDATA segment. Those ampersands are actually part of other valid XML encodings, and translating them will totally break the display of that HTML, littering it with extra gobbledygook which will invariably make a user set his hair on fire.
+</p>
+
+<p>
+See <a href='http://bitkickers.blogspot.com/2009/01/regular-expression-negative-lookahead_31.html'>Part II</a> to find out how to only replace ampersands outside a CDATA.
+</p>

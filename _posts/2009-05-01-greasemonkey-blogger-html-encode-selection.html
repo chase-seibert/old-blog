@@ -1,0 +1,51 @@
+---
+layout: post
+title: Greasemonkey + Blogger HTML encode selection
+tags: 
+---
+
+<p>
+Quick hit this week. Here is a <a href="https://addons.mozilla.org/en-US/firefox/addon/748">Greasemonkey</a> script I've been using for a few months. It adds a new button to your Blogger post editor which allows you to HTML encoded any selected text. This is useful if you include a lot of code examples in your blog. <a href="http://userscripts.org/scripts/show/42696">Download</a>.
+</p>
+
+<pre name="code" class="javascript">
+// ==UserScript==
+// @name           Blogger - HTML encode on post edit
+// @namespace      com.bitkickers
+// @namespace      http://bitkickers.blogspot.com/
+// @include        http*://www.blogger.com/post-*.g?*
+// @require     http://ajax.googleapis.com/ajax/libs/jquery/1.3.1/jquery.min.js
+// ==/UserScript==
+
+function addButton() {
+
+   $("#postButtons").append($("&lt;div dir=\"ltr\" class=\"cssButtonSize-small cssButtonSide-left\"&gt;&lt;div class=\"cssButtonColor-blue\"&gt;&lt;a href=\"#\" class=\"cssButton\" id=\"encodeButton\"&gt;&lt;div class=\"cssButtonOuter\"&gt;&lt;div class=\"cssButtonMiddle\"&gt;&lt;div class=\"cssButtonInner\"&gt;HTML Encode Selection&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;"));
+
+   $("#encodeButton").click(encode);
+}
+
+function encode() {
+
+   var editBox = $("#textarea")[0];
+   if (typeof(editBox) != "undefined") {
+      var originalScrollHeight = editBox.scrollTop;
+      var selectedText = editBox.value.substring(editBox.selectionStart, editBox.selectionEnd);
+      if (selectedText != "") {
+         editBox.value = 
+                  editBox.value.substring(0, editBox.selectionStart)
+  + escapeHTML(selectedText)
+                + editBox.value.substring(editBox.selectionEnd)
+         editBox.scrollTop = originalScrollHeight;
+      }
+   }
+}
+
+function escapeHTML(str){
+   var div = document.createElement('div');
+   var text = document.createTextNode(str);
+   div.appendChild(text);
+   return div.innerHTML;
+};
+
+addButton();
+</pre>

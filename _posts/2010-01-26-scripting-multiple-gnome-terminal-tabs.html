@@ -1,0 +1,30 @@
+---
+layout: post
+title: scripting multiple gnome terminal tabs
+tags: 
+---
+
+<p>
+Sometimes it feels like I'm looking at logs all day. Certainly there are times when this is more true than others. If you find yourself in one of those times, you might benefit from being able to call all your typical log files up at once.
+</p>
+
+<p>
+On my system, I do this by opening a gnome terminal, and having one tab for each file doing a tail command. Here is a BASH script that launches such a terminal window, opens and even names the tabs for you with convenient titles.
+</p>
+
+<pre name="code" class="bash">
+#!/bin/bash
+
+# space-delimited list of colon-delimited tab name, log file pairs
+LOGS="jboss:~/jboss/server/bullhorn/log/server.log solr:/var/log/solr.log"
+
+args=""
+for log in $LOGS
+do
+ tab_name=${log%:*}
+ log_file=${log#*:}
+ args=" $args --tab -e \"bash -c \\\"printf '\033]2;%s\007' '$tab_name'; tail -f $log_file\\\"\""
+done
+
+eval "gnome-terminal --hide-menubar --maximize $args"
+</pre>

@@ -1,0 +1,31 @@
+---
+layout: post
+title: Ant java.library.path
+tags: java, ant
+---
+
+<p>
+Maybe this will save someone an hour... to set java.library.path from inside an ANT Java task, you need to set the parameter fork="true".
+</p>
+
+<pre name="code" class="xml">
+    &lt;target name="run" depends="deploy"&gt;
+       &lt;java dir="${jlan}" classname="org.alfresco.jlan.app.JLANServer" fork="true"&gt;
+         &lt;arg value="${jlan}/jlanConfig.xml"/&gt;
+         &lt;sysproperty key="java.library.path" path="${jlan}/jni"/&gt;
+         &lt;classpath&gt;
+            &lt;filelist dir="${jlan}"&gt;
+                &lt;file name="jars/alfresco-jlan.jar" /&gt;
+                &lt;file name="libs/cryptix-jce-provider.jar" /&gt;
+                &lt;file name="service/wrapper.jar" /&gt;
+                &lt;file name="libs/bullhorn-virtualfs-0.1.jar" /&gt;
+                &lt;file name="libs/log4j-1.2.14.jar" /&gt;
+            &lt;/filelist&gt;
+         &lt;/classpath&gt;
+      &lt;/java&gt;
+    &lt;/target&gt;
+</pre>
+
+<p>
+The reason seems to be that ANT does not allow you to reset a property. Once it's set, that's it. Of course, the ant task has its own java.library.path already, so manually setting it will be ignored. The fork is kind of a hack, by forcing a new process, you get clean system variables.
+</p>

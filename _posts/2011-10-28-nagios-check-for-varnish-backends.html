@@ -1,0 +1,87 @@
+---
+layout: post
+title: Nagios check for Varnish Backends
+tags: python, nagios, varnish
+---
+
+<p>
+We recently starting using <a href="https://www.varnish-cache.org/">Varnish</a> to cache un-authenticated requests to our web farm. It even has this great feature called <a href="https://www.varnish-cache.org/docs/trunk/tutorial/handling_misbehaving_servers.html">grace mode</a>, where it will keep serving a cached version of a page if the back-end server goes down. But we still want to be alerted that the back-end is down.
+</p>
+
+<p>
+I wrote a Nagios check to do just that. It's written in Python, and using the varnishadm command-line tool that ships with Varnish.
+</p>
+
+<pre name="code" class="python">
+#!/usr/bin/python
+# save as /usr/lib/nagios/plugins/check_varnish_backends.py
+
+from optparse import OptionParser
+import subprocess
+
+def getOptions():
+    arguments = OptionParser()
+    arguments.add_option(&quot;--host&quot;, dest=&quot;host&quot;, help=&quot;Host varnishadm is running on&quot;, type=&quot;string&quot;, default=&quot;localhost&quot;)
+    arguments.add_option(&quot;--port&quot;, dest=&quot;port&quot;, help=&quot;varnishadm port&quot;, type=&quot;string&quot;, default=&quot;6082&quot;)
+    arguments.add_option(&quot;--secret&quot;, dest=&quot;secret&quot;, help=&quot;varnishadm secret file&quot;, type=&quot;string&quot;, default=&quot;/etc/varnish/secret&quot;)
+    arguments.add_option(&quot;--command&quot;, dest=&quot;command&quot;, help=&quot;varnishadm backend health command&quot;, type=&quot;string&quot;, default=&quot;debug.health&quot;)
+    return arguments.parse_args()[0]
+
+def run(command, exit_on_fail=True):
+    # don't use check_output in order to supportPython 2.6
+    process = subprocess.Popen(command.split(&quot; &quot;), stdout=subprocess.PIPE)
+    output, unused_err = process.communicate()
+    _retcode = process.poll()
+    return output
+
+if __name__ == '__main__':
+
+    options = getOptions()
+    varnishadm_raw = run(&quot;varnishadm -T %(host)s:%(port)s -S %(secret)s %(command)s&quot; % options.__dict__)
+
+    lines = varnishadm_raw.split(&quot;\n&quot;)
+    backends_sick, backends_healthy = [], []
+    for line in lines:
+        if line.startswith(&quot;Backend&quot;):
+            if line.endswith(&quot;Sick&quot;):
+                backends_sick.append(line)
+            else:
+                backends_healthy.append(line)
+
+    if not backends_healthy and not backends_sick:
+        print &quot;There are NO backends&quot;
+        exit(2)
+
+    if backends_sick:
+        print &quot;&quot;.join(backends_sick)
+        exit(2)
+
+    print &quot;All %s backends are healthy&quot; % len(backends_healthy)
+</pre>
+
+<p>
+Because varnishadm uses a shared secret file, I decided to have the checks run on the actual Varnish hosts, using Nagios NRPE.
+</p>
+
+<pre name="code" class="bash">
+# add the following config line on the varnish hosts
+vim /etc/nagios/nrpe.cfg
+command[check_varnish_backends]=/usr/lib/nagios/plugins/check_varnish_backends.py
+
+service nagios-nrpe-server restart
+
+# and configure the Nagios server to look for that check
+vim /etc/nagios3/conf.d/services_nagios2.cfg
+define service {
+        use                             generic-service
+        hostgroup_name                  proxy-servers
+        service_description             check_varnish_backends
+        check_command                   check_nrpe_1arg!check_varnish_backends
+}
+
+service nagios3 restart
+</pre>
+
+<p>
+<i>Note:</i> depending on your setup, you may need to use chmod to give the nagios user access to ready the shared secret file (/etc/varnish/secret) on the Varnish servers. 
+</p>

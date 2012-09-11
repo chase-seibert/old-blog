@@ -94,7 +94,7 @@ def write_markdown_file(post):
             date_added.month,
             date_added.day,
             slugify(post.get("title")))
-    filepath = os.path.join(options.outputdir, slug + ".md")
+    filepath = os.path.join(options.outputdir, slug + ".html")
 
     with codecs.open(filepath, encoding="utf-8", mode="w") as file:
         file.write("---\nlayout: post\ntitle: %s\ntags: %s\n---\n\n" % (
@@ -103,24 +103,13 @@ def write_markdown_file(post):
                     ))
 
         content = post.get("content")
-        soup = BeautifulSoup(content)  # so html2text won't bomb
-        content = unicode(soup)
-
-        # manual hack fixups
-        for (pattern, replacement) in (
-            ('<pre name="code">', r"{% highlight python %}<pre>"),
-            ('<pre name="code" class="([^"]+)">', r"{% highlight \1 %}<pre>"),
-            ("</pre>", "</pre>{% endhighlight %}"),
-            ):
-            content = re.sub(pattern, replacement, content)
-
-        html2text.BODY_WIDTH = 0  # no wrap; breaks links
-        content = html2text.html2text(content)  # to markdown
 
         # manual hack fixups
         for (old_str, new_str) in (
-            ("($*)", "($&#42;)"),
-            ("[4 to 6]", "&#91;4 to 6&#93;"),
+            ("{{", "&#123;&#123;"),
+            ("}}", "&#125;&#125;"),
+            ("{%", "&#123;%"),
+            ("%}", "%&#125;"),
             ):
             content = content.replace(old_str, new_str)
 

@@ -1,0 +1,91 @@
+---
+layout: post
+title: Quick and dirty Ajax on any FORM
+tags: javascript, jquery, ajax
+---
+
+<p>
+I have been trying to write as much unobtrusive javascript as possibly lately. Mainly this means getting everything working without any javascript in the picture to start, and then layering in dynamic elements without breaking anything for javascript-disabled users.
+</p>
+
+<p>
+This week, I had a pretty simply page with a single FORM element and a bunch of INPUT  elements, many of which were submit buttons with various name/value pairs. Why so many buttons? Well, it's a semantically valid way to capture a single-click user action.
+</p>
+
+<p>
+The user wants to go to the next page? That's a button. Want to remove a keyword from this list? That's a button. Want to expand a section? You guessing it, that's a button.
+</p>
+
+<p>
+Why not use a link for this? In a simple case that's fine. If you wanted to go a whole other page, that's a link. But usually when I'm writing a web-application (as opposed to a web-site) there is a whole lot of state to pass around. Sure, the "next page" operation is the new piece of state, but what about the current page/last page state? I could wrap those into each link on the server-side, but that gets messy quickly. You're also limiting yourself to the size of the state by using a GET for that request.
+</p>
+
+<p>
+Now, buttons are kind ugly. Luckily, there is a cross-browser way to display them as images using just CSS:
+</p>
+
+<pre name="code" class="html">
+INPUT.ImageButton {
+ border: 0px;
+ padding: 0 0 0 16px !important; /* Hide text - IE */
+ text-indent: -999em; /* Hide text - FF */
+ height: 10px;
+ width: 10px;
+ margin-bottom: 3px;
+ cursor: pointer;
+ display: inline;
+ font-size: 8px;
+}
+
+INPUT.ImageButton.Add {
+ background: transparent url(/media/img/admin/icon_addlink.gif) no-repeat center;
+}
+
+...
+
+&lt;input type="submit" class="ImageButton Add" name="next_page" value="true"/&gt;
+</pre>
+
+<p>
+What does this have to do with Ajax? Well, it makes Ajax a breeze. Here is a generic jQuery snippet for turning any page where the state is entirely FORM-based into an Ajax request.
+</p>
+
+<pre name="code" class="javascript">
+$(document).ready(function() {
+ bind(); 
+})
+
+function bind() {
+ var form = $("#results-form");
+ if (form) {
+  
+  $("input[type=submit]").click(function(e) {
+
+   // disable the form buttons so the user can't submit twice   
+   $("input[type=submit]").click(function(){ return false; });
+
+   var form = $("#results-form");
+   var button = this;
+   var url = "ajax=true&amp;" + button.name + "=" + button.value + "&amp;";
+   
+   document.body.style.cursor = 'wait';
+   
+   $.post(form[0].action, url + form.serialize(), function (data) {    
+
+    document.body.style.cursor = 'auto';
+    
+    $("#contentDiv").html(data);
+        
+    // re-bind new html for next Ajax call
+    bind();    
+   });
+   
+   return false;
+  });
+ }
+}
+</pre>
+
+<p>
+All you need to do is change your back-end to look for the ajax parameter, and only render the contents of contentDiv in that case.
+</p>

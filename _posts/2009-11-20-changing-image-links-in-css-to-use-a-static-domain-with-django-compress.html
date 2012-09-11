@@ -1,0 +1,56 @@
+---
+layout: post
+title: Changing image links in CSS to use a static domain with Django compress
+tags: 
+---
+
+<p>
+<a href="http://code.google.com/p/django-compress/">Django compress</a> is a great little utility for hitting some of the <a href="http://developer.yahoo.com/performance/rules.html">YSlow</a> website performance high notes. It can combine and minify css/js files on the fly, when settings.DEBUG is set to False. This allows you to keep the files separate in development for debugging.</p>
+
+<p>
+I also wanted to use django compress to serve js, css and image resources from a static domain as per YSlow's <a href="http://developer.yahoo.com/performance/rules.html#cookie_free">Cookie-Free</a> and <a href="http://developer.yahoo.com/performance/rules.html#split">Domain Split</a> rules.
+</p>
+
+<blockquote>
+ When the browser makes a request for a static image and sends cookies together with the request, the server doesn't have any use for those cookies. So they only create network traffic for no good reason. You should make sure static components are requested with cookie-free requests. Create a subdomain and host all your static components there.<br/>
+<br/>
+If your domain is www.example.org, you can host your static components on static.example.org. However, if you've already set cookies on the top-level domain example.org as opposed to www.example.org, then all the requests to static.example.org will include those cookies. In this case, you can buy a whole new domain, host your static components there, and keep this domain cookie-free. Yahoo! uses yimg.com, YouTube uses ytimg.com, Amazon uses images-amazon.com and so on.<br/>
+<br/>
+Another benefit of hosting static components on a cookie-free domain is that some proxies might refuse to cache the components that are requested with cookies. On a related note, if you wonder if you should use example.org or www.example.org for your home page, consider the cookie impact. Omitting www leaves you no choice but to write cookies to *.example.org, so for performance reasons it's best to use the www subdomain and write the cookies to that subdomain. 
+</blockquote>
+
+<blockquote>
+Splitting components allows you to maximize parallel downloads. Make sure you're using not more than 2-4 domains because of the DNS lookup penalty. For example, you can host your HTML and dynamic content on www.example.org  and split static components between static1.example.org and static2.example.org
+</blockquote>
+
+<p>
+Django compress can do this for css and js resources using MEDIA_URL. But out of the box, it doesn't help with image links <span style="font-weight:bold;">inside</span> a css file. But it's easily extensible. Here is a quick filter to replace image links (or anything, really), in your css. Again, this would only fire in production.
+</p>
+
+<pre name="code" class="python">
+"""Django compress filter to replace image src URLs in a CSS file with a static 
+domain. See: http://developer.yahoo.com/performance/rules.html#cookie_free 
+
+Example configuration in settings:
+
+COMPRESS_CSS_FILTERS = ('compress.filters.csstidy.CSSTidyFilter', 
+    'search.helpers.static_domain_css.StaticDomainCSSFilter')
+    
+COMPRESS_STATICDOMAIN_SETTINGS = [
+    ("/static/images/", "http://static.powerfill.com/static/images/"),
+    ("../images/", "http://static.powerfill.com/static/images/"),
+    ] 
+
+"""
+from django.conf import settings
+from compress.filter_base import FilterBase
+
+COMPRESS_STATICDOMAIN_SETTINGS = getattr(
+    settings, 'COMPRESS_STATICDOMAIN_SETTINGS', {})
+
+class StaticDomainCSSFilter(FilterBase):
+    def filter_css(self, css):
+        for old, new in COMPRESS_STATICDOMAIN_SETTINGS:      
+            css = css.replace(old, new)
+        return css
+</pre>

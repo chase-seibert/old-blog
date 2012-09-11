@@ -1,0 +1,56 @@
+---
+layout: post
+title: Django&#58; uniform image resizing
+tags: django
+---
+
+<p>
+Sometimes, you want all the thumbnails you're creating to be the same dimensions. For example, your layout may require a certain width so that all the items line up in a grid. In my case, I wanted them to be exactly 96x96 pixels. 
+</p>
+
+<p>
+The tool of choice in Django is <a href="http://www.pythonware.com/products/pil/">PIL</a>, which is a PITA to install, but which works well once it's installed. Just be sure to check that JPEG works, it's <a href="http://effbot.org/zone/pil-decoder-jpeg-not-available.htm">commonly flubbed</a> by the installer.
+</p>
+
+<img src="http://lh5.ggpht.com/_EE2zVzGv1Ds/TMsNuxj-MvI/AAAAAAAALYQ/NwOc_Il-Tlw/s800/chase.png" border=1>
+
+<p>
+Another common requirement is to retain the aspect ratio of the original image. For example, 
+given the above input image, we would not want to produce this:</p>
+
+<img src="http://lh5.ggpht.com/_EE2zVzGv1Ds/TMsNvCYh4dI/AAAAAAAALYY/CeXKCMtiY3g/s800/chase_scaled.png" border=1>
+
+<p>
+For that, PIL's built-in <a href="http://www.pythonware.com/library/pil/handbook/image.htm#Image.thumbnail">thumbnail</a> method will do nicely. However, that would not get us a perfect 96x96 square. Unless the original image is also a square, it will instead produce a thumbnail where only the larger dimension it 96 pixels.
+</p>
+
+<p>
+To compensate, we need to add literal white space to fill out the remaining pixels. In PIL, you can accomplish this with the <a href="http://www.pythonware.com/library/pil/handbook/image.htm#Image.paste">paste</a> method.
+</p>
+
+<pre name="code" class="python">
+import Image
+import traceback
+import sys
+
+def resize_aspect_ratio(path, maxSize, method=Image.ANTIALIAS):
+    """ Resizing an image to a static side, in place """
+
+    try:
+        
+        # shrink, but maintain aspect ratio
+        image = Image.open(path)   
+        image.thumbnail(maxSize)
+        
+        # fill out to exactly maxSize (square image)        
+        background = Image.new("RGBA", maxSize, (255, 255, 255, 0)) # use white for empty space
+        background.paste(image, ((maxSize[0] - image.size[0]) / 2, (maxSize[1] - image.size[1]) / 2))
+    
+        background.save(path)
+    
+    except Exception, e:
+        
+        print "Error resizing image: %s" % e
+</pre>
+
+<img src="http://lh3.ggpht.com/_EE2zVzGv1Ds/TMsNvI5bekI/AAAAAAAALYU/o-LyinWy4oY/s800/chase_96.png" border=1>

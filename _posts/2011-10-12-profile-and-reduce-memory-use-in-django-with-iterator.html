@@ -1,0 +1,90 @@
+---
+layout: post
+title: Profile and reduce memory use in Django with .iterator()
+tags: profile, django
+---
+
+<p>
+For the most part, objects allocated by Django are short-lived, and are eligible for garbage collection when the request ends. In our case, we also have some long running jobs using <a href="http://celeryproject.org/">celery</a>. One in particular, a job to create a several hundred megabyte XML file, was consistently using all the RAM on the machine.
+</p>
+
+<p>
+This wasn't too surprising because we were initially using Django templating to create the file, which keeps the entire response in memory while it's still being composed. But even after we <a href="/2011/06/creating-large-xml-files-in-python-with.html">moved to a SAX parser</a>, which is specifically designed for running with little memory by streaming the file, we were still running out of memory occasionally.
+</p>
+
+<p>
+We decided it was time to stop guessing, and profile the memory usage. Never having done this before, I did some research and came up with <a href="http://www.lshift.net/blog/2008/11/14/tracing-python-memory-leaks">this excellent guide</a> to using pdb for memory profiling.
+</p>
+
+<p>
+To get started, I needed something I could run from the command line, outside of the celery task framework. Using the <a href="https://docs.djangoproject.com/en/dev/howto/custom-management-commands/">Django Command framework</a>, I was easily able to compose a job that could run via manage.py.
+</p>
+
+<pre name="code" class="python">
+# in file myapp/management/commands/xmlmemtest.py
+from django.core.management.base import BaseCommand
+from myapp.helpers.scheduler import write_job_board_feed
+import uuid
+
+class Command(BaseCommand):    
+    def handle(self, *args, **options):
+        write_job_board_feed(&quot;simplyhired&quot;, &quot;&quot;, &quot;justjobs&quot;, nocache=uuid.uuid4())
+
+# can be run via: ./manage.py xmlmemtest
+</pre>
+
+<p>
+With that, I was set to launch this process using pdb, the <a href="http://docs.python.org/library/pdb.html">Python debugger</a>.
+</p>
+
+<pre name="code" class="bash">
+chase@chase:~$ pdb ./manage.py xmlmemtest 
+-&gt; from django.core.management import execute_manager
+(Pdb) r
+
+#... wait for a while until memory is getting high (will be much slower than usual) ...
+
+# pause execution
+&lt;Ctrl+C&gt;
+
+# evoke the garbage collector manually to make sure you&#39;re only seeing referenced objects
+(Pdb) import gc
+(Pdb) gc.collect()
+58
+(Pdb) gc.collect()
+0
+
+# show the top items in memory
+(Pdb) import objgraph
+(Pdb) objgraph.show_most_common_types(limit=5)
+Job                        184791
+builtin_function_or_method 57542
+tuple                      55478
+list                       14900
+dict                       8631
+</pre>
+
+<p>
+I was excepting to see some SAX parser objects at the top of the list. Instead, most of the memory was tied up in Job objects, which are a Django model in my application. Looking at the function, jobs were first referenced in the following code block.
+</p>
+
+<pre name="code" class="python">
+    for job in jobs:
+        feed.write_entry(2, job)
+</pre>
+
+<p>
+Playing around a bit, I tried the following, which immediately solved the memory issue.
+</p>
+
+<pre name="code" class="python">
+    for _job in jobs:
+        job = Job.objects.get(id=_job.id)
+        feed.write_entry(2, job)
+</pre>
+
+<p>
+Basically, doing a separate query for each job, and making sure it <b>goes out of scope</b> after we're done using it. In retrospect, this was pretty obvious. So obvious, that Django even provides a handy idiom called <a href="https://docs.djangoproject.com/en/dev/ref/models/querysets/#iterator">.iterator()</a> to do just this.
+</p>
+
+<blockquote>Evaluates the QuerySet (by performing the query) and returns an iterator (see PEP 234) over the results. A QuerySet typically caches its results internally so that repeated evaluations do not result in additional queries. In contrast, iterator() will read results directly, without doing any caching at the QuerySet level (internally, the default iterator calls iterator() and caches the return value). For a QuerySet which returns a large number of objects that you only need to access once, this can results in better performance and a significant reduction in memory.</blockquote>

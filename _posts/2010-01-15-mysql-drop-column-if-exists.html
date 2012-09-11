@@ -1,0 +1,57 @@
+---
+layout: post
+title: MySQL drop column if exists
+tags: MySQL
+---
+
+<blockquote>
+Idempotence describes the property of operations in mathematics and computer science that means that multiple applications of the operation do not change the result.
+   - <a href="http://en.wikipedia.org/wiki/Idempotence">Wikipedia</a>
+</blockquote>
+
+<p>
+When updating a database schema, it's very useful to make your SQL scripts idempotent. I.e. you should be able to run the script more than once, no run should error out, and the end result should be the same as when you ran it the first time.
+</p>
+
+<p>
+On the face of it, this seems absurd. Why might you want to code idempotent schema updates? Say your initial version of the schema update got it slightly wrong. You actually want a column to be varchar(255), not a varchar(50). You could add yet another schema update to fix this, or if your script was idempotent, you could simply modify the original script and run it again.
+</p>
+
+<p>
+The most common operation you will want to do is to drop a table or column, <span style="font-style:italic;">but only if it exists</span>. MySQL has a built-in modifier for this.
+</p>
+
+<pre name="code" class="sql">
+DROP TABLE IF EXISTS candidate;
+CREATE TABLE candidate...
+</pre>
+
+<p>
+For some reason, the same facility does not exist in MySQL for dropping a column if it exists. But you can fake it, at least in MySQL 5 or later, by querying the database meta-data do see if the column exists, and drop it if it does. However, because you need an IF statement, it will need to be a stored procedure.
+</p>
+
+<pre name="code" class="sql">
+drop procedure if exists schema_change;
+
+delimiter ';;'
+create procedure schema_change() begin
+
+ /* delete columns if they exist */
+ if exists (select * from information_schema.columns where table_name = 'table1' and column_name = 'column1') then
+  alter table table1 drop column `column1`;
+ end if;
+ if exists (select * from information_schema.columns where table_name = 'table1' and column_name = 'column2') then
+  alter table table1 drop column `column2`;
+ end if;
+ 
+ /* add columns */
+ alter table table1 add column `column1` varchar(255) NULL;
+ alter table table1 add column `column2` varchar(255) NULL;
+  
+end;;
+
+delimiter ';'
+call schema_change();
+
+drop procedure if exists schema_change;
+</pre>

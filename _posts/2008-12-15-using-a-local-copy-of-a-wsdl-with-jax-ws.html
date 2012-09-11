@@ -1,0 +1,46 @@
+---
+layout: post
+title: Using a local copy of a WSDL with JAX-WS
+tags: jax-ws
+---
+
+<p>By default when JAX-WS auto-generates a proxy stub via wsimport, it will reference the live web version of the WSDL in the stub definition. This means that when the stub object is instantiated, JAX-WS will go over the wire to get a copy of the WSDL. Recently, we had a WAR deploy break because Spring was instantiating one of these on start up, and the actual third party WSDL wasn't there.</p>
+
+<p>I little research turned up a <a href="https://jax-ws.dev.java.net/guide/Developing_client_application_with_locally_packaged_WSDL.html">few ways to make this WSDL a local resource</a>, instead. In our case, we just put it in the META-INF directory in the WAR, and made a small manual change to the stub code.</p>
+
+<p>What used to be...</p>
+
+<pre name="code" class="java">
+@WebServiceClient(name = &quot;MonsterBusinessGatewayService&quot;, targetNamespace = &quot;http://www.monster.com/definitions&quot;, wsdlLocation = &quot;https://gateway.monster.com:8443/bgwBroker?WSDL&quot;)
+public class MonsterBusinessGatewayService
+    extends Service
+{
+
+    private final static URL MONSTERBUSINESSGATEWAYSERVICE_WSDL_LOCATION;
+    private final static Logger logger = Logger.getLogger(com.monster.definitions.MonsterBusinessGatewayService.class.getName());
+
+    static {
+        URL url = null;
+        try {
+            URL baseUrl;
+            baseUrl = com.monster.definitions.MonsterBusinessGatewayService.class.getResource(&quot;.&quot;);
+            url = new URL(baseUrl, &quot;https://gateway.monster.com:8443/bgwBroker?WSDL&quot;);
+        } catch (MalformedURLException e) {
+            logger.warning(&quot;Failed to create URL for the wsdl Location: 'https://gateway.monster.com:8443/bgwBroker?WSDL', retrying as a local file&quot;);
+            logger.warning(e.getMessage());
+        }
+        MONSTERBUSINESSGATEWAYSERVICE_WSDL_LOCATION = url;
+    }
+</pre>
+
+<p>became...</p>
+
+<pre name="code" class="java">
+@WebServiceClient(name = &quot;MonsterBusinessGatewayService&quot;, targetNamespace = &quot;http://www.monster.com/definitions&quot;, wsdlLocation = &quot;META-INF/wsdl/MonsterWSDL.xml&quot;)
+...
+        try {
+            URL baseUrl = MonsterBusinessGatewayService.class.getClassLoader().getResource(&quot;.&quot;);
+            url = new URL(baseUrl, &quot;META-INF/wsdl/Monster.xml&quot;);
+        } catch (MalformedURLException e) {
+...
+</pre>

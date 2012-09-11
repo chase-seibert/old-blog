@@ -1,0 +1,39 @@
+---
+layout: post
+title: Save a screenshot to Dropbox with a keyboard shortcut
+tags: bash
+---
+
+<p>
+It's not uncommon for me to call my product manager over to my desk half a dozen times on a given day to look at what I'm working on. To speed things up, I decided to start IMing him screen shots instead. Here is a BASH script that builds on <a href="http://drjnet.wordpress.com/2010/05/19/dropbox-screenshots-ubuntu/">Drjnet's excellent script</a>, but which also allows you to select just a small region of your screen to capture.
+</p>
+
+<pre name="code" class="bash">
+#!/bin/bash
+
+# Setup filename for the screenshot
+myfile=$(date +%Y%m%d%S).png
+
+#Setup paths to dropbox & full url to new screenshot
+dropboxwebpath='http://dl.dropbox.com/u/422013/temp/' # PUT YOUR DROPBOX USERID HERE
+dropboxfileurl=$dropboxwebpath$myfile
+
+# see: http://code.google.com/p/xmonad/issues/detail?id=476
+sleep 0.2
+
+# Use scrot to take a screenshot and stick it in your dropbox screenshots folder
+scrot $myfile -e 'mv $f ~/Dropbox/Public/temp/' -s
+
+#  Put full URL to new screenshot into clipboard
+echo $dropboxfileurl | xclip -selection c
+</pre>
+
+<p>
+Note the sleep; that's important to get around a race condition between scrot and your window manager for access to your mouse/keyboard.
+</p>
+
+<p>
+To install as a keyboard shortcut (I have mine bound to Windows + PrtScr), just launch the "Keyboard" app in Ubuntu, and add it under Shortcuts -> Custom Shortcuts.
+</p>
+
+<img src="https://lh4.googleusercontent.com/-P0rj25xO-9w/Tz66cDghKQI/AAAAAAAALog/4U_yVTnbZhc/s757/keyboard_shortcut.png">

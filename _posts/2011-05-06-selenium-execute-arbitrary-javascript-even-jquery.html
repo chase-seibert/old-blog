@@ -1,0 +1,55 @@
+---
+layout: post
+title: Selenium&#58; Execute arbitrary javascript (even jQuery)
+tags: jquery, selenium
+---
+
+<p>
+We're very happy with our new-ish Selenium + Saucelabs setup for web site automation testing. But as easy as Selenium makes it to compose tests, you will inevitably be frustrated trying to do some of the more complicated test scenarios.
+</p>
+
+<p>
+For example, the Selenium IDE has not been sufficient for us to automatically generate code to look inside a javascript based rich text editor control. Similarly, we could not figure out how to uncheck ALL checkboxes in a certain form when you don't know their IDs/names up front.
+</p>
+
+<p>
+As a web developer, when I run into issues like this with Selenium, I find myself wishing that I could just use jQuery. It's such a familiar tool, that I often think of how I would implement something with jQuery, and then attempt to translate that into the Selenium API. 
+</p>
+
+<p>
+Maybe in the future, Selenium will let you just code in javascript. What could be more natural? For now, you can use a work-around like the following python helper.
+</p>
+
+<pre name="code" class="python">
+# adapted from http://pivotallabs.com/users/patn/blog/articles/717-run-javascript-in-selenium-tests-easily-
+def javascript(sel, script):
+    return sel.get_eval("""
+    (function() {
+            with(this) {
+              %(script)s
+            }
+          }).call(selenium.browserbot.getUserWindow());
+    """ % locals())
+</pre>
+
+<p>
+There is a tricky bit here. When you call <a href="http://release.seleniumhq.org/selenium-remote-control/1.0-beta-2/doc/dotnet/Selenium.ISelenium.GetEval.html">get_eval</a>(), your javascript is executed in the context of the test runner, not the actual test window. Hence wrapping your javascript in an anonymous function, and executing it in the context of the browserbot window via the <a href="https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Function/call">call()</a> method.
+</p>
+
+<p>
+Another subtly is using getUserWindow() instead of getCurrentWindow(). This is so you can use the jQuery library already loaded by your app. Due to <a href="http://jira.openqa.org/browse/SEL-558">SEL-558</a>, getCurrentWindow() no longer gives you access to dynamically defined document properties, like "jQuery" or "$". Thanks to <a href="http://crschmidt.net/blog/archives/348/selenium-ide-getcurrentwindow-problems/">Christopher Schmidt</a>.
+</p>
+
+<p>
+Assuming you already have jQuery loaded in your application, un-checking all the checkboxes on the page is as simple as:
+</p>
+
+<pre name="code" class="python">
+class MyTest(SeleniumTestCase):
+   def runTest(self):               
+      javascript(self.selenium, "$('input[type=checkbox]').attr('checked', false);")
+</pre>
+
+<p>
+You can also use a jQuery selector to find a particular element and then return it. Any string returned from javascript() will get passed back to the python test runner code.
+</p>

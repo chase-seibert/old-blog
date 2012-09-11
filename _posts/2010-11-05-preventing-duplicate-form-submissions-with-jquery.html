@@ -1,0 +1,52 @@
+---
+layout: post
+title: Preventing duplicate form submissions with jQuery
+tags: jquery
+---
+
+<p>
+A common problem for a new site to have is for their users to occasionally submit the same form two or more times. For example, maybe they were adding a new record, and were not sure if the application registered their submit button click, so they try again. This problem can be exacerbated by a slow website, which gives the users a larger window in which to come to this conclusion.
+</p>
+
+<p>
+Typically, this is not a problem for edit forms. For the most past, committing the same edits twice to a single record is fine; the record ends up in the same final state either way. Of course, some edits have side effects, which could certainly be an issue. However, one case that almost always fails out of the box would be a user <i>adding</i> a record twice. Typically, this ends up with two new records in the system.
+</p>
+
+<p>
+One way to prevent these duplicate submissions is to use a unique token for each add/edit form. The server would render this token into a hidden field on the form, and then check for that token being present on the commit. But this can be difficult to implement on an existing code base with many different forms, unless your framework has some kind of middleware layer that you can leverage to apply to all form render/submissions.
+</p>
+
+<p>
+A more typical solution is to use Javascript. Of course, this does not guarantee that the user cannot submit the form twice; all they would need to do is disable Javascript, or hit an untrapped error on your code. But it does address the core issue, which is one of user experience. It's by far a better user experience to give a visual indication that the form is being processed. 
+</p>
+
+<p>
+Here is a simple approach that you can include in your base jQuery code, and which will provide consistent functionality across all the existing forms on your site. It requires jQuery, and was tested in version 1.4.2.
+</p>
+
+<pre name="code" class="javascript">
+ $("form").submit(function () {
+  var form = $(this);
+  form.find("input[type=submit]").attr("disabled", "disabled")
+  form.find("input[type=submit]").attr("value", "Processing...");
+  // prevent the user from hitting ENTER on a field to submit again
+  form.find("input").attr("readonly", true);
+  document.body.style.cursor = "wait";
+ });
+</pre>
+
+<p>
+The key trick here is NOT just disabling the form. That's a common approach, but it has one major issue. Disabled forms can't actually be submitted. A common hack is to disable the form after a certain timeout, but that's inviting a race condition on a slow machine. The readonly/disable the button approach is more robust.
+</p>
+
+<p>
+At the same time, you may want to change the style of the disabled form submit button, not just the text.
+</p>
+
+<pre name="code" class="html">
+input[type=button][disabled], input[type=submit][disabled] { background-color: #BBB; border-color: #444; }
+</pre>
+
+<p>
+One issue to be aware of with this solution is that if the the user uses the back button to navigate to a previous form, the submit button will still be disabled. That may or may not be desirable. It's definitely not desirable, for example, if the form submission page threw an error and the user is legitimately trying to submit again. I'm interested in some thoughts on a solution for this case.
+</p>

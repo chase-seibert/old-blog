@@ -1,0 +1,150 @@
+---
+layout: post
+title: Using JAXB without a schema
+tags: xmlspy, xml, jaxb
+---
+
+<p>A <a href="http://developer.yahoo.com/hotjobs/">Yahoo HotJobs API</a> project has been my first exposure to <a href="http://en.wikipedia.org/wiki/Representational_State_Transfer">REST</a> APIs. Usually, I'm working with <a href="http://en.wikipedia.org/wiki/SOAP_(protocol)">SOAP web-services</a>. Bullhorn is actually thinking about trying to support REST with its own APIs, so this was a good opportunity to learn about the strengths and weaknesses of REST.</p>
+
+<p>With a typical SOAP API, my strategy would look something like:</p>
+<ul>
+   <li>Find the link to the <a href="http://en.wikipedia.org/wiki/Web_Services_Description_Language">WSDL</a> in their documentation.</li>
+   <li>Use the <a href="https://jax-ws.dev.java.net/jax-ws-ea3/docs/wsimport.html">wsimport</a> command to create <a href="http://en.wikipedia.org/wiki/JAXB">JAXB</a> stubs for the web-service.</li>
+   <li>Copy the stubs over to my project.</li>
+   <li>Start coding some unit tests to make sure they work, and you got your prototype.</li>
+</ul>
+
+<p><b>First problem:</b> there is no WSDL in REST. Instead, they use a similar <a href="http://en.wikipedia.org/wiki/Web_Application_Description_Language">WADL</a> standard. There is even a <a href="http://www.google.com/search?q=wadl2java&ie=utf-8&oe=utf-8&aq=t&rls=org.mozilla:en-US:official&client=firefox-a">wadl2java</a> tool to create stubs.</p>
+
+<p><b>Second problem:</b> this actual web-service doesn't support WADL. In fact, many REST web-services don't support it. The main problem is that there is no codified standard for REST; it evolved to its current state. WADL was an after-thought, and is still gaining traction.</p>
+
+<p>So, I needed to produce XML and post it to this API somehow. My initial implementation was to create the XML by hand, and post it to the API using <a href="http://hc.apache.org/httpclient-3.x/">Apache's HttpClient</a>. HttpClient is great, because it supports all the standard HTTP methods (POST, GET), plus the less frequently used ones needed for REST (PUT, DELETE, etc).</p>
+
+<p>For the XML part; I had been looking for a reason to play around with <a href="http://www.cs.usfca.edu/~parrt/course/601/lectures/stringtemplate.html">StringTemplate</a>. I started with a template XML file that looked like:</p>
+
+<pre name="code" class="xml">
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?&gt;
+&lt;atom:feed xmlns:yheader=&quot;http://schemas.yahoo.com/ypost/jobsHeader/3.0&quot;
+   xmlns:atom=&quot;http://www.w3.org/2005/Atom&quot;
+   xmlns:yjob=&quot;http://schemas.yahoo.com/ypost/jobs/3.0&quot;
+   xmlns:ycontrol=&quot;http://schemas.yahoo.com/ypost/control/1.0&quot;&gt;
+   &lt;yheader:Credential&gt;
+       &lt;yheader:Login&gt;$login$&lt;/yheader:Login&gt;
+       &lt;yheader:Password&gt;$password$&lt;/yheader:Password&gt;
+       &lt;yheader:Version&gt;3.0&lt;/yheader:Version&gt;
+       &lt;yheader:LicenseKey&gt;$license$&lt;/yheader:LicenseKey&gt;
+   &lt;/yheader:Credential&gt;
+   &lt;atom:id&gt;$account$&lt;/atom:id&gt;
+&lt;/atom:feed&gt;  
+</pre>
+
+<p>... and a code segment that looked like:</p>
+
+<pre name="code" class="java">
+    private static final String AUTH_XML_FILE = &quot;HotJobs.template.auth.xml&quot;;
+    private static Map&lt;String, String&gt; replacements = new HashMap&lt;String, String&gt;() &#123;&#123;
+            put(&quot;login&quot;, &quot;user@user.com&quot;);
+            put(&quot;password&quot;, &quot;password&quot;);
+            put(&quot;account&quot;, &quot;12345&quot;);
+            put(&quot;license&quot;, &quot;abc123&quot;);
+        &#125;&#125;;
+
+    public static String getXml() {
+
+        StringTemplate xml
+                = new StringTemplate(getFileContents(AuthRequest.class.getResourceAsStream(AUTH_XML_FILE)));
+        
+        for (String key: replacements.keySet())
+            xml.setAttribute(key, replacements.get(key));
+
+        return xml.toString();
+    }
+
+    public static String getFileContents(InputStream resourceAsStream) {
+        // left as an exercise for the reader ;)
+    }
+</pre>
+
+<p>Pretty soon, I ran into into a situation where I was posting invalid XML. Of course, I should have realized that you can't just cram any string into an XML element; it may contain an <a href="http://www.w3schools.com/xml/xml_cdata.asp">invalid character</a>, such as the ampersand. Or it may just be the wrong encoding. The hack fix is to escape the values:</p>
+
+<pre name="code" class="java">
+   // using org.apache.commons.lang.StringEscapeUtils
+   xml.setAttribute(key, StringEscapeUtils.escapeXml(replacements.get(key)));
+</pre>
+
+<p>However, this is really a symptom of a poor design. In general, it's <a href="http://stackoverflow.com/questions/139650/when-writing-xml-is-it-better-to-hand-write-it-or-to-use-a-generator-such-as-si">not a good idea</a> to generate XML by hand like this.</p>
+
+<p>I set out to use JAXB, instead. With no schema provided by the vendor, I would need to make one. I loaded up my trusted copy of <a href="http://www.altova.com/">XMLSpy</a>, and copy and pasted an example XML document. Then I selected DTD/Schema -> Generate DTD/Schema:</p>
+
+<img src="http://lh5.ggpht.com/_EE2zVzGv1Ds/SVlEQ6y4WcI/AAAAAAAAH2o/TSeApwM2leo/s800/XMLSpy1.gif">
+
+<p>There were a few tweaks necessary. String fields came across as enumerations, which is somewhat understandable because XMLSpy has to guess at what types the fields are. I couldn't find a configuration option to change it, so I edited it by hand:</p>
+
+<pre name="code" class="xml">
+&lt;xs:element name=&quot;id&quot;&gt;
+ &lt;xs:simpleType&gt;
+  &lt;xs:restriction base=&quot;xs:string&quot;&gt;
+   &lt;xs:enumeration value=&quot;1-JYNURD&quot;/&gt;
+  &lt;/xs:restriction&gt;
+ &lt;/xs:simpleType&gt;
+&lt;/xs:element&gt;
+</pre>
+
+<p>became...</p>
+
+<pre name="code" class="xml">
+&lt;xs:element name=&quot;id&quot;&gt;
+ &lt;xs:simpleType&gt;
+  &lt;xs:restriction base=&quot;xs:string&quot;&gt;
+  &lt;/xs:restriction&gt;
+ &lt;/xs:simpleType&gt;
+&lt;/xs:element&gt;
+</pre>
+
+<p>Then, all I needed to do was to generate the JAXB stubs. Xjc handled the multiple chained XSD files just fine.</p>
+
+<pre name="code" class="xml">
+xjc -d generated -p com.bullhorn.athens.jobboards.hotjobs.generated.login login.xsd
+</pre>
+
+<p>Once I plugged this into my existing implementation, it <i>almost</i> worked. By default, JAXB was marshalling the objects into XML without the custom namespaces. For example, "yheader" was becoming "ns1", while "atom" was not namespaced at all. The namespace declarations were properly changed to match, so it was valid XML,  just not what the API was expecting.</p>
+
+<p>This would work for many REST APIs, but this particular one doesn't seem to be using an XML parser on the other end. I assume they are parsing the XML by hand using regular expressions or something. This is another good argument for using XML parsers versus doing it yourself!</p>
+
+<p>Fixing the namespace issue was easy. All you have to do is provide an implementation of NamespacePrefixMapper. In my case, it looked like:</p>
+
+<pre name="code" class="java">
+import com.sun.xml.bind.marshaller.NamespacePrefixMapper;
+
+public class YahooNamespacePrefixMapper extends NamespacePrefixMapper {
+
+    public String getPreferredPrefix(String namespaceUri, String suggestion, boolean requirePrefix) {
+
+        if (namespaceUri.equalsIgnoreCase(&quot;http://www.w3.org/2005/Atom&quot;)) return &quot;atom&quot;;
+        return &quot;yheader&quot;;        
+    }
+}
+</pre>
+
+<p>Then, in my marshalling code, you have to pass in the custom prefix mapper:</p>
+
+<pre name="code" class="java">
+    public static String marshall(Class className, Object value) {
+
+        try {
+
+            JAXBContext jaxbContext = JAXBContext.newInstance(className);
+            Marshaller marshaller = jaxbContext.createMarshaller();
+            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+            marshaller.setProperty(NAMESPACE_PREFIX_MAPPER, new YahooNamespacePrefixMapper());
+            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+            marshaller.marshal(value, bytes);
+            return bytes.toString();
+
+        } catch (JAXBException e) {
+            throw new RuntimeException(e);
+        }
+    }    
+</pre>
+
+<p>Success! Of course, generating a schema by hand is not ideal, either. But if there is no first-party schema, at least it's an option.</p>

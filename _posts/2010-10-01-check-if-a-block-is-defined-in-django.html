@@ -1,0 +1,95 @@
+---
+layout: post
+title: Check if a block is defined in Django
+tags: django
+---
+
+<p>
+Very often when styling a webpage, you want to put content in a box. For example, say you have a standard box for contextual help content.
+</p>
+
+<pre name="code" class="html">
+   &lt;div class="help"&gt;
+      &lt;!--- actual html contents here ---&gt;
+   &lt;/div&gt;
+   &lt;style&gt;
+      .help { 
+         padding: 1em;
+         border: 1px dashed black;
+      }
+   &lt;/style&gt;
+</pre>
+
+<p>
+A sensible way to make this re-usable in Django would be to use blocks. 
+</p>
+
+<pre name="code" class="html">
+   &lt;div class="help"&gt;
+      &#123;% block help %&#125;&#123;% endblock %&#125;
+   &lt;/div&gt;
+</pre>
+
+<p>
+But what happens if no help block is defined? With this implementation, you would still get the empty help DIV, complete with a border and padding. Of course, you could render the div inside the block, but then you're repeating yourself every time you define one.
+</p>
+
+<p>
+One work-around is via css:empty.
+</p>
+
+<pre name="code" class="html">
+   &lt;style&gt;
+      .help:empty {
+         disply: none;
+      }
+   &lt;/style&gt;
+</pre>
+
+<p>
+However, that approach will not work in all browsers/versions. Also, it's muddying the separation between content and style.
+</p>
+
+<p>
+Ideally, you would be able to omit the div at the base template level if the block is not defined. I wondered if there was an way to check if a block is defined. While <a href="http://nathanborror.com/posts/2009/feb/28/capturing-content-django-templates/">hunting around</a>, I found the <a href="http://djangosnippets.org/snippets/545/">next best thing</a>. The following code (from <a href="http://djangosnippets.org/users/kcarnold/">kcarnold</a>) will capture the contents of a block to a variable. You can then conditionally render it only if it exists and is not empty.
+</p>
+
+<pre name="code" class="python">
+from django import template
+
+register = template.Library()
+
+@register.tag(name='captureas')
+def do_captureas(parser, token):
+    try:
+        tag_name, args = token.contents.split(None, 1)
+    except ValueError:
+        raise template.TemplateSyntaxError("'captureas' node requires a variable name.")
+    nodelist = parser.parse(('endcaptureas',))
+    parser.delete_first_token()
+    return CaptureasNode(nodelist, args)
+
+class CaptureasNode(template.Node):
+    def __init__(self, nodelist, varname):
+        self.nodelist = nodelist
+        self.varname = varname
+
+    def render(self, context):
+        output = self.nodelist.render(context)
+        context[self.varname] = output
+        return ''
+</pre>
+
+<pre name="code" class="html">
+ &#123;% captureas help_content %&#125;&#123;% spaceless %&#125;&#123;% block help %&#125;&#123;% endblock %&#125;&#123;% endspaceless %&#125;&#123;% endcaptureas %&#125;
+
+ &#123;% if help_content %&#125;
+    &lt;div id="help"&gt;
+        &#123;&#123; help_content &#125;&#125;
+    &lt;/div&gt;
+ &#123;% endif %&#125;
+</pre>
+
+<p>
+Django actually may <a href="http://code.djangoproject.com/ticket/6378">add this functionality</a> natively in the future. 
+</p>

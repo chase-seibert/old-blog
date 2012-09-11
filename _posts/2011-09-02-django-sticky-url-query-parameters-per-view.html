@@ -1,0 +1,93 @@
+---
+layout: post
+title: Django&#58; sticky URL query parameters per view
+tags: django
+---
+
+<p>
+On pages that contain filter controls, such as search results pages, it's common for the filter selections to be put into the URL using query parameters. This makes the search results bookmark-able. A common requirement on such pages is to have the application remember the particular filter parameters the user set the last time they viewed the page. They should be able to browse away from the page, come back, and pick up where they left off.
+</p>
+
+<p>
+In Django, it's reasonable to store those filter settings in the user's session, which will persist as long as they are logged in. You could easily code this up inside a particular view. But if this is something you do a lot, it makes more sense to extract the logic into a view decorator. Here is a generic decorator you can apply to any view to have a subset of the query parameters "stick" between renders.
+</p>
+
+<pre name="code" class="python">
+from django.http import HttpResponseRedirect
+import urlparse
+import urllib
+
+def remember_last_query_params(url_name, query_params):
+
+    &quot;&quot;&quot;Stores the specified list of query params from the last time this user
+    looked at this URL (by url_name). Stores the last values in the session.
+    If the view is subsequently rendered w/o specifying ANY of the query params,
+    it will redirect to the same URL with the last query params added to the URL.
+
+    url_name is a unique identifier key for this view or view type if you want
+    to group multiple views together in terms of shared history
+
+    Example:
+
+    @remember_last_query_params(&quot;jobs&quot;, [&quot;category&quot;, &quot;location&quot;])
+    def myview(request):
+        pass
+
+    &quot;&quot;&quot;
+
+    def is_query_params_specified(request, query_params):
+        &quot;&quot;&quot; Are any of the query parameters we are interested in on this request URL?&quot;&quot;&quot;
+        for current_param in request.GET:
+            if current_param in query_params:
+                return True
+        return False
+
+    def params_from_last_time(request, key_prefix, query_params):
+        &quot;&quot;&quot; Gets a dictionary of JUST the params from the last render with values &quot;&quot;&quot;
+        params = {}
+        for query_param in query_params:
+            last_value = request.session.get(key_prefix + query_param)
+            if last_value:
+                params[query_param] = last_value
+        return params
+
+    def update_url(url, params):
+        &quot;&quot;&quot; update an existing URL with or without paramters to include new parameters
+        from http://stackoverflow.com/questions/2506379/add-params-to-given-url-in-python
+        &quot;&quot;&quot;
+        if not params:
+            return url
+        if not url: # handle None
+            url = &quot;&quot;
+        url_parts = list(urlparse.urlparse(url))
+        # http://docs.python.org/library/urlparse.html#urlparse.urlparse, part 4 == params
+        query = dict(urlparse.parse_qsl(url_parts[4]))
+        query.update(params)
+        url_parts[4] = urllib.urlencode(query)
+        return urlparse.urlunparse(url_parts)
+
+    def do_decorator(view_func):
+
+        def decorator(*args, **kwargs):
+
+            request = args[0]
+
+            key_prefix =  url_name + &quot;_&quot;
+
+            if is_query_params_specified(request, query_params):
+                for query_param in query_params:
+                    request.session[key_prefix + query_param] = request.GET.get(query_param)
+
+            else:
+                last_params = params_from_last_time(request, key_prefix, query_params)
+                if last_params and last_params != {}:
+                    current_url = &quot;%s?%s&quot; % (request.META.get(&quot;PATH_INFO&quot;), request.META.get(&quot;QUERY_STRING&quot;))
+                    new_url = update_url(current_url, last_params)
+                    return HttpResponseRedirect(new_url)
+
+            return view_func(*args, **kwargs)
+
+        return decorator
+
+    return do_decorator
+</pre>

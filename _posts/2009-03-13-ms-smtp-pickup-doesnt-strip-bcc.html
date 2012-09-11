@@ -1,0 +1,69 @@
+---
+layout: post
+title: MS SMTP Pickup Doesn't Strip BCC
+tags: 
+---
+
+<blockquote>
+...when a message containing a "Bcc:" field is prepared to be sent, the "Bcc:" line is removed even though all of the recipients (including those specified in the "Bcc:" field) are sent a copy of the message. <a href="http://www.faqs.org/rfcs/rfc2822.html">[RFC2822]</a>
+</blockquote>
+
+<p>
+When I first started at my current job in 2003, the email system was in a dire state. My first six months were spent reinventing how we handled email with our web application, both inbound and outbound. Since that time, we have scaled up from handling less than 50,000 messages a day, to over three million.
+</p>
+
+<p>
+A few years later, Gmail was really starting to take off. Once they gained a foothold in the business world, a fairly egregious problem came to my attention. It seemed that every email that was BCCed from our system into Gmail was actually showing the BCC recipients in Gmail. Basically, this turned BCC into an unwitting CC. Customers were generally bemused, but it was actually a rather large security issue.
+</p>
+
+<p> 
+It turns out that the problem wasn't specifically related to Gmail. A little investigation revealed that email was actually leaving our system with the BCC header on it. Virtually any email client allows you to view email headers, and so the BCC info was just a click away. Gmail just happened to show those values on their regular UI, while most clients didn't. 
+</p>
+
+<p>
+What's SUPPOSED to happen is that the sending email server strips the BCC info from the header as it's sending it out. How does it deliver it to the BCCed recipients, then? It all has to do with the difference between the <a href="http://www.freesoft.org/CIE/RFC/1123/86.htm">message envelope</a> and the message header.
+</p>
+
+<p>
+People typically think of an email as having numerous parts. You have your from, to, subject and body. You also have attachments. What's actually going on behind the scenes is that there is an email header that contains all the required stuff (from, to, subject, etc). There is also the body, which contains the text/html of the message, as well as encoded attachments. A typical email header looks like:
+</p>
+
+<pre name="code" class="html">
+Return-Path: [fake@address.com]
+Received: from server.mymailhost.com (mail.mymailhost.com [126.43.75.123])
+        by pilot01.cl.msu.edu (8.10.2/8.10.2) with ESMTP id NAA23597;
+        Fri, 12 Jul 2002 16:11:20 -0400 (EDT)
+Received: from aol.com (127-34-56-98.dsl.mybigisp.com [127.34.56.98])
+        by server.mymailhost.com; Fri, 12 Jul 2002 13:09:38 -0700 (PDT)
+Date: Fri, 12 Jul 2002 13:09:38 -0700 (PDT)
+From: Hot Summer Deals &lt;hot_deals@aol.com&gt;
+To: My.Friends@pilot.msu.edu
+Subject: Just what you've been waiting for!!
+</pre>
+
+<p>
+There is actually a third part of an email, called the SMTP envelope. This is comprised of meta-data that the SMTP servers exchange <span style="font-style:italic;">before</span> they hand off the actual message. This includes the message recipients. Someone confusingly, this recipient list doesn't necessarily need to match what's in the header. In fact, this is exactly how BCC works; the servers talk to each other about the "real" recipients, but the message they deliver to you only shows the ones the sender wants you to see.
+</p>
+
+<p>
+In our implementation, the sending sever is MS-SMTP, the basic server that ships with Windows. More specifically, we're using the Pickup directory method of handing messages off to the server, which involves simply writing the EML file to a local directory. It's actually a fully supported transport mechanism and <a href="http://www.singular.co.nz/blog/archive/2007/11/28/using-an-smtp-pickup-directory-delivery-method-for-asp-net-development.aspx">rather popular</a>. Even <a href="http://technet.microsoft.com/en-us/library/bb124549.aspx">Exchange</a> implements it.
+</p>
+
+<p>
+The problem arises because MS-SMTP typically does BCC stripping when the message is handed to it, <span style="font-weight:bold;">over SMTP</span>. During its receiving SMTP conversation, it records the BCC addresses you want to deliver to, and then strips them. When you use the Pickup directly, you are skipping this step.
+</p>
+
+<p>
+You can solve this problem by using SMTP for the initial hand-off. However, many shops would prefer to use the Pickup instead, especially if they are generating many thousands of messages at once, and want to reduce overhead. In that case, you can use a work-around:
+</p>
+
+<pre>
+From: Hot Summer Deals &lt;hot_deals@aol.com&gt;
+To: My.Friends@pilot.msu.edu
+<b>X-Receiver: someguy@gmail.com</b>
+Subject: Just what you've been waiting for!!
+</pre>
+
+<p>
+This is basically an alias for BCC. While MS-SMTP won't strip that either, Gmail won't display it in the front-end. <span style="font-style:italic;">Note: this <a href="http://stackoverflow.com/questions/631799/bcc-never-sent-from-exchange-2007-using-specifiedpickupdirectory/633019#633019">may no longer</a> work on Exchange 2007.</span>
+</p>

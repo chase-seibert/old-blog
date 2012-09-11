@@ -1,0 +1,42 @@
+---
+layout: post
+title: Django fix_IE_for_vary "bug"
+tags: 
+---
+
+<p>
+I was briefly perplexed by an IE only bug this week. An Ajax call was throwing the following 500 exception, but only in IE.
+</p>
+
+<pre name="code" class="python">
+Traceback (most recent call last):
+
+File "/home/chase/bullhorn/branches/talladega/virtualenv/lib/python2.6/site-packages/django/core/servers/basehttp.py", line 280, in run
+self.result = application(self.environ, self.start_response)
+
+File "/home/chase/bullhorn/branches/talladega/virtualenv/lib/python2.6/site-packages/django/core/servers/basehttp.py", line 674, in _call_
+return self.application(environ, start_response)
+
+File "/home/chase/bullhorn/branches/talladega/virtualenv/lib/python2.6/site-packages/django/core/handlers/wsgi.py", line 246, in _call_
+response = self.apply_response_fixes(request, response)
+
+File "/home/chase/bullhorn/branches/talladega/virtualenv/lib/python2.6/site-packages/django/core/handlers/base.py", line 195, in apply_response_fixes
+response = func(request, response)
+
+File "/home/chase/bullhorn/branches/talladega/virtualenv/lib/python2.6/site-packages/django/http/utils.py", line 77, in fix_IE_for_vary
+if response['Content-Type'].split(';')[0] not in safe_mime_types:
+
+AttributeError: 'int' object has no attribute 'split'
+</pre>
+
+<p>
+Originally, I thought this looked like a bug in Django, however unlikely that is. But after walking through the code with a debugger, it was clear that the "Content-Type" reponse header was not "text/plain", or some such. Instead it was the integer 200. I finally traced it back to my own code.
+</p>
+
+<pre name="code" class="python">
+return HttpResponse("job saved", 200) # should be status=200
+</pre>
+
+<p>
+The problem is that the second positional argument to HttpResponse is content type, but I was just assuming it was the status code in this case. Easy fix. 
+</p>

@@ -1,0 +1,60 @@
+---
+layout: post
+title: Django {% url %} tag; it can do both absolute/relative urls!
+tags: 
+---
+
+<p>
+Most often, when you're using Django's url tag, you want relative links, not <a href="http://en.wikipedia.org/wiki/Absolute_url#Examples_of_absolute_URIs">absolute links</a>.
+</p>
+
+<p>
+Examples of relative links:
+</p>
+
+<ul>
+<li>/user/103</li>
+<li>/user/103/edit</li>
+</ul>
+
+<p>
+Examples of absolute links:
+</p>
+
+<ul>
+<li>http://example.com/user/103</li>
+<li>https://example.com/user/103/edit</li>
+</ul>
+
+<p>
+With relative links, you preserve the domain same and protocol (HTTP or HTTPS) of the current user session, with zero work on your part. This is the default behavior of <a href="http://docs.djangoproject.com/en/dev/ref/templates/builtins/#url">Django's &#123;% url %&#125; tag</a>. <i>Note: confusingly, they refer to "absolute" urls incorrectly in their documentation.</i>
+</p>
+
+<p>
+However, in some cases you need to use absolute URLs. For example, in html emails. When the users is in their email client, they don't have the context of what domain/protocol the link is for.
+</p>
+
+<p>
+In the past, I would typically change the code of those templates to look something like this:
+</p>
+
+<pre name="code" class="html">
+ &lt;!-- you could also pull the protocol/domain from a setting or from Django's sites metadata --&gt;
+ Please &lt;a href="http://example.com&#123;% url user user.id %&#125;"&gt;click here&lt;a&gt;.
+</pre>
+
+<p>
+But what if you're using the same template for website content and email content? You could just output absolute links in both cases. You could put logic into the templates to only output the domain if a certain view scope variable is set. You could also just create separate templates for email/site content. None of these solutions is ideal.
+</p>
+
+<p>
+Instead, you could use Django's <a href="http://code.djangoproject.com/browser/django/trunk/django/core/urlresolvers.py#L398">set_script_prefix</a>. I can't find it in the official documentation, but this handy little method sets a prefix for the current thread context, which will be used on all subsequent url resolutions.
+</p>
+
+<p>
+In my case, I just added the following one liner to my mail sending routine before the email content template is rendered.
+</p>
+
+<pre name="code" class="python">
+   set_script_prefix(settings.SITE_URL) # ie, http://example.com
+</pre>

@@ -1,0 +1,41 @@
+---
+layout: post
+title: RPC/Encoded web services on Java 1.6
+tags: java
+---
+
+<p>Usually, when I want to call a remote web-service in Java, I would generate stub proxy classes at the command line with:</p>
+
+<pre name="code" class="xml">
+wsimport http://someurl?WSDL
+</pre>
+
+<p>On a recent project, this command resulted in the error message:</p>
+
+<pre name="code" class="xml">
+parsing WSDL...
+
+[ERROR] rpc/encoded wsdls are not supported in JAXWS 2.0.
+  line 56 of http://someurl?WSDL
+</pre>
+
+<p>The line in question is the start of a binding, which contains an elements definition that looks like:</p>
+
+<pre name="code" class="xml">
+        &lt;soap:body use=&quot;encoded&quot; encodingStyle=&quot;http://schemas.xmlsoap.org/soap/encoding/&quot; namespace=&quot;urn:SimpleRexServiceIntf-ISimpleRexService&quot;/&gt;
+</pre>
+
+<p>Doing some research, it seems that this is one of the earlier SOAP variants. None of the modern web service APIs support it. From <a href="http://msdn.microsoft.com/en-us/magazine/cc164152.aspx">msdn</a>:</p>
+
+<blockquote>
+<p>RPC (Remote Procedure Call) style, on the other hand, indicates that the SOAP body contains an XML representation of a method call such as the traditional distributed component technologies of DCOM, Corba, and others. RPC style uses the names of the method and its parameters to generate structures that represent a method's call stack (see section 7 of the SOAP 1.1 specification at http://www.w3c.org/TR/SOAP). These structures can then be serialized into the SOAP message according to a set of encoding rules. The SOAP specification defines a standard set of encoding rules for this purpose (see section 5 of the SOAP 1.1 spec) that codify how to map the most common programmatic data structures, such as structs and arrays, into an XML 1.0 format. Since RPC is traditionally used in conjunction with the SOAP encoding rules, the combination is referred to as rpc/encoded.
+</p>
+<p>
+The document/literal approach is more straightforward and easier for toolkits to get right because it simply relies on XML Schema to describe exactly what the message looks like on the wire. SOAP, however, was created before XML Schema existed. And back then they were focused primarily on objects (hence the O in SOAP), which led to the rpc/encoded way of doing things. Since universal description languages such as XML Schema or Web Services Description Language (WSDL) weren't available back then, the rpc/encoded style had to assume that additional metadata would be available for describing the method call (such as a type library, Microsoft .NET Framework assembly, or Java class file).</p>
+</blockquote>
+
+<p>However, Apache Axis v1 does still seem to work in Java 1.6. All I did was download axis-1.4.jar, and run the following command:</p>
+
+<pre name="code" class="xml">
+java -cp axis-1.4.jar;commons-logging-1.1.jar;commons-discovery-0.2.jar;jaxrpc-1.1.jar;saaj-1.1.jar;wsdl4j-1.4.jar;activation-1.1.jar;mail-1.4.jar org.apache.axis.wsdl.WSDL2Java http://someurl?WSDL
+</pre>

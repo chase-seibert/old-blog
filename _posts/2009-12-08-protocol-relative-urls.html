@@ -1,0 +1,37 @@
+---
+layout: post
+title: Protocol Relative URLs
+tags: 
+---
+
+<p>
+   If you follow <a href="http://developer.yahoo.com/performance/rules.html">YSlow rules</a>, then you are likely separating HTTP requests for static resources (images, CSS, javascript) onto a second domain. Maybe you even have a <a href="http://bitkickers.blogspot.com/2009/11/changing-image-links-in-css-to-use.html">nice script</a> to translate your includes when you deploy to production. Then one day, you enable your site for SSL.
+</p>
+
+<p>
+Most likely, your static domain resources are being referenced as absolute, global, non-SSL URLs. Ie, <a href="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js">http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js</a>. In most browsers, there is no problem with mixing an HTTPS page with HTTP includes. But with IE, Microsoft has made the dubious decision to warn users that "this page contains both secure and nonsecure items".
+</p>
+
+<img src="http://lh6.ggpht.com/_EE2zVzGv1Ds/SyKwDwHoI7I/AAAAAAAAJas/mWz-4mY8gKE/s800/nonsecure-items.gif" />
+
+<p>
+Personally, I don't think this makes much sense. Whether my static resources are being served by SSL or not does not effect the security of the page, and it definitely slows it down.
+</p>
+
+<p>
+The most obvious solution to include these resources with HTTPS when appropriate is to change the includes to relative (or domain relative) URLs. Ie, /ajax/libs/jquery/1/jquery.min.js. But then YSlow rightly complains that this is not optimized; you're sending cookies for each static include, and the browser can't load the includes in parallel with your main page.
+</p>
+
+<p>
+Another solution is to change the includes dynamically based on whether the main page is HTTPS or not. Fine for HTML, but what about the CSS file? That's usually static. You could dynamically generate it on the fly (performance problem), or generate two versions on deploy and include the HTTP or HTTPS one as appropriate. Neither option is appealing.
+</p>
+
+<p>
+Now, I have been writing HTML for about 15 years. But until I did a little research for this issue, I had never heard of <a href="http://nedbatchelder.com/blog/200710/httphttps_transitions_and_relative_urls.html">protocol relative URLs</a>. It turns out that the browser can load a resource from a URL pointing to another domain, and decide to use either HTTP or HTTPS on the fly depending on the current page. Fantastic!
+</p>
+
+<pre name="code" class="html">
+.body {
+    background-image: url("//static.powerfill.com/images/woot.gif");
+}
+</pre>

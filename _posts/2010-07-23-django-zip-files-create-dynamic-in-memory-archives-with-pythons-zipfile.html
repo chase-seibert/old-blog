@@ -1,0 +1,52 @@
+---
+layout: post
+title: Django zip files (create dynamic in-memory archives with Python's zipfile)
+tags: 
+---
+
+<p>
+Usually, Django should not be used to serve static files.
+</p>
+
+<blockquote>
+The reasoning here is that standard Web servers, such as Apache, lighttpd and Cherokee, are much more fine-tuned at serving static files than a Web application framework.
+   - <a href="http://docs.djangoproject.com/en/dev/howto/static-files/">Django documentation</a>
+</blockquote>
+
+<p>
+However, dynamic files are a different story. Say you want to wrap more than one file being generated on the fly from a form POST. In my case, I wanted to let the user download a zip archive of a few generated reports.
+</p>
+
+<p>
+Using Python's <a href="http://docs.python.org/library/zipfile.html">zipfile</a> it's easy to create the archive in-memory, without writing to disk. Then, serving that file as a zip content-type is easy in Django.
+</p>
+
+<pre name="code" class="python">
+
+from StringIO import StringIO
+from zipfile import ZipFile
+from django.http import HttpResponse
+
+def download(request, company_id):     
+    
+    in_memory = StringIO()
+    zip = ZipFile(in_memory, "a")
+        
+    zip.writestr("file1.txt", "some text contents")
+    zip.writestr("file2.csv", "csv,data,here")
+    
+    # fix for Linux zip files read in Windows
+    for file in zip.filelist:
+        file.create_system = 0    
+        
+    zip.close()
+
+    response = HttpResponse(mimetype="application/zip")
+    response["Content-Disposition"] = "attachment; filename=two_files.zip"
+    
+    in_memory.seek(0)    
+    response.write(in_memory.read())
+    
+    return response
+
+</pre>

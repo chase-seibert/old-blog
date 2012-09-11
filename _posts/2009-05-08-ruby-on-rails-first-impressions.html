@@ -1,0 +1,68 @@
+---
+layout: post
+title: Ruby on Rails - First Impressions
+tags: 
+---
+
+<p>
+I've started playing around with Ruby on Rails. Maybe it was my recent experience with Python, which has a similar syntax to Ruby. Perhaps it's because I keep hearing how you can get a fully working site up in just minutes. Maybe I'm just bored.
+</p>
+
+<p>
+Going into it, I had some preconceptions about Ruby on Rails above and beyond the <a href="http://www.loudthinking.com/posts/29-the-rails-myths">common myths</a>.
+ <ul>
+   <li>It's easy to get started, but gets complicated quickly.</li>
+   <li>It's hard to scale.</li>
+   <li>The documentation sucks.</li>
+ </ul>
+<p>
+
+<p>
+Installation was daunting at first. I had bought a copy of <a href="http://oreilly.com/catalog/9780596518776/">Learning Rails</a> (just $15 on the Kindle), which presented three different options. Having seen some screencast tutorials, I knew that Rails was very Mac centric. My first install via apt-get on Ubuntu was a breeze. Subsequent install on Windows using InstantRails was dead simple.
+</p>
+
+<p>
+At home, I first tried Eclipse (Ganymede) w/ the dynamic language plug-in. I also tried NetBeans (having never used it before), which I found to be far superior for Rails. The auto-completion just works, and it supports all the various files types that Rails uses. I wasn't able to get the debugger Firefox plug-in working, however. 
+</p>
+
+<p>
+The Ruby language itself is right up my alley. Being at one with the concept of <a href="http://steve-yegge.blogspot.com/2007/12/codes-worst-enemy.html">code is the enemy</a>, I appreciate the brevity of the syntax. Stylistically, it's a lot like Python, which I have recently come to adore. Having worked in jQuery/Prototype a lot recently, I absolutely love the support for <a href="http://en.wikipedia.org/wiki/Anonymous_function">lambdas</a> and the fact that hashes are primitives (and used a LOT in the APIs for parameter passing).
+</p>
+
+<p>
+Example:
+<pre name="code" class="ruby">
+    @chart = Gchart.line(
+      :format =&gt; 'image_tag',
+      :size =&gt; '500x300',
+      :title =&gt; 'Weight (lbs)',
+      #:bg =&gt; 'white',
+      #:legend =&gt; ['first data set label', 'second data set label'],
+      #:line_colors =&gt; '76A4FB',
+      :data =&gt; weights,
+      :axis_with_labels =&gt; ['x','r'],
+      :axis_labels =&gt; [dates.join('|'), "#{min}|#{max}" ]
+    )
+</pre>
+</p>
+
+<p>
+However, my absolute best discovery about Rails so far is the MVC model. Their implementation is simple, and easy to use. Providing a language level syntax for variables from the controller to automatically be in the scope of the view was brilliant. The model itself has class level declarations for input validation, which means that your methods don't get crowded with validation code. I'm not sure I'm crazy about the level of formatting logic that can be present in the view, but I suppose that's a necessary evil.
+</p>
+
+<p>
+The Rails concept of <a href="http://en.wikipedia.org/wiki/Convention_over_Configuration">configuration by convention</a> I find to be very powerful, while at times cryptic. But in the war against code size, it's a killer weapon. Somewhere down the line I may get frustrated with the fact that some level of naming discretion it taken away from the developer. On the other hand, I have come to love Python's "whitespace is not a style choice" approach. I sense this might be the case here, as well.
+</p>
+
+<p>
+Documentation, as promised, is spotty. While the <a href="http://railscasts.com/">plethora of video tutorials</a> are great for getting started, I'm not sure how useful they are for trouble-shooting specific issues. Various blogs seem to be the best bet, but very often the information there is out-dated, and may not even work in the current version of Rails. On the other hand, in NetBeans I find it fairly easy to discover the correct API calls/syntax, and being able to see the actual code behind the Rails API right in your IDE is always a huge help.
+</p>
+
+<p>
+Post-conceptions:
+ <ul>
+   <li>The Rails community is very mac heavy, but getting up and running on Linux/Windows was easy.</li>
+   <li>The language and framework are ultra-modern, in a good way.</li>
+   <li>The documentation sucks. Do yourself a favor a buy a book.</li>
+ </ul>
+<p>

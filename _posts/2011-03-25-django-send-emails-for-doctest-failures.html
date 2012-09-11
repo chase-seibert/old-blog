@@ -1,0 +1,45 @@
+---
+layout: post
+title: Django&#58; send emails for doctest failures
+tags: 
+---
+
+<p>
+If you're using <a href="http://bitkickers.blogspot.com/2009/10/unit-testing-django-with-doctest.html">Django's unit/doc testing</a> functionality, you would typically be running those tests manually on your local machine. This week, I decided that I wanted to run these nightly from our integration server, and send failures to the dev team. 
+</p>
+
+<p>
+The easiest way I could think of to do this was to write a little python script. You could run this script nightly using cron, or you could even run it on every commit as a post-build hook in your continuous integration tool.
+</p>
+
+<pre name="code" class="python">
+#!/usr/bin/python
+from optparse import OptionParser
+import smtplib
+from email.mime.text import MIMEText
+import settings
+import commands
+
+def getOptions():
+    arguments = OptionParser()
+    arguments.add_option("--email", action="store_true", dest="email_failures", help="Send email failure reports")
+    return arguments.parse_args()[0]
+
+def send_email(body):
+    message = MIMEText(body)
+    message["Subject"] = settings.MAIL_SUBJECT_UNITTESTS
+    message["From"] = settings.MAIL_FROM
+    message["To"] = ", ".join(settings.MAIL_TO)
+    smtp = smtplib.SMTP(host=settings.SMTP_HOST)
+    smtp.sendmail(settings.MAIL_FROM, settings.MAIL_TO, message.as_string())
+    smtp.quit()
+                        
+if __name__ == '__main__':        
+    options = getOptions()
+    # STDIN (0), STDOUT (1) and STDERR (2)
+    # just output stderr, which has the failures
+    exit_code, output = commands.getstatusoutput("../manage.py test --noinput YOURAPPNAME 1&gt;/dev/null")
+    # exit_code == 256 (ERROR), 0 (SUCCESS)
+    if exit_code != 0 and options.email_failures:
+        send_email(output)
+</pre>

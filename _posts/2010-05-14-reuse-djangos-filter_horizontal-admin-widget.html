@@ -1,0 +1,45 @@
+---
+layout: post
+title: Reuse Django's filter_horizontal admin widget
+tags: 
+---
+
+<p>
+The HTML <a href="http://www.w3schools.com/tags/att_select_multiple.asp">select multiple</a> control sucks mightily. Though it's a standard form widget, regular users seem to have usability problems with it. Specifically, it's easy to forget to control-click to add a new item, and you end up removing anything previously added. Also, it's hard to find options in large unsorted lists.
+</p>
+
+<p>
+There are many projects out there that can transform a multiselect into a more advanced widget. Typically they operate via JavaScript, replacing the vanilla control on the fly client-side. The server-side receives the same form variables. This has the advantage of being a drop-in replacement, and of degrading nicely if the user does not have JavaScript enabled.
+</p>
+
+<p>
+Django has a particularly nice one built into it's admin interface. It turns a multi-select such as...
+</p>
+
+<img src="http://lh6.ggpht.com/_EE2zVzGv1Ds/S-2OWm8O4kI/AAAAAAAALVM/EU7CFjUKEQk/s800/django-admin-before.png" />
+
+<p>
+into this...
+</p>
+
+<img src="http://lh5.ggpht.com/_EE2zVzGv1Ds/S-2OWXPWSmI/AAAAAAAALVI/QVGFmrPrVko/s800/django-admin-after.png" />
+
+<p>
+This comes complete with add/remove all, and client-side search capability. Because this is all JavaScript, it's easy to remove from Django admin and integrate into any page. I found a <a href="http://www.hoboes.com/Mimsy/hacks/replicating-djangos-admin/reusing-djangos-filter_horizontal/">decent guide</a> online, but I think we can do it in fewer steps.
+</p>
+
+<ul>
+ <li>Download <a href="http://dl.dropbox.com/u/422013/bitkickers/django-admin.multiselect.js">django-admin.multiselect.js</a>, and include in your page.</li>
+ <li>Download <a href="http://dl.dropbox.com/u/422013/bitkickers/django-admin-widgets.css">django-admin-widgets.css</a> and include in your page.</li>
+</ul>
+
+<p>
+Then, all you have to do is initialise it for any multi-selects you have.
+</p>
+
+<pre name="code" class="javascript">
+ jQuery.each($("select[multiple]"), function () {
+  // "Locations" can be any label you want
+  SelectFilter.init(this.id, "Locations", 0, "/media/");
+ });
+</pre>

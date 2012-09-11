@@ -1,0 +1,60 @@
+---
+layout: post
+title: Using pgpool2 to timeout idle Postgres connections from Django
+tags: 
+---
+
+<p>
+Django has a <a href="http://thebuild.com/blog/2010/10/25/django-and-postgresql-idle-in-transaction-connections/">well known issue</a> with "&lt;IDLE&gt; in transaction" queries piling up. I have found that simply "&lt;IDLE&gt;" queries also have a tendency to hang out. This can cause problems for a high traffic site, as you can run out of open connections slots on the database side.
+</p>
+
+<p>
+To see if you're affected, you can run a database query to see the status of open connections.
+</p>
+
+<pre name="code" class="sql">
+&gt;select count(*), current_query from pg_stat_activity group by current_query;
+ count |                                current_query                                 
+-------+------------------------------------------------------------------------------
+    31 | &lt;IDLE&gt; in transaction
+    54 | &lt;IDLE&gt;
+     1 | select count(*), current_query from pg_stat_activity group by current_query;
+(3 rows)
+
+&gt;SHOW max_connections;
+125
+</pre>
+
+<p>
+In this case, you can see that 86 out of a possible 125 connections are open, and there is only one "real" query running. After a while, you might start seeing the <b>OperationalError: FATAL:  sorry, too many clients already</b> error from Postgres, by way of Django.
+</p>
+
+<p>
+Why are these connections hanging out? Maybe you're <a href="http://stackoverflow.com/questions/1303654/threaded-django-task-doesnt-automatically-handle-transactions-or-db-connections">opening a transaction and not closing it</a>. In my case, I have no idea. But I don't really care either, I just want them closed after say 90 seconds. Surprisingly, there is no configuration option in Django or Postgres for this. Instead, you have to rely on a Postgres add-on like <a href="http://pgpool.projects.postgresql.org/">pgpool2</a>.
+</p>
+
+<p>
+Here are my notes for installing pgpool2 on Ubuntu, fixing a bug in the Ubuntu 11.04 init script and configuring a 90 second connection timeout. In this example, I'm installing pgpool2 on the Postgres database server itself, and having pgpool2 take over post 5432, moving Postgres itself to 5431 (to make it a seamless transition as far as Django config is concerned).
+</p>
+
+<pre name="code" class="bash">
+apt-get install pgpool2 
+
+vim /etc/init.d/pgpool2 
+PIDFILE=/var/run/pgpool/pgpool.pid 
+
+vim /etc/pgpool.conf 
+port = 5432 
+connection_life_time = 90 
+client_idle_limit = 90 
+backend_hostname0 = &#39;localhost&#39; 
+backend_port0 = 5431 
+backend_weight0 = 1 
+
+vim /etc/postgresql/8.4/main/postgresql.conf 
+port = 5431 
+
+/etc/init.d/postgresql-8.4 stop 
+/etc/init.d/postgresql-8.4 start 
+service pgpool2 restart
+</pre>

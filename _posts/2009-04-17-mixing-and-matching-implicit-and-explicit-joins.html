@@ -1,0 +1,75 @@
+---
+layout: post
+title: Mixing and matching implicit and explicit JOINs
+tags: sql
+---
+
+<p>
+Back in the caveman days, there was only one way to JOIN tables in a SQL query. Now, we refer to this as "table list", "theta" or simply "implicit" JOIN syntax:
+</p>
+
+<pre name="code" class="sql">
+ SELECT e1.name,
+        e2.name,
+        e1Manager.name
+   FROM Employee e1,
+        Employee e2,
+        Employee e1Manager
+  WHERE e1.managerEmployeeID = e1Manager.employeeID
+</pre>
+
+<p>
+There are a few problems with this syntax. For one, it makes it easy to forgot your WHERE clauses, which could lead to an exponentially larger result set that you were expecting. This is due to the default JOIN behavior resulting a <a href="http://en.wikipedia.org/wiki/Cartesian_product">Cartesian product</a>. Also, it does not make it easy to see which filter clauses go with which tables. Lastly, it does not allow <a href="http://en.wikipedia.org/wiki/Join_(SQL)#Outer_joins">OUTER JOINs</a>.
+</p>
+
+<blockquote>An outer join does not require each record in the two joined tables to have a matching record. The joined table retains each record—even if no other matching record exists. Outer joins subdivide further into left outer joins, right outer joins, and full outer joins, depending on which table(s) one retains the rows from (left, right, or both).</blockquote>
+
+<p>
+Once these deficiencies were realized, they were corrected in the <a href="http://en.wikipedia.org/wiki/SQL-92">SQL-92</a> standard. That's why the current best practice is to use explicit JOIN syntax:
+</p>
+
+<pre name="code" class="sql">
+ SELECT e1.name,
+        e2.name,
+        e1Manager.name
+   FROM Employee e1
+  CROSS JOIN Employee e2
+  INNER JOIN Employee e1Manager
+     ON e1.managerEmployeeID = e1Manager.employeeID
+</pre>
+
+<p>
+However, what would happen if you tried to mix and match implicit and explicit JOINs? I recently found out, thanks to an <a href="http://opensource.atlassian.com/projects/hibernate/browse/HHH-3388">open bug</a> in <a href="http://www.hibernate.org">Hibernate</a>. Say your witless Hibernate layer generates the following SQL:
+</p>
+
+<pre name="code" class="sql">
+ SELECT e1.name, 
+        e2.name, 
+        e1Manager.name
+   FROM Employee e1,
+        Employee e2
+  INNER JOIN Employee e1Manager 
+     ON e1.managerEmployeeID = e1Manager.employeeID
+</pre>
+
+<p>
+I can't tell for certain whether this is technically invalid SQL. What I can tell you is that it blows up spectacularly in Microsoft SQL (2000/2008) and MySQL.
+</p>
+
+<blockquote>The column prefix 'e1' does not match with a table name or alias name used in the query. -MS SQL 2000</blockquote>
+<blockquote>Unknown column 'e1.managerEmployeeID' in 'on clause'. -MySQL</blockquote>
+
+<p>
+Sorry, no real solution at the moment. I'm off to write a one-off JDBC implementation for this data access object... If you want to experience the pain yourself, you can setup these toy tables with the following SQL:
+</p>
+
+<pre name="code" class="sql">
+ CREATE TABLE Employee (
+  employeeID INT,
+  name VARCHAR(255),
+  managerEmployeeID INT 
+ )
+
+ INSERT INTO Employee (employeeID, name) VALUES (1, 'Gary')
+ INSERT INTO Employee (employeeID, name, managerEmployeeID) VALUES (2, 'Bob', 1)
+</pre>

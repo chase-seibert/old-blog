@@ -1,0 +1,33 @@
+---
+layout: post
+title: Free search string tokenization in Python
+tags: python
+---
+
+<p>
+Want to do some simple lex parsing in Python? Using <a href="http://docs.python.org/library/shlex.html">shlex</a>, you may be able to get something that meets your requirements almost for free. Here is an example I used recently to parse a search string. The requirements were that tokens could be separated by spaces or commas, and double-quotes denotes a single token.
+</p>
+
+<pre name="code" class="python">
+import shlex 
+
+def _tokens(query):
+    return shlex.split(str(query))
+</pre>
+
+<p>
+Examples:
+</p>
+
+<pre name="code" class="bash">
+
+&gt;&gt;&gt; _tokens("java, perl, c++")
+['java,', 'perl,', 'c++']
+
+&gt;&gt;&gt; _tokens("java perl c++")
+['java', 'perl', 'c++']
+
+&gt;&gt;&gt; _tokens("java perl c++ \"Phil's Staffing\"")
+['java', 'perl', 'c++', "Phil's Staffing"]
+
+</pre>

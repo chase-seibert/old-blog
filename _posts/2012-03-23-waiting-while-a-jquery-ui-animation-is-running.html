@@ -1,0 +1,44 @@
+---
+layout: post
+title: waiting while a jQuery UI animation is running
+tags: javascript, jquery
+---
+
+<p>
+A common pattern for less than instantaneous ajax calls is to show the user a "loading" animation while the ajax response is pending. If your animation is a loading spinner graphic, then it makes sense to stop that animation immediately when the response is ready. But what if you're using a <a href="http://api.jquery.com/slideToggle/">slide</a> or a <a href="http://api.jquery.com/fadeOut/">fade</a> animation? In that case, it might be a better experience to let the initial animation finish, especially if it's pretty fast anyway. Otherwise, you would get a jarring half-animation.
+</p>
+
+<p>
+jQuery has a handy <a href="http://api.jquery.com/animated-selector/">:animated</a> selector which you can use to test if an element's animation is still running. But doing some kind of while/sleep loop turns out to be a little tricky. Javascript doesn't have a sleep method, and if you implement your own <a href="http://api.jquery.com/animated-selector/">naive busy-wait loop</a>, it will actually block the browser from rendering the animation, defeating the purpose. Firefox will actually lock up completely, because javascript execution happens in the main UI thread.
+</p>
+
+<p>
+However, there is an easy work-around in the form of <a href="http://www.elated.com/articles/javascript-timers-with-settimeout-and-setinterval/">setInterval/clearInterval</a>. Here is an example:
+</p>
+
+<pre name="code" class="javascript">
+$("#content").hide("slide", { direction: "left" });
+
+$.ajax({
+    type: "GET",
+    url: "/foobar",
+    success: function (data) {
+
+     // need to wait for the first animation to 
+        // stop before showing the new data/second animation
+
+     var wait = setInterval(function() {
+
+            if ($("#content:not(animated)")) {
+
+             clearInterval(wait);
+
+                $("#content").html(data);
+                $("#content").show("slide", { direction: "right" });
+
+            }
+     }, 100);
+    }
+})
+
+</pre>

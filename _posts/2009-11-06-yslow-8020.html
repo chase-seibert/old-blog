@@ -1,0 +1,57 @@
+---
+layout: post
+title: YSlow 80/20
+tags: 
+---
+
+<p>
+I spent some time this week optimising a new site, specifically looking at some of the <a href="http://developer.yahoo.com/yslow/">YSlow</a> recommendations.
+</p>
+
+<p>
+For a smaller, low traffic site, some of the recommendations are over-kill. I'm not paying for a CDN. But I did find some of the tidbits valuable, specifically around what Apache does not do by default.
+</p>
+
+<p>
+First of all, Apache2 out of the box has gzip enabled, but CSS and Javascript files are not in the list the zippable MIME types. Adding them is easy. Just edit /etc/apache2/mods-available/deflate.conf:
+</p>
+
+<pre name="code" class="xml">
+&lt;IfModule mod_deflate.c&gt;
+      AddOutputFilterByType DEFLATE text/html text/plain text/xml application/x-javascript text/javascript text/css application/javascript
+&lt;/IfModule&gt;
+</pre>
+
+<p>
+The larger win was the Expires HTTP header, which lets the browser know that it shouldn't even attempt to see if a CSS, Javascript or image has been updated until such and such a date. By default, Apache2 deploys with Expires disabled.
+</p>
+
+<p>
+Yahoo! recommends setting this to a "far future" value, like 10 years from now, and then managing this by changing the URLs for CSS, Javascript or images every time they actually change on the server. Implementing that is a PITA because you need a tool that can auto-rewrite the image URLs in the CSS, and the script URLs in your HTML.
+</p>
+
+<p>
+This may make sense for a large site, where you are concerned with minimising bandwidth. But on a smaller site like mine, I'm more concerned with minimising the number of HTTP connections when the user is rapidlly clicking between pages. I don't care if they have to hit the server again per resource every once in a while, just as long as in the average case they are only loading one HTML page per request.
+</p>
+
+<p>
+I picked an Expire window of just 12 hours. This is long enough so that during a single session, the user will only request each resource once. But it's short enough that if I push an actual change at night, everyone will get it in the morning.
+</p>
+
+<p>
+To make the actual change, you need to enable the expire_mod, and then set the actual Expires value per MIME type.
+</p>
+
+<pre>
+&gt;cd /etc/apache2
+&gt;sudo ln -s ../mods-available/expires.load mods-enabled/expires.load
+</pre>
+
+<pre name="code" class="bash">
+# edit /etc/apache2/sites-available/default
+ExpiresActive On
+ExpiresByType text/css "access plus 12 hours"
+ExpiresByType application/javascript "access plus 12 hours"
+ExpiresByType image/png "access plus 12 hours"
+ExpiresByType image/gif "access plus 12 hours"
+</pre>

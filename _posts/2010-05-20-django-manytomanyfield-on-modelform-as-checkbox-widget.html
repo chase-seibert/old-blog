@@ -1,0 +1,33 @@
+---
+layout: post
+title: Django&#58; ManyToManyField on ModelForm as checkbox widget
+tags: django
+---
+
+<p>
+By default, Django will use a mutli-select widget for rendering a ManyToManyField on a ModelForm. Switching it out for checkboxes is simple.
+</p>
+
+<pre name="code" class="python">
+
+from django.db import models
+from django.forms.models import ModelForm
+from django.forms.widgets import CheckboxSelectMultiple
+
+class Company(models.Model):  
+    industries = models.ManyToManyField(Industry, blank=True, null=True)
+
+class CompanyForm(ModelForm):
+    
+    class Meta:
+        model = Company
+        fields = ("industries")
+             
+    def __init__(self, *args, **kwargs):
+        
+        super(CompanyForm, self).__init__(*args, **kwargs)
+        
+        self.fields["industries"].widget = CheckboxSelectMultiple()
+        self.fields["industries"].queryset = Industry.objects.all()
+
+</pre>

@@ -1,0 +1,70 @@
+---
+layout: post
+title: Django&#58; persist some session state across login/logout boundaries
+tags: django
+---
+
+<p>
+By definition session state is tied to the session. When you log out, you obviously don't want the server remembering who you are. Likewise, session state is typically lost when an formerly anonymous user logs in. But very occasionally, there might be some pieces of information you're storing against the session that you DO want to persist even when the user logs in or out.
+</p>
+
+<p>
+For example, say you're keeping track of where a user is coming from when they come to your site. So you put <a href="https://docs.djangoproject.com/en/dev/ref/request-response/#django.http.HttpRequest.META">request.META.HTTP_REFERER</a> into request.session['HTTP_REFERER']. Maybe you're going to use this information after they create an account, if they ever do.
+</p>
+
+<p>
+If you find yourself in such a situation, here is a decorator that you can throw onto the view(s) where the user is being logged in/out to preserve a subset of the session variables.
+</p>
+
+<pre name="code" class="python">
+from functools import wraps
+
+
+class persist_session_vars(object):
+    """ Some views, such as login and logout, will reset all session state.
+    However, we occasionally want to persist some of those session variables.
+    """
+
+    session_backup = {}
+
+    def __init__(self, vars):
+        self.vars = vars
+
+    def __enter__(self):
+        for var in self.vars:
+            self.session_backup[var] = self.request.session.get(var)
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        for var in self.vars:
+            self.request.session[var] = self.session_backup.get(var)
+
+    def __call__(self, test_func, *args, **kwargs):
+
+        @wraps(test_func)
+        def inner(*args, **kwargs):
+            if not args:
+                raise Exception('Must decorate a view, ie a function taking request as the first parameter')
+            self.request = args[0]
+            with self:
+                return test_func(*args, **kwargs)
+
+        return inner
+</pre>
+
+<p>
+This class is both a <a href="http://www.python.org/dev/peps/pep-0318/">decorator</a> and a <a href="http://docs.python.org/release/2.5.2/lib/typecontextmanager.html">context manager</a>. In fact, it's more like a decorator that manages the context of the function that it's decorating.
+</p>
+
+<p>
+If you're calling <a href="https://docs.djangoproject.com/en/dev/topics/auth/#django.contrib.auth.views.login">auth.login</a> or <a href="https://docs.djangoproject.com/en/dev/topics/auth/#django.contrib.auth.views.logout">auth.logout</a> yourself, you would put the decorator on the view where that happens. If you're delegating to the built-in view for those, you can easily wrap them.
+</p>
+
+<pre name="code" class="python">
+from django.contrib.auth import views
+
+
+@persist_session_vars(['HTTP_REFERER'])
+def login(request, *args, **kwargs):
+    """ we want to persist SOME session variables, even after logout """
+    return views.login(request, *args, **kwargs)
+</pre>

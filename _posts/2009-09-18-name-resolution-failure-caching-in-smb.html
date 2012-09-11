@@ -1,0 +1,50 @@
+---
+layout: post
+title: Name resolution failure caching in SMB
+tags: netbios
+---
+
+<p>
+If you have a production file server failing, you have serious problems. Client requests are failing. But they may not be failing quickly. If your product is a website, and the web-servers make a lot of file requests, one of the fallouts is that requests will start to pile up.
+</p>
+
+<p>
+What's happening? The Windows web-servers are actually making NetBIOS broadcasts, asking your network "hey, is anyone fileserver1?". If fileserver1 is actually down, then no response is coming. But the web-server waits for a handful of seconds before it's sure. That whole time, the browser request is hanging out waiting for the web-server to respond.
+</p>
+
+<p>
+I ran some tests using ColdFusion, and I noticed that if you request a file on a known-down or non-existent server, the initial request takes 15 seconds to timeout. Subsequent requests fail quickly for the next 10 seconds or so. Then there is another 15 second timeout, and the pattern repeats. So there is actually a caching mechanism for unavailable servers.
+</p>
+
+<p>
+<a href="http://serverfault.com/questions/64210/can-fast-fail-of-smb-cifs-hosts-be-tuned">I was trying to find</a> a way to configure both the maximum amount of time a request to a non-existent server can take (the 15 seconds), as well as how long the fact that the server is down is cached (the 10 seconds). But I couldn't find any knobs to turn in Windows.
+</p>
+
+<p>
+Instead, I got a capture from Wireshark showing Netbios naming service packets:
+</p>
+
+<pre>
+    No.     Time        Source                Destination           Protocol Info
+         90 2.184614    172.27.8.7            172.27.8.255          NBNS     Name query NB CHASE-IE&lt;20&gt;
+         97 2.920946    172.27.8.7            172.27.8.255          NBNS     Name query NB CHASE-IE&lt;20&gt;
+        106 3.671325    172.27.8.7            172.27.8.255          NBNS     Name query NB CHASE-IE&lt;20&gt;
+        136 12.936379   172.27.8.7            10.0.2.15             NBNS     Name query NBSTAT *&lt;00&gt;&lt;00&gt;&lt;00&gt;&lt;00&gt;&lt;00&gt;&lt;00&gt;&lt;00&gt;&lt;00&gt;&lt;00&gt;&lt;00&gt;&lt;00&gt;&lt;00&gt;&lt;00&gt;&lt;00&gt;&lt;00&gt;
+        140 14.436181   172.27.8.7            10.0.2.15             NBNS     Name query NBSTAT *&lt;00&gt;&lt;00&gt;&lt;00&gt;&lt;00&gt;&lt;00&gt;&lt;00&gt;&lt;00&gt;&lt;00&gt;&lt;00&gt;&lt;00&gt;&lt;00&gt;&lt;00&gt;&lt;00&gt;&lt;00&gt;&lt;00&gt;
+        142 15.936134   172.27.8.7            10.0.2.15             NBNS     Name query NBSTAT *&lt;00&gt;&lt;00&gt;&lt;00&gt;&lt;00&gt;&lt;00&gt;&lt;00&gt;&lt;00&gt;&lt;00&gt;&lt;00&gt;&lt;00&gt;&lt;00&gt;&lt;00&gt;&lt;00&gt;&lt;00&gt;&lt;00&gt;
+</pre>
+
+<p>
+You can see the 15 seconds the initial request is taking. It looks like it does a UDP broadcast to the whole subnet (172.27.8.255). It doesn't get an answer, and then somehow gets the right IP (10.0.2.15), perhaps via DNS. Then it spends a few seconds timing out to that server. 
+</p>
+
+<p>
+Finally, I was able to reduce the initial waiting period from 15 seconds to 2 seconds by putting the server into lmhosts.
+</p>
+
+<ol>
+ <li>Edit c:\windows\system32\drivers\etc\lmhosts (not .sam, the sample file)</li>
+ <li>Add the line "10.0.2.15 chase-ie #PRE"</li>
+ <li>Run "nbtstat -R" to reload the Netbios naming cache</li>
+ <li>Run "nbtstat -r" to check that the name is cached</li>
+</ol>

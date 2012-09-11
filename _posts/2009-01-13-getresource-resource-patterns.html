@@ -1,0 +1,64 @@
+---
+layout: post
+title: getResource() resource patterns
+tags: 
+---
+
+<p>The Java <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/lang/ClassLoader.html">class loader</a> contains a convenience method <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/lang/ClassLoader.html#getResource(java.lang.String)">getResource()</a>, which is great for externalizing some static content from your code. In the past, I've used it almost exclusively with .properties files. Could there be a more ideal candidate for data that should be outside the code?</p>
+
+<p>Recently, I wanted to leverage this concept to load text and html data. I needed to generate a email based on a static template. In order to support rich html email clients as well as plain text clients, it's necessary to send a MultiPart MIME email with both versions. My options were to hard-code the HTML/text templates in the Java code, or externalize them as files. I had a utility method lying around that would make this easy:</p>
+
+<pre name="code" class="java">
+    private static String txtTemplate, htmlTemplate;
+
+    private static final String EMAIL_TEMPLATE_TXT = &quot;LegacyAppointmentEmail.txt&quot;;
+    private static final String EMAIL_TEMPLATE_HTML = &quot;LegacyAppointmentEmail.html&quot;;
+ 
+ static {
+        try {
+            txtTemplate = readFile(EMAIL_TEMPLATE_TXT);
+            htmlTemplate = readFile(EMAIL_TEMPLATE_HTML);
+        } catch (IOException e) {
+            LOG.error(e);
+        }
+    }
+ 
+    private static String readFile(String fileName) throws IOException {
+
+        InputStream stream = LegacyAppointmentEmail.class.getResourceAsStream(fileName);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+        StringBuilder builder = new StringBuilder();
+
+        String line;
+        while ((line = reader.readLine()) != null)
+            builder.append(line).append(&quot;\n&quot;);
+
+        reader.close();
+        return builder.toString();        
+    } 
+</pre>
+
+<p>My first unit test failed on the line where the first file was loaded. Initially, I thought the path must be wrong. I played with various combinations, such as moving the file to the root, putting the full scope into the file path, etc. Eventually, I went back and looked at some working code I had written in the past. The only difference I could see was that is was a .properties file, not a .txt file. I renamed the file, and it worked!</p>
+
+<p>I knew that <a href="http://www.java2s.com/Code/Java/Development-Class/Loadresourcefilerelativetotheclasslocation.htm">wasn't right</a>, but I put it aside and continued on. When I came back to it, I tried to come up with the smallest reproducible case I could. I thought that if I was still stumped, at least I could post it on <a href="http://stackoverflow.com/">stackoverflow</a>.</p>
+
+<pre name="code" class="java">
+    public class Test {
+
+        public static void main(String[] args) {
+
+            assert Test.class.getResource(&quot;file.properties&quot;) != null;
+            assert Test.class.getResource(&quot;file.txt&quot;) != null;
+        }
+    }
+</pre>
+
+<p><i>Note: file.properties and file.txt should both be blank files in the same directory as Test.java.</i></p>
+
+<p>This test was still failing on the txt file, <b>in IntelliJ</b>. In order to get the cleanest repo possible, I saved Test.java to a new directory, and compiled and ran it from the command line using just the "javac" and "java" JDK command-line tools. Immediately, it started working.</p>
+
+<p>Having isolated the issue to IntelliJ, I did a little digging. Even when I took all the classpath and "java" command arguments from IntelliJ and ran them manually, it still worked. Having eliminated runtime issues, I went into the IntelliJ compiler settings. The very first window shows the following option:</p>
+
+<img src="http://lh5.ggpht.com/_EE2zVzGv1Ds/SWzVaCeIsUI/AAAAAAAAH4s/N2t-8mVJUeM/s800/IntelliJResourcePatterns.gif" />
+
+<p><i>***Shakes fist at IntelliJ***</i> Oh well, it was a learning experience.</p>

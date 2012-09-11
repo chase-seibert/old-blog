@@ -1,0 +1,71 @@
+---
+layout: post
+title: Java phone number format API
+tags: java
+---
+
+<p>
+So, you have a database with millions of phone numbers with free-for-all formatting. Ie, the UI does not enforce any constraints and the users are typing in whatever they want. There must be a Java API to format these, right? Yeah, <a href='http://stackoverflow.com/questions/487906/java-phone-number-format-api'>not so much.</a>
+</p>
+
+<p>
+For example, a phone number in the system might look like any of the following:
+<p/>
+
+<pre name="code" class="xml:nocontrols">
+    (555) 478-1123
+    555-478-1123 
+    555.478.1123
+    5554781123
+</pre>
+ 
+<p>
+You want an API that given the country of US, would produce the value "+1 (555) 478-1123" for all these. Of course, there are countless variations of the examples, as well as the complication of international phone numbers, which each have their own validation rules. 
+</p>
+
+<p>
+Well, I don't have a drop-in solution for you. But faced with the above situation, I did come up with the beginnings of a Java API that does this. For now, I have implemented US and UK formatting. <a href='http://dl.dropbox.com/u/422013/bitkickers/JavaPhoneAPI.zip'>Download the API here.</a>
+</p>
+
+<pre name="code" class="java">
+    PhoneNumberFactory phoneNumberFactory = new PhoneNumberFactory();
+
+    PhoneNumber phoneNumber = phoneNumberFactory.create(CountryCodes.US, &quot;5554781123&quot;); 
+    // phoneNumber.toString() == &quot;+1 (555) 478-1123&quot;
+
+    PhoneNumber ukPhoneNumber = phoneNumberFactory.create(CountryCodes.UK, &quot;442088709929&quot;); 
+    // phoneNumber.toString() == &quot;+44 20 88 70 99 29&quot;
+</pre>
+
+<p>
+You can define new countries by extending PhoneNumber, and implementing the logic to parse any string into country code, area code and a list of subscriber number groups. For example, "+1 (555) 478-1123" has a country code of "1", area code of "555" and a List of subscriber numbers ("478", "1123"). You can group subscriber numbers however you want, it's just a convenience for formatting.
+</p>
+
+<p>
+You can can also define your own formatters. Don't like my US format? No problem!
+</p>
+
+<pre name="code" class="java">
+public class MyPhoneFormat implements PhoneFormat {
+
+    public String format(PhoneNumber phoneNumber) {
+
+        String value = phoneNumber.getCountryCode()
+              + &quot; &quot; + phoneNumber.getAreaCode() + getPostAreaCode(phoneNumber);
+
+        for (int i = 0; i &lt; phoneNumber.getSubscriberNumbers().size(); i++)
+            value += phoneNumber.getSubscriberNumber(i);
+
+        return value.trim();
+    }
+
+    //  US phone numbers are one long run of digits, UK has a space
+    private String getPostAreaCode(PhoneNumber phoneNumber) {
+        return phoneNumber.getCountryCode().equalsIgnoreCase(CountryCodes.UK) ? &quot; &quot;: &quot;&quot;;
+    }
+}
+</pre>
+
+<p>
+This would output phone numbers in either "1 5554789119" (US) or "44 20 88709929" (UK).
+</p>

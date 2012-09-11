@@ -1,0 +1,17 @@
+---
+layout: post
+title: Setting the title on a Gnome terminal
+tags: 
+---
+
+<p>
+I usually have several terminals open running various daemon processes in tabs. To make the tabs more identifiable, you can set the tab title from your BASH script as follows:
+</p>
+
+<pre name="code" class="ruby">
+#!/bin/bash
+printf '\033]2;%s\007' "You Title Goes Here"
+#your daemon command goes here
+</pre>
+
+<img src="http://lh5.ggpht.com/_EE2zVzGv1Ds/So7e87ybvjI/AAAAAAAAJTY/lEuBc3P3jJ8/s800/Screenshot-ColdFusion%3A%20Current%20Release.png" />

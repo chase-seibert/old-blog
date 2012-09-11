@@ -1,0 +1,135 @@
+---
+layout: post
+title: Quickstart&#58; Log shipping with Postgres 8.4
+tags: postgres
+---
+
+<p>
+The official <a href="http://www.postgresql.org/docs/8.4/static/warm-standby.html">Postgres documentation</a> covers log shipping (aka WAL Archiving, aka warm standby) in some depth. But it's still quite a lot to absorb. The basic idea is to give you a hot spare to fail over to if your main database server crashes. Here is a step by step guide on how to set this up on the command line in Ubuntu (10.04). I assume you have two identical servers (vm clone?), a master and a slave.
+</p>
+
+<p>
+First, you need to setup a directory on the slave which will hold the WAL archives (logs). Unless otherwise notes, all commands are run as root.
+</p>
+
+<pre name="code" class="bash">
+# on the slave, must be outside main b/c we are going to blow that away
+mkdir /var/lib/postgresql/8.4/pg_wal
+chown postgres:postgres /var/lib/postgresql/8.4/pg_wal
+</pre>
+
+<p>
+We're going to use ssh/scp to copy WAL files from the master to the slave(<b>10.177.1.247</b>), so you need to exchange ssh keys for the postgres users on each end.
+</p>
+
+<pre name="code" class="bash">
+# on master, share postgres credentials with slave
+sudo su postgres
+ssh-keygen -t rsa # press enter to all prompts (don't set explicit password)
+ssh postgres@10.177.1.247 mkdir -p ~/.ssh
+cat ~/.ssh/id_rsa.pub | ssh postgres@10.177.1.247 'cat &gt;&gt; ~/.ssh/authorized_keys'
+
+# test the ssh connection
+ssh postgres@10.177.1.247 # should not prompt for a password
+exit # exit new ssh session
+exit # exit sudo as postgres, you're now root again
+
+# setup postgres WAL archiving to copy to slave
+vim /etc/postgresql/8.4/main/postgresql.conf
+
+# make the following edits
+archive_mode = on
+archive_command = 'scp %p postgres@10.177.1.247:/var/lib/postgresql/8.4/pg_wal/%f &lt;/dev/null'
+archive_timeout = 600 # 10 minutes
+
+# now, outside of vim, restart postgres
+/etc/init.d/postgresql restart
+</pre>
+
+<p>
+If you wait 10 minutes, you should see a new file in /var/lib/postgresql/8.4/pg_wal on the slave. Assuming that's working, you're ready to create the initial snapshot.
+</p>
+
+<p>
+I was confused by the documentation on this point. Basically, you want to issue a pg_start_backup SQL command on the master, then copy the entire /var/lib/postgresql/8.4/main directory to the slave. The pg_start_backup ensures that the physical files will be in a consistent state. You can perform this copy while master is running. 
+</p>
+
+<pre name="code" class="bash">
+# on master
+sudo -u postgres psql mydbname
+SELECT pg_start_backup('initial');
+# may take a few minutes, wait then control-D to exit
+
+# zip up the main data directory, and copy it to the slave
+cd /var/lib/postgresql/8.4
+zip -r main.zip main
+scp main.zip postgres@10.177.1.247:/var/lib/postgresql/8.4
+
+sudo -u postgres psql mydbname
+SELECT pg_stop_backup();
+</pre>
+
+<p>
+Now the initial snapshot is on the slave, but we need to actually restore those files as the new primary files on the slave. At the same time, we can restart the slave in recovery mode, using <a href="http://www.postgresql.org/docs/9.0/static/pgstandby.html">pg_standby</a>. Recovery is enabled by creating a .conf file right in main.
+</p>
+
+<pre name="code" class="bash">
+# on the SLAVE
+apt-get install postgresql-contrib-8.4 # installs the pg_standby tool
+/etc/init.d/postgresql-8.4 stop
+cd /var/lib/postgresql/8.4
+mv main main.bak
+unzip main.zip
+rm -f main/pg_xlog/* # these are from master, and are not needed
+
+# create the recovery config file
+vim /var/lib/postgresql/8.4/main/recovery.conf
+
+# add the following, and save
+restore_command = '/usr/lib/postgresql/8.4/bin/pg_standby -d -t /tmp/pgsql.trigger.5442 /var/lib/postgresql/8.4/pg_wal %f %p %r 2&gt;&gt;/var/log/postgresql/standby.log'
+recovery_end_command = 'rm -f /tmp/pgsql.trigger.5442'
+
+# make sure the new main (as well as recovery.conf) have the correct ownership
+chown postgres:postgres main -R
+
+# restart, and keep and eye on the new standby.log file to see if it's working
+/etc/init.d/postgresql-8.4 restart
+tail -f /var/log/postgresql/standby.log -n 100
+</pre>
+
+<p>
+You should see log lines like the following.
+</p>
+
+<pre name="code" class="bash">
+Trigger file   : /tmp/pgsql.trigger.5442
+Waiting for WAL file : 0000000100000006000000AE.00000020.backup
+WAL file path  : /var/lib/postgresql/8.4/pg_wal/0000000100000006000000AE.00000020.backup
+Restoring to  : pg_xlog/RECOVERYHISTORY
+Sleep interval  : 5 seconds
+Max wait interval : 0 forever
+Command for restore : cp "/var/lib/postgresql/8.4/pg_wal/0000000100000006000000AE.00000020.backup" "pg_xlog/RECOVERYHISTORY"
+Keep archive history : 000000000000000000000000 and later
+running restore  : OK
+Trigger file   : /tmp/pgsql.trigger.5442
+Waiting for WAL file : 0000000100000006000000AE
+WAL file path  : /var/lib/postgresql/8.4/pg_wal/0000000100000006000000AE
+Restoring to  : pg_xlog/RECOVERYXLOG
+Sleep interval  : 5 seconds
+Max wait interval : 0 forever
+Command for restore : cp "/var/lib/postgresql/8.4/pg_wal/0000000100000006000000AE" "pg_xlog/RECOVERYXLOG"
+Keep archive history : 000000000000000000000000 and later
+running restore  : OK
+
+Trigger file   : /tmp/pgsql.trigger.5442
+Waiting for WAL file : 0000000100000006000000AF
+WAL file path  : /var/lib/postgresql/8.4/pg_wal/0000000100000006000000AF
+Restoring to  : pg_xlog/RECOVERYXLOG
+Sleep interval  : 5 seconds
+Max wait interval : 0 forever
+Command for restore : cp "/var/lib/postgresql/8.4/pg_wal/0000000100000006000000AF" "pg_xlog/RECOVERYXLOG"
+Keep archive history : 0000000100000006000000AE and later
+WAL file not present yet. Checking for trigger file...
+WAL file not present yet. Checking for trigger file...
+WAL file not present yet. Checking for trigger file...
+</pre>

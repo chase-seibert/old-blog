@@ -1,0 +1,36 @@
+---
+layout: post
+title: Ubuntu 11.10 Lock Screen - Suspend Monitors
+tags: unity, ubuntu
+---
+
+<p>
+Whenever I get up from my desk, I reflexively <a href="http://www.codinghorror.com/blog/2007/11/dont-forget-to-lock-your-computer.html">lock my workstation</a>. Ever since upgrading to Ubuntu 11.10, this has failed to put my monitors into suspend mode. In addition, it also continues to display some parts of the Unity interface, most critically the title of the currently active window.
+</p>
+
+<img src='https://lh3.googleusercontent.com/-qvBtXw5FT7M/Ttjo8Q9-ggI/AAAAAAAALn8/jvH7fz5HPEo/s600/lockscreen.png'>
+
+<p>
+I assume that it's related to using the proprietary ATI drivers, possibly also with multiple monitors. I've actually <a href="https://bugs.launchpad.net/ubuntu/+source/gnome-screensaver/+bug/899201">filed a bug</a> for it, and I'm not the <a href="https://bugs.launchpad.net/ubuntu/+source/unity-2d/+bug/830348">only</a> <a href="https://bugs.launchpad.net/ubuntu/+source/unity-2d/+bug/820041">one</a>. In the meantime, there is a work-around, at least for the power saving component. Here is the bash script:
+</p>
+
+<pre name="code" class="bash">
+#!/bin/bash
+gnome-screensaver-command -l
+sleep 3
+xset dpms force off
+</pre>
+
+<p>
+Save this as a file, mark it as executable (chmod +x), and they you can map a custom keyboard shortcut to it.
+</p>
+
+<ol>
+<li>Open the keyboard shortcut configuration ("keyboard" from the dash)</li>
+<li>Go to "Custom Shortcuts"</li>
+<li>Add a shortcut called "Lock Screen + Sleep Monitor", and point it to the bash script.</li>
+</ol>
+
+<p>
+On my machine, I've mapped it to Control + ALT + L. It doesn't solve the security issue, but at least you're not burning out your monitors.
+</p>

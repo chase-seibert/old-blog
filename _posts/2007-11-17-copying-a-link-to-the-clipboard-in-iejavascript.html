@@ -1,0 +1,55 @@
+---
+layout: post
+title: Copying a link to the clipboard in IE/Javascript
+tags: javascript
+---
+
+<p>
+Problem: You want to copy a link into the clipboard from a web-app such that when you paste, you get the link URL AND the link text.
+</p>
+
+<p>
+For example, I was developing a web-based IM client. I wanted users to be able to copy a link from another part of our web-app and paste it into the web client. But I didn't want them to see the full ugly URL, but rather a nice small text description.
+</p>
+
+<p>
+The following code does the link URL part: 
+</p>
+
+<pre name="code" class="javascript">
+window.clipboardData.setData("Text", "http://www.google.com");
+</pre>
+
+<p>
+Supposedly, it can also take a "Url" value for the first parameter. However, I could not get this to work, and I'm not sure what it's supposed to do anyway.
+</p>
+
+<p>
+Note: There may be no general solution for all browsers. I didn't find one, in any case.
+</p>
+
+<p>
+SOLUTION FOR IE ONLY:
+</p>
+
+<pre name="code" class="javascript">
+// create an "A" DOM object, and populate the link text and url
+var linkElement = document.createElement("a");
+linkElement.setAttribute("href", linkHref);
+linkElement.innerHTML = linkBody;
+
+// create an editable DIV, this is crucial because a regular DIV
+//will not preserve the link URL when copying from a createTextRange
+var linkSubElement = document.createElement("div");
+with (linkSubElement) {
+contentEditable = true;
+}
+linkSubElement.appendChild(linkElement);
+
+// select the editable content and copy it
+//to the clipboard (this is the IE only part)
+var r = document.body.createTextRange();
+r.moveToElementText(linkSubElement);
+r.select();
+r.execCommand("Copy"); 
+</pre>

@@ -1,0 +1,63 @@
+---
+layout: post
+title: click on a link (follow) via jQuery/JavaScript
+tags: javascript, jquery
+---
+
+<p>
+You might reasonably assume that it would be possible to fire a click event on an "A" element (link) via JavaScript, at which point the browser would fire any click event handlers currently attached, or otherwise just follow the link. But you would be wrong, at least in the case of Firefox.
+</p>
+
+<blockquote>
+The click method is intended to be used with INPUT elements of type button, checkbox, radio, reset or submit. Gecko does not implement the click method on other elements that might be expected to respond to mouse–clicks such as links (A elements), nor will it necessarily fire the click event of other elements. 
+  - <a href="https://developer.mozilla.org/en/DOM/element.click">Mozila Documentation</a>
+</blockquote>
+
+<p>
+Why is that? It seems that Firefox is <a href="http://www.w3.org/TR/DOM-Level-2-HTML/html.html#ID-2651361">following the standard</a> quite strictly, whereas IE has no problems automating link clicks. There may also be a sandbox security argument here, but personally I don't buy that as long as we are allowing <a href="http://trevordavis.net/blog/tutorial/ajax-forms-with-jquery/">JavaScript to fire FORM POSTS</a>.
+</p>
+
+<p>
+Regardless, a cross browser solution is needed. At first blush, just setting window.location directly seems to work.
+</p>
+
+<pre name="code" class="javascript">
+   window.location = $("a#my-link").attr("href");
+</pre>
+
+<p>
+This naive solution has serious drawbacks; IE will not post a <a href="http://en.wikipedia.org/wiki/HTTP_referrer">HTTP Referrer</a> header, and the back button may skip pages navigated to this way. However, it may be an acceptable solution depending on your application.
+</p>
+
+<p>
+If you have control over the HTML itself, a better solution is to just use FORMs instead. It's trivial to submit a form via jQuery. It's even possible to make the button look somewhat like a HTML link.
+</p>
+
+<pre name="code" class="html">
+
+&lt;!-- was &lt;a href="/my-link-url"&gt;Click me&lt;/a&gt; --&gt;
+&lt;form id="my-form" action="/my-link-url" action="get"&gt;
+   &lt;input class="button-link" type="submit" value="Click me" /&gt;
+&lt;/form&gt;
+
+&lt;script&gt;
+   // simulate a user clicking the "link"
+   $(".button-link").click();
+
+   // you could also just submit the form directly, depending on what's easier
+   $("form#my-form").submit();
+&lt;/script&gt;
+
+&lt;style&gt;
+   .button-link {
+      background-color:white;
+      border:0;
+      color:blue;
+      text-decoration:underline;
+      font-size:1em;
+      font-family:inherit;
+      cursor:pointer;
+   }
+&lt;/style&gt;
+
+</pre>

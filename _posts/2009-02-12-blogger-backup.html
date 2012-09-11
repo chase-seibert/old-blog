@@ -1,0 +1,85 @@
+---
+layout: post
+title: blogger backup
+tags: python
+---
+
+<p>
+Want to backup your Blogger posts? Here is a quick Python script that does just that. It will create an HTML file for each post, with the subject of the post as the file name and the post date as the file timestamp.
+</p>
+
+<pre name="code" class="python">
+import os
+import urllib
+import re  
+from optparse import OptionParser
+from xml import sax
+from xml.sax import ContentHandler
+import time
+from time import mktime
+
+class FileWriterContentHandler(ContentHandler):
+    seenItem = False
+    def __init__(self, dir):
+        self.dir = dir        
+    def startElement(self, tag, attrs):
+        if (tag == &quot;item&quot;): self.seenItem = True 
+        self.content = &quot;&quot;
+    def characters(self, content):    
+        self.content += content # the content for a single  XML node will get passed-in in chuncks
+    def endElement(self, tag):
+        setattr(self, tag, self.content)
+        if self.seenItem: # there is a description tag in the header as well, only write a file if you're past that
+            if (tag == &quot;description&quot;): # the last tag we need to write the file
+                fileName = createFileName(self.dir, getattr(self, &quot;title&quot;))
+                writeFile(fileName, self.content)
+                setFileDateTime(fileName, makeUnixTime(getattr(self, &quot;pubDate&quot;)))
+                
+def createFileName(dir, title):    
+    # remove any special characters from the file name, ie can't save a file with the name &quot;blog 1/2.html&quot;
+    return os.path.expanduser(os.path.join(dir, re.sub(&quot;[^A-Za-z0-9 .()]&quot;, &quot;&quot;, title) + &quot;.html&quot;)) 
+    
+def writeFile(fileName, content):
+    print fileName    
+    open(fileName, &quot;w&quot;).write(content.encode(&quot;utf-8&quot;)) # the file will be closed as soon as the program is done
+    
+def setFileDateTime(path, time):
+    os.utime(path, (time, time))
+
+def getOptions():
+    arguments = OptionParser()
+    arguments.add_options([&quot;--blogID&quot;, &quot;--dir&quot;])
+    return arguments.parse_args()[0] # options
+
+# Example: &quot;Mon, 09 Feb 2009 20:14:00 +0000&quot;
+def makeUnixTime(pubDate):
+    return mktime(time.strptime(pubDate, &quot;%a, %d %b %Y %H:%M:%S +0000&quot;))
+
+def downloadRSS(blogID):
+    url = &quot;http://www.blogger.com/feeds/%s/posts/default?alt=rss&amp;prettyprint=true&amp;start-index=1&quot; % blogID
+    print &quot;Backing up %s&quot; % url
+    return urllib.urlopen(url).read()
+
+if __name__ == '__main__':
+    options = getOptions()
+    rssXml = downloadRSS(options.blogID)    
+    sax.parseString(rssXml, FileWriterContentHandler(options.dir))
+</pre>
+
+<p>
+To run the program, first find your blogger ID. If you view the source of your blog, it will be at the top in the RSS feed link:
+</p>
+
+<pre name="code" class="xml">
+&lt;link rel=&quot;service.post&quot; type=&quot;application/atom+xml&quot; title=&quot;bitkickers - Atom&quot; href=&quot;http://www.blogger.com/feeds/7663029716914672257/posts/default&quot; /&gt;
+</pre>
+
+<p>
+Then, execute the script like so:
+</p>
+
+<pre name="code" class="xml">
+python backup.py --blogID 7663029716914672257 --dir ./output
+</pre>
+
+<p><b>Update: tested on Windows/Linux</b></p>

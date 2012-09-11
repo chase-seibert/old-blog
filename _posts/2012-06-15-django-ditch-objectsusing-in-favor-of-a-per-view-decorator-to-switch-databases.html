@@ -1,0 +1,177 @@
+---
+layout: post
+title: Django&#58; ditch objects.using() in favor of a per-view decorator to switch databases
+tags: django
+---
+
+<p>
+Django has a "multiple databases" feature that lets you read/write data from more than just the default database. I'm going to show you how to switch databases on a per-view level, rather than per-query with <a href="https://docs.djangoproject.com/en/dev/topics/db/multi-db/#manually-selecting-a-database">objects.using()</a>, or per-server by changing <a href='https://docs.djangoproject.com/en/dev/ref/settings/#database-routers'>DATABASE_ROUTERS</a>. 
+</p>
+
+<p>
+First, some background. Let's look at how regular database routing works. It all starts with DATABASES in settings.py.
+</p>
+
+<pre name="code" class="python">
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'myapp',
+        'USER': 'postgres',
+        'PASSWORD': 'password',
+    },
+    'standby': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'myapp',
+        'USER': 'postgres',
+        'PASSWORD': 'password',
+    }
+}
+</pre>
+
+<p>
+Then, you configure a <a href="https://docs.djangoproject.com/en/dev/topics/db/multi-db/#an-example">database router</a>. Here is an example that reads from one database and writes to another. Maybe standby is a read-replica of default.
+</p>
+
+<pre name="code" class="python">
+class StandbyRouter(object):
+    """A router to control all database operations on models in
+    the website application"""
+
+    def db_for_read(self, model, **hints):
+        return "standby"
+
+    def db_for_write(self, model, **hints):
+        return "default"
+
+    def allow_relation(self, obj1, obj2, **hints):
+        return True
+
+    def allow_syncdb(self, db, model):
+        return None
+</pre>
+
+<p>
+That's fine if you want ALL reads to go to the standby, but what if you only want to do this for some queries? In my situation, I wanted to off load long running queries specifically for reporting. Here is the standard syntax for querying from another server, assuming your router db_for_read() returns "default".
+</p>
+
+<pre name="code" class="python">
+class UserProfile(models.Model):
+
+    user = models.OneToOneField(User, editable=False, unique=True)
+
+    @property
+    def timecards(self):
+        return Timecard.objects.filter(user=self.user, status='open')
+
+def get_report_data(request):
+    num_invoices = Invoices.objects.using("standby").filter(user=request.user).count()
+    num_timecards = request.user.profile.timecards.count()
+</pre>
+
+<p>
+Maybe you see the problem here already. The using method is fine as long as you're making the queries yourself at the top level inside get_report_data(). But what about the timecards model property? It will use the default database. Sure, I could repeat myself all over the place passing around a parameter for the current database, and having a using clause on every single query, but that sounds messy.
+</p>
+
+<p>
+Ideally, I want to set the database for an entire view at a time. Here's one way to do it. First, I declare a new router that dynamically chooses a database based on a setting.
+</p>
+
+<pre name="code" class="python">
+class SettingsRouter(object):
+    """A router to control all database operations on models in
+    the website application. Can be over-ridden on demand with a
+    decorator on a view or a particular function:
+
+    @thread_local(DB_OVERRIDE='report')
+    def social_network_reach(request):
+
+    This is more DRY than having a .using() on every query. It also
+    means you don't have to pass a using parameter all over the place.
+
+    """
+
+    def db_for_read(self, model, **hints):
+        return get_thread_local('DB_FOR_READ_OVERRIDE', 'default')
+
+    def db_for_write(self, model, **hints):
+        return "default"
+
+    def allow_relation(self, obj1, obj2, **hints):
+        return True
+
+    def allow_syncdb(self, db, model):
+        return None
+</pre>
+
+<p>
+To pass the DB_FOR_READ_OVERRIDE variable down the stack with out manually passing it via method arguments, I'm setting a <a href="http://docs.python.org/library/threading.html#threading.local">thread local variable</a>. This means that in a production setting, the variable will only be set in the context of the currently running request. Here is the decorator that does just that.
+</p>
+
+<pre name="code" class="python">
+import threading
+from functools import wraps
+
+
+threadlocal = threading.local()
+
+
+class thread_local(object):
+    """ a decorator that wraps a function in a thread local definition block
+    useful for passing variables down the stack w/o actually passing them
+    examples: what database to read from, whether to cache queries, etc
+    adapted from django.test.utils.override_settings
+
+    Usage:
+
+    @thread_local(SITE_NAME_SHORT='foobar')
+    def override(request):
+        ...
+
+    """
+
+    def __init__(self, **kwargs):
+        self.options = kwargs
+
+    def __enter__(self):
+        for attr, value in self.options.items():
+            print attr, value
+            setattr(threadlocal, attr, value)
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        for attr in self.options.keys():
+            setattr(threadlocal, attr, None)
+
+    def __call__(self, test_func):
+
+        @wraps(test_func)
+        def inner(*args, **kwargs):
+            # the thread_local class is also a context manager
+            # which means it will call __enter__ and __exit__
+            with self:
+                return test_func(*args, **kwargs)
+
+        return inner
+
+
+def get_thread_local(attr, default=None):
+    """ use this method from lower in the stack to get the value """
+    return getattr(threadlocal, attr, default)
+</pre>
+
+<p>
+Finally, here is the what it looks like to use the new thread local variable to scope all of the inner queries to the standby database.
+</p>
+
+<pre name="code" class="python">
+@thread_local(DB_FOR_READ_OVERRIDE='standby')
+def get_report_data(request):
+    num_invoices = Invoices.objects.filter(user=request.user).count()
+    num_timecards = request.user.profile.timecards.count()
+</pre>
+
+<p>
+<i>
+Edit: I originally implemented this with @override_settings, before realizing that it would not work in a threaded production environment.
+</i>
+</p>

@@ -1,0 +1,51 @@
+---
+layout: post
+title: CFEclipse StackOverflowError (Editor could not be initialized)
+tags: 
+---
+
+<p>
+Even since I moved from Windows to Linux, I have been experiencing an exception trying to edit certain CFMs in CFEclipse.
+</p>
+
+<pre name="code" class="html">
+eclipse.buildId=I20090611-1540
+java.version=1.6.0_14
+java.vendor=Sun Microsystems Inc.
+BootLoader constants: OS=linux, ARCH=x86, WS=gtk, NL=en_US
+Framework arguments:  -product org.eclipse.epp.package.java.product
+Command-line arguments:  -os linux -ws gtk -arch x86 -product org.eclipse.epp.package.java.product
+
+!ENTRY org.eclipse.ui 4 0 2009-08-03 14:31:31.555
+!MESSAGE Unable to create editor ID org.cfeclipse.cfml.editors.CFMLEditor: Editor could not be initialized.
+!STACK 0
+java.lang.StackOverflowError
+ at java.util.regex.Pattern$Neg.match(Pattern.java:4590)
+ at java.util.regex.Pattern$Branch.match(Pattern.java:4114)
+ at java.util.regex.Pattern$GroupHead.match(Pattern.java:4168)
+ at java.util.regex.Pattern$Loop.match(Pattern.java:4295)
+ at java.util.regex.Pattern$GroupTail.match(Pattern.java:4227)
+ at java.util.regex.Pattern$BranchConn.match(Pattern.java:4078)
+ at java.util.regex.Pattern$CharProperty.match(Pattern.java:3345)
+ at java.util.regex.Pattern$Neg.match(Pattern.java:4609)
+ at java.util.regex.Pattern$Branch.match(Pattern.java:4114)
+ at java.util.regex.Pattern$GroupHead.match(Pattern.java:4168)
+ at java.util.regex.Pattern$Loop.match(Pattern.java:4295)
+ at java.util.regex.Pattern$GroupTail.match(Pattern.java:4227)
+ at java.util.regex.Pattern$BranchConn.match(Pattern.java:4078)
+ at java.util.regex.Pattern$CharProperty.match(Pattern.java:3345)
+ at java.util.regex.Pattern$Neg.match(Pattern.java:4609)
+        ...
+</pre>
+
+<p>
+A few <a href="http://groups.google.com/group/cfeclipse-users/search?group=cfeclipse-users&q=stackoverflow&qt_g=Search+this+group">google searches</a> later, and it seemed that I was the only one with this problem. I tried re-installing the plugin, etc, to no avail.
+</p>
+
+<p>
+It turns out that that Java stack size was simply too small for some of the regular expressions CFEclipse was putting our admittedly massive CFMs through. The fix was to bump the stack size (via <a href="http://publib.boulder.ibm.com/infocenter/wasinfo/v6r1/topic/org.eclipse.platform.doc.user/tasks/running_eclipse.htm">command-line args</a>) up from the <a href="http://e-docs.bea.com/jrockit/geninfo/diagnos/thread_basics.html">default</a> 128k on 32-bit Linux.
+</p>
+
+<pre name="code" class="html">
+/usr/share/eclipse/eclipse -vmargs -Xss2048k
+</pre>

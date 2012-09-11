@@ -1,0 +1,64 @@
+---
+layout: post
+title: Mint.com backup
+tags: python
+---
+
+<p>
+<a href="http://www.mint.com/">Mint.com</a> is a <i>great</i> personal finance tool. I started using it once I made the switch to Linux at home. I used to use Quicken, but I really didn't want to configure WINE for that one application. Besides, Quicken is getting really crusty; it looks like it's still the same codebase from the Windows 95 days.
+</p>
+
+<p>
+My only gripe with Mint is that your data is "in the cloud". I want a local copy! Mint has a handy link that you can use at the bottom of your transaction list to download a CSV copy. But I wanted to automate it...
+</p>
+
+</p>
+Want to backup Mint.com? Here is a quick Python script to download your entire transaction history into a CSV file.
+</p>
+
+<pre name="code" class="python">
+import os
+import urllib
+import urllib2
+import cookielib
+from optparse import OptionParser
+import datetime
+
+class mintlib():
+    
+    def __init__(self):
+        self.opener = urllib2.build_opener(urllib2.HTTPCookieProcessor())  # need cookies for the JSESSION ID
+        urllib2.install_opener(self.opener)
+    
+    def login(self, username, password):
+        request = urllib2.Request(&quot;https://wwws.mint.com/loginUserSubmit.xevent?task=L&quot;,  urllib.urlencode(locals()))
+        request.add_header(&quot;User-Agent&quot;, &quot;Mozilla/5.0&quot;) # Mint kicks to a &quot;Upgrade to IE 7.0&quot; page without this
+        response = self.opener.open(request)
+        
+    def download(self, file):
+        # write CSV file of all Mint transactions for this account to a file
+        response = self.opener.open(&quot;https://wwws.mint.com/transactionDownload.event?&quot;) 
+        open(file, &quot;w&quot;).write(response.read())
+        
+    def logout(self):
+        response = self.opener.open(&quot;https://wwws.mint.com/logout.event&quot;)         
+
+def getOptions():
+    arguments = OptionParser()
+    arguments.add_options([&quot;--username&quot;, &quot;--password&quot;, &quot;--file&quot;])
+    arguments.set_default(&quot;file&quot;, &quot;mint_backup_%s.csv&quot; % str(datetime.date.today()))
+    return arguments.parse_args()[0] # options
+
+if __name__ == '__main__':    
+    options = getOptions()
+    mint = mintlib()
+    mint.login(options.username, options.password)
+    mint.download(options.file)
+    print &quot;Done&quot;
+</pre>
+
+The command to run it looks like:
+
+<pre>
+python mint.py --username=foo --password=bar
+</pre>

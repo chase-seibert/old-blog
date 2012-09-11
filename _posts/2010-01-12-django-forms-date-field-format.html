@@ -1,0 +1,17 @@
+---
+layout: post
+title: Django forms date field format
+tags: django
+---
+
+<p>
+Django defaults dates in forms to the format "2010-01-15". But changing the default format is fairly straight-forward, though there appears to be some <a href="http://code.djangoproject.com/ticket/3672">confusion</a> about how.
+</p>
+
+<pre name="code" class="python">
+class MyForm(Form):
+    
+    # the default format is %Y-%m-%d
+    date_available = forms.DateField(
+        widget=forms.widgets.DateInput(format="%m/%d/%Y"))
+</pre>

@@ -1,0 +1,61 @@
+---
+layout: post
+title: Django&#58; white-label styling with URL prefixes
+tags: django
+---
+
+<p>
+Many websites have branding or "white label" functionality where the site can have custom styles per customer. A common use case with commercial products is to allow the customer to use their own logo and colors in place of the defaults, usually for an extra fee.
+</p>
+
+<p>
+In web apps, customers will often want to customize either the subdomain of their branded version, or perhaps use a CNAME one on of their existing domains. Alternatively, you can also differentiate brandings based on a URL prefix, such as Google apps does with www.google.com/a/customer_name. The later method is the focus of this blog post.
+</p>
+
+<p>
+In Django, you can take advantage of the template inheritance and URL mapping features built into the framework to do most of the heavy lifting for you. For styling, you can easily image inserting a new branding template between your existing pages and your base template.
+</p>
+
+<img src='https://lh6.googleusercontent.com/-cGk-v36FxQw/Tjxc_jdr_wI/AAAAAAAALe0/3KE98q1vdAg/s800/dgpzvkwf_281fkrfc2hg_b.png'>
+
+<p>
+You can switch between your regular base template and the branding template by simply using a variable for the extends declaration.
+</p>
+
+<pre name="code" class="python">
+&#123;% extends request.BASE_TEMPLATE %&#125;
+</pre>
+
+<p>
+In that template, you can override any styling you need to. But what about the links in those templates? Plus, how do we set request.BASE_TEMPLATE w/o a bunch of duplicate code everywhere? Well, you can do that at the same time you're providing the URL mapping to your branding prefix. 
+</p>
+
+<pre name="code" class="python">
+# url handler for ANYthing under /sites/, slug is the per-customer branding prefix
+url(r'^sites/(?P&lt;slug&gt;([^//]+))/.*$', dispatch),
+</pre>
+
+<pre name="code" class="python">
+def dispatch(request, slug):
+     
+      # &#123;% url %&#125; will now render urls w/ this branding prefix
+      company_url_prefix = "/sites/%s" % slug    
+      old_prefix = urlresolvers.get_script_prefix()
+      urlresolvers.set_script_prefix(company_url_prefix)
+
+      try:
+
+     request.BASE_TEMPLATE = "branded.html"
+     # you can also set any state you need to do the actual branding here
+      
+     rest_of_url = request.META.get("PATH_INFO").replace(company_url_prefix, "")
+     view, args, kwargs = urlresolvers.resolve(rest_of_url)
+     return view(request, **kwargs)
+      finally:
+            # set_script_prefix is thread specific, so you need to be careful to reset it
+            urlresolvers.set_script_prefix(old_prefix)
+</pre>
+
+<p>
+The trick here is <a href="https://docs.djangoproject.com/en/dev/topics/http/urls/#module-django.core.urlresolvers">set_script_prefix</a>, a little known Django utility method that will prefix any template call to the &#123;% url %&#125; tag with a custom string. So, if your page normally renders a link as /job/44, it will now render as /sites/XXX/job/44, effectively keeping the user in the same branding experience.
+</p>

@@ -1,0 +1,48 @@
+---
+layout: post
+title: Python&#58; Convert a Word/PDF document to html
+tags: django, linux, python
+---
+
+<p>
+My current Django project deals with resume files in Word/PDF format. In order to show a web preview of the file, it's necessary to translate these files to plain HTML. While this was sometimes a pain in the past, I've recently found that it's relatively easy with standard Linux tools.
+</p>
+
+<p>
+<a href="http://www.abisource.com/">AbiWord</a> is a general purpose word processor for Linux. It has pretty good support for Word files, as well as many other formats such as PDF, RTF, etc. Usually it's invoked as a GUI app, just like Microsoft Word. However, being a Linux app, there is also good command-line support.
+</p>
+
+<p>
+One of the things you can do from the command line is <a href="http://manpages.ubuntu.com/manpages/intrepid/man1/abiword.1.html">convert files</a> from one format to another. Here is a quick example:
+</p>
+
+<pre name="code" class="bash">
+# print the HTML translation of a DOC file to the console
+abiword -t output.html resume.doc; cat output.html
+</pre>
+
+<p>
+It's also relatively simple to invoke this from Python, using the standard libraries.
+</p>
+
+<pre name="code" class="python">
+import subprocess
+import os
+import uuid
+
+def document_to_html(file_path):
+    tmp = "/tmp"
+    guid = str(uuid.uuid1())
+    # convert the file, using a temporary file w/ a random name
+    command = "abiword -t %(tmp)s/%(guid)s.html %(file_path)s; cat %(tmp)s/%(guid)s.html" % locals()    
+    p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, cwd=os.path.join(settings.PROJECT_DIR, "website/templates"))
+    error = p.stderr.readlines()    
+    if error:
+        raise Exception("".join(error))
+    html = p.stdout.readlines()
+    return "".join(html)
+</pre>
+
+<p>
+AbiWord produces fairly clean HTML. If you want to scrub it even more, I would suggest something like <a href="http://www.crummy.com/software/BeautifulSoup/">BeautifulSoup</a>.
+</p>

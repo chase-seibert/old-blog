@@ -1,0 +1,47 @@
+---
+layout: post
+title: SOAP vs. REST from a consumer's perspective
+tags: 
+---
+
+<p>When implementing web-services, the two most popular paradigms are SOAP and REST. Prior to REST becoming a formal standard (though it's still very loose), many so-called web-services were implemented as XML/CSV/JSON/something over HTTP. Those could be fairly categorized as REST-like, also.</p>
+
+<h3>Popularity</h3>
+
+<p>Though SOAP was formalized far in advance of REST, REST has become more and more popular in recent years. Take a look at the <a href='http://www.google.com/trends?q=REST%2C+SOAP&ctab=0&geo=all&date=all&sort=0'>Google search trends</a> for each:</p>
+
+<img src='http://www.google.com/trends/viz?q=REST,+SOAP&date=all&geo=all&graph=weekly_img&sort=0&sa=N'>
+
+<p><i><small>SOAP = Red, REST = blue</small></i></p>
+
+<h3>Trade-offs</h3>
+
+<p>What were some of the problems with SOAP that REST was <a href='http://en.wikipedia.org/wiki/Representational_State_Transfer#Claimed_benefits'>designed to improve</a> on?</p>
+
+<blockquote>
+<ul>
+ <li>Provides improved response time and reduced server load due to its support for the caching of representations</li>
+ <li>Improves server scalability by reducing the need to maintain session state. This means that different servers can be used to handle different requests in a session</li>
+ <li><b>Requires less client-side software</b> to be written than other approaches, because a single browser can access any application and any resource</li>
+ <li>Depends less on vendor software and mechanisms which layer additional messaging frameworks on top of HTTP</li>
+ <li>Provides equivalent functionality when compared to alternative approaches to communication</li>
+ <li><b>Does not require a separate resource discovery mechanism</b>, due to the use of hyperlinks in representations</li>
+ <li>Provides better long-term compatibility and evolvability characteristics than RPC.</li>
+</ul>
+</blockquote>
+
+<p>The bolded points are aimed directly at SOAP. With SOAP, you generally need some solid framework support to consume web-services easily. Specifically, many platforms have a way of generating stubs from a WSDL, and then helper methods to allow calling the web-service with those stubs.</p>
+
+<h3>Discovery</h3>
+
+<p>In practice, all SOAP services publish a WSDL that allows frameworks to auto-generate sample code to consume the service. In practice, virtually no REST services publish their equivalent, WADL.</p>
+
+<p>In Java and .NET, the framework tools are pretty awesome. It's not unreasonable to expect an experienced developer to get up and running with a new SOAP service in just a few minutes on a platform with good SOAP tools.</p>
+
+<p>On other platforms, SOAP can be a pain. You would not want to try to call a SOAP service from JavaScript, for example. While there are libraries that help, there are some fundamental mismatches. JavaScript is dynamically typed, where-as SOAP is strongly types. In JavaScript, you generally do things on the fly at run-time. Most SOAP tools pre-package stubs ahead of time. It's a more natural fit to call a REST service via an HTTP Ajax request.</p>
+
+<h3>Developers are lazy</h3>
+
+<p>I think that's what it comes down to. If your platform has really good SOAP AND REST tools, you will get up and running much faster using SOAP, due to auto-discovery. If your platform has poor/no SOAP tools, you will have to "discover" the particulars by reading the documentation, and you will need to make calls manually or via your REST framework tools. In that case, REST is much easier to implement.<p>
+
+<p>REST is great. It really is simpler and more scalable. I just think they dropped the ball by not pushing WADL harder.</p>

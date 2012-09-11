@@ -1,0 +1,25 @@
+---
+layout: post
+title: Converting a legacy ColdFusion app from Windows to Linux&#58; Part I
+tags: 
+---
+
+<p>
+Having moved to a Linux desktop at work, I'm in the process of migrating my development environment to the extent possible. Eclipse + JBOSS were a slam dunk. SQL Server is a definite no-go. I'm having good luck using VirtualBox for that. ColdFusion seems promising, but will entail some work.
+</p>
+
+<p>
+The only reason it's promising, of course, is that my team has undertaken moving the code base from a stand-alone ColdFusion install to a vanilla JRun4 instance, and hopefully to a JBOSS instance, eventually. I'll go into more detail on that conversion process in a future post, as I learn more of it myself.
+</p>
+
+<p>
+Converting from Windows to Linux shouldn't be that hard, one would think. Well, it turns out that the major sticking point so far is case-sensitivity. In Windows, you can CFINCLUDE a file, or hit a URL and it will work even if the cases don't match. Predictably, this means that a legacy Windows code base is likely to have many case-mismatches.
+</p>
+
+<p>
+Fixing the code is an option, for sure. But for now, I've just been compiling a bash script to create symlinks between the requested file and the actual file. This is aided by the fact that ColdFusion logs each instance of a FileNotFound.
+</p>
+
+<p>
+Stay tuned!
+</p>

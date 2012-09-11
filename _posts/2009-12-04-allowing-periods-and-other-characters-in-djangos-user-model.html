@@ -1,0 +1,33 @@
+---
+layout: post
+title: Allowing periods (and other characters) in Django's user model
+tags: django
+---
+
+<p>
+By default, Django's authentication middleware only allows user names with 30 characters or fewer, containing only letters, digits and underscores. What if you want to allow other user names? It's actually a very small change to admin.py:
+</p>
+
+<pre name="code" class="python">
+username_regex_field = forms.RegexField (
+        label = "Username", 
+        max_length = 30,
+        regex = r"^[\w'\.\-@]+$",
+        help_text = "Required. 30 characters or fewer. Letters, apostrophes, periods, hyphens and at signs.",
+        error_message = "This value must contain only letters, apostrophes, periods, hyphens and at signs."
+        )
+
+class UserCreationForm(UserCreationForm):
+    username = username_regex_field
+    
+class UserChangeForm(UserChangeForm):
+    username = username_regex_field
+    
+class UserProfileAdmin(UserAdmin):
+    form = UserChangeForm
+    add_form = UserCreationForm
+</pre>
+
+<p>
+All I'm doing here is defining a new <a href="http://docs.djangoproject.com/en/dev/ref/forms/fields/#regexfield">RegexField</a>, and then over-writing the default create and change user forms for Django auth.
+</p>

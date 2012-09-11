@@ -1,0 +1,97 @@
+---
+layout: post
+title: Numeric Range Searches in Lucene
+tags: lucene
+---
+
+<p>
+One of the reasons Lucene is awesomely fast is that it treats all data as strings. This is a perfect optimisation for most searching tasks. However, it does mean that other data types need to be converted to strings before they are indexed or searched for. When dealing with range searches on numbers, special care needs to be taken to get it right.
+</p>
+
+<p>
+Say you want to index latitude and longitude coordinates, so that you can quickly search for all records in physical proximity to any location. These coordinates are typically expressed as decimal values, such as 53.1345. They can also be negative.
+</p>
+
+<p>
+The naive approach would be to convert these to strings such as "53.1345". You would need to come up with a tokenizer that didn't split based on the decimal point (period character). Then your Lucene search string would look like "longitude:53.1345". This works if you are trying to find any records with this exact longitude, but it breaks down when doing a ranged search.
+</p>
+
+<p>
+Say you want to search for all longitudes between 4 and 6. You Lucene search string would look like "longitude:[4 to 6]". Critically, this would actually match a record with value "53.1345", because Lucene can only compare <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/lang/String.html#compareTo(java.lang.String)">lexicographically</a>. In short, the first character in "53.1345" is '5', and because that's between the '4' and '6', the whole string "53.1345" is between "4" and "6".
+</p>
+
+<p>
+The suggested solution is to pad all numeric values to a fixed width. So, 53.1345 becomes "000000000000053.13450000". Notice that we can't encode ALL possible decimal values in a fixed width; you have to decide how many digits of precision you will need, and what the max value you will need to support is.
+</p>
+
+<p>
+So that you don't have to write a decimal-ignoring tokenizer, it's also easier to replace the '.' character with a alphanumeric, such as 'd'. So your serialized double now looks like "000000000000053d13450000".
+</p>
+
+<p>
+What about negative numbers? If you just add a negative sign to the beginning, you are no longer fixed width. There are many solutions, but I would advocate using "p" to denote positive numbers, and "n" to denote negatives. So 53.1345 becomes "p000000000000053d13450000", and -1.32 becomes "n000000000000001d31000000". These are comparable because "p" happens to be greater than "n", alphabetically. You could use any number of other special characters, but sticking to something that no rational tokenizer would ever split on makes things easier.
+</p>
+
+<p>
+More importantly with negative values, comparison breaks because while -1.33 is numerically less than -1.32, "n000000000000001d33000000" is lexicographically <span style="font-weight:bold;">greater</span> than "n000000000000001d32000000".
+</p>
+
+<p>
+The solution is to <a href="http://wiki.apache.org/lucene-java/SearchNumericalFields#head-19a4340c637fad4601e9ef9db2f7a41dbf2d7518">"invert" the magnitude</a> of negative numbers. You do this by subtracting each digit in the number from 9. In other words, subtracting your value from 999999999999999.99999999, aka 9<span style="border-top: 1px solid black;">9</span>.9<span style="border-top: 1px solid black;">9</span>. So, "n000000000000001d32000000" becomes "n999999999999998d67999999".
+</p>
+
+<p>
+Here is some Java code to convert doubles to the p/n format:
+</p>
+
+<pre name="code" class="java">
+package com.bullhorn.common.lucene;
+
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+
+/**
+ * Format decimals as strings for Lucene
+ * Basic format is: p00000000000051d50300000 = 51.503
+ * This is done so the values are lexicographically comparable
+ * Negative numbers need to be "inverted" in magnitude, so they
+ * can be compared to positive values. Negatives are also prepended
+ * with "n". For example: n99999999999999d86799999 = -0.132
+ * 
+ * This way, -0.132 &gt; -0.133 b/c n99999999999999d86_7_99999 &gt; n99999999999999d86_6_99999
+ * also, 0.132 &gt; -0.133 b/c p00000000000000d13200000 &gt; n99999999999999d86699999 (b/c p &gt; n)
+ * 
+ * See: http://wiki.apache.org/lucene-java/SearchNumericalFields#head-19a4340c637fad4601e9ef9db2f7a41dbf2d7518 
+ * 
+ * @author chase
+ */
+public class DecimalFormatter {
+ 
+ public static final NumberFormat NUMBER_FORMATTER = new DecimalFormat("00000000000000.00000000");
+
+ public static String formatDouble(double x) {
+  
+     String latStr = NUMBER_FORMATTER.format(x);
+     if (latStr.startsWith("-")) {
+         latStr = invertNegativeDouble("n".concat(latStr.substring(1)));
+     } else {
+         latStr = "p".concat(latStr);
+     }
+     return latStr.replaceAll("\\.", "d");
+ }
+ 
+ public static String invertNegativeDouble(String negDbl) {
+  
+  String value = "";
+  for (int i = 0; i &lt; negDbl.length(); i++) { 
+   char digit = negDbl.charAt(i);
+   if (digit &gt;= '0' &amp;&amp; digit &lt;= '9')
+    value += String.valueOf(('9' - digit));
+   else value += digit;
+  }
+  
+  return value;
+ } 
+
+}
+</pre>

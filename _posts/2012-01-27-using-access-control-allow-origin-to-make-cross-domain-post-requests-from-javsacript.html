@@ -1,0 +1,50 @@
+---
+layout: post
+title: Using Access-Control-Allow-Origin to make cross domain POST requests from javsacript
+tags: javascript, django, security
+---
+
+<p>
+Making ajax calls from javascript, even without a framework like jQuery, is pretty trivial. However, once you try to make the same request cross-domain, it gets hard fast. This is due to the security model all modern browsers use, known as the <a href="http://en.wikipedia.org/wiki/Same_origin_policy">same origin policy</a>. This policy makes sense in a lot of ways, but it's also somewhat broken and antiquated on the web today. 
+</p>
+
+<p>
+Why might you want to make cross domain requests? Just take a look at some examples:
+</p>
+
+<ul>
+<li>Google Analytics sends metrics from your page to their central servers.</li>
+<li><a href="http://www.housingmaps.com/">HousingMaps</a>, a mashup of craigslist and GoogleMaps.</li>
+<li>The <a href="http://www.instapaper.com/extras">Read Later</a> Instapaper bookmarklet.</li>
+</ul>
+
+<p>
+For cross domain ajax requests, the same origin policy is "broken" in the sense that there have been work-arounds available for a years. First there were <a href="http://ajaxpatterns.org/Cross-Domain_Proxy">proxy pages</a>, where you wrap a remote URL in a page being served by the site the user is actually on. The proxy requires that you be in control of the page the user is on. Then there was a <a href="http://softwareas.com/cross-domain-communication-with-iframes">dual IFRAME hack</a>, but that requires that you be in control of both ends.
+</p>
+
+<p>
+Recently, <a href="http://www.ibm.com/developerworks/library/wa-aj-jsonp1">JSONP</a> has emerged as a standard 
+to allow cross domain requests. It's something of a hack that works by returning an executable javascript function from a script tag request. It also exposes you to potential javascript injection vulnerabilities if you are not in control of the remote host. On the plus side, it's provided seamlessly as a <a href="http://api.jquery.com/jQuery.getJSON/">feature in recent jQuery</a> versions.
+</p>
+
+<p>
+Luckily, there is a true standard emerging that's not built on top of a hack. In 2004, the W3C started work on a draft called Cross-Origin Resource Sharing (CORS). In 2009, <a href="https://developer.mozilla.org/En/HTTP_access_control">Mozilla</a> was the first browser to implement support for CORS. Currently Chrome also supports it. It allows a HTTP server to set some new headers that tell the browser to modify its same origin policy.
+</p>
+
+<p>
+For example, the following <a href="http://stackoverflow.com/questions/298745/how-do-i-send-a-cross-domain-post-request-via-javascript">Django code</a> with allow an ajax request from another domain to your server.
+</p>
+
+<pre name="code" class="python">
+def myview(_request):
+    response = HttpResponse(json.dumps({&quot;key&quot;: &quot;value&quot;, &quot;key2&quot;: &quot;value&quot;}))
+    response[&quot;Access-Control-Allow-Origin&quot;] = &quot;*&quot;
+    response[&quot;Access-Control-Allow-Methods&quot;] = &quot;POST, GET, OPTIONS&quot;
+    response[&quot;Access-Control-Max-Age&quot;] = &quot;1000&quot;
+    response[&quot;Access-Control-Allow-Headers&quot;] = &quot;*&quot;
+    return response
+</pre>
+
+<p>
+In typical fashion, Microsoft went ahead and implemented their own incompatible version of the same thing, which they call <a href="http://msdn.microsoft.com/en-us/library/ie/cc288060(v=vs.85).aspx">XDR</a>. If you're masochistic, you can try to use it. Otherwise, you can wait until IE10 when <a href="http://blogs.msdn.com/b/ie/archive/2011/11/29/html5-for-applications-the-fourth-ie10-platform-preview.aspx">they will support CORS</a>, too.
+</p>

@@ -1,0 +1,92 @@
+---
+layout: post
+title: Deploying Jersey to JBOSS
+tags: java
+---
+
+<p>
+I spent the afternoon playing around with <a href='https://jersey.dev.java.net/'>Jersey</a> in <a href='http://www.jboss.org/'>JBOSS</a>. Jersey is a Java API for publishing REST web-services, and JBOSS is the application server we use at work. Not finding any particularly helpful tutorials, I muddled my way through. Lucky for you, I have distilled the required steps here.
+</p>
+
+<p>
+The first step is to create a Java class with the method you would like to invoke via a REST call. Here is what I came up with:
+</p>
+
+<pre name="code" class="java">
+package com.bitkickers;
+
+import java.util.Map;
+import javax.ws.rs.*;
+
+@Path("JerseyServices")
+public class JerseyServices {
+
+ @GET
+ @Produces({"text/plain"})
+ @Path("/helloWorld") 
+ public String helloWorld(@QueryParam("name") String name) {
+  return String.format("Hello, %s", name);
+ } 
+  
+}
+</pre>
+
+<p>
+The annotations include <I>@Path("JerseyServices")</I>, which defines a path relative to the web context to serve all of the methods in this class from. <I>@GET</I>, tells Jersey to attach to HTTP GET requests for this method. <I>@Path("/helloWorld")</I> and <I>@QueryParam("name")</I> combine to define the whole relative URL as <I>"/JerseyServices/helloWorld?name=Chase"</I> to call this method with the parameter name set to "Chase".
+</p>
+
+<p>
+The web.xml to tie in the Jersey servlet looks like the following:
+</p>
+
+<pre name="code" class="xml">
+&lt;?xml version="1.0" encoding="ISO-8859-1"?&gt;
+&lt;web-app xmlns="http://java.sun.com/xml/ns/javaee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+    version="2.5"&gt;
+
+    &lt;display-name&gt;Jersey API Skunkworks&lt;/display-name&gt;
+
+    &lt;servlet&gt;
+        &lt;servlet-name&gt;JerseyAPI&lt;/servlet-name&gt;
+        &lt;servlet-class&gt;com.sun.jersey.spi.container.servlet.ServletContainer&lt;/servlet-class&gt;        
+  &lt;init-param&gt;
+            &lt;param-name&gt;com.sun.jersey.config.property.packages&lt;/param-name&gt;
+            &lt;param-value&gt;com.bitkickers&lt;/param-value&gt;
+        &lt;/init-param&gt;
+    &lt;/servlet&gt;
+
+    &lt;servlet-mapping&gt;
+        &lt;servlet-name&gt;JerseyAPI&lt;/servlet-name&gt;
+        &lt;url-pattern&gt;/api/*&lt;/url-pattern&gt;
+    &lt;/servlet-mapping&gt; 
+
+&lt;/web-app&gt;
+</pre>
+
+<p>
+The parameter "com.sun.jersey.config.property.packages" tells "ServletContainer" to scan for any classes annotated with @Path in the package "com.bitkickers", recursively. The servlet mapping tells the servlet to attach to the URL "/api".
+</p>
+
+<p>
+Finally, the jboss-web.xml just sets the root context to "jersey":
+</p>
+
+<pre name="code" class="xml">
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;!DOCTYPE jboss-web PUBLIC "-//JBoss//DTD Web Application 2.4//EN" "http://www.jboss.org/j2ee/dtd/jboss-web_4_2.dtd"&gt;
+&lt;jboss-web&gt;
+
+    &lt;context-root&gt;jersey&lt;/context-root&gt;
+ 
+&lt;/jboss-web&gt;
+</pre>
+
+<p>
+All together, the URL to invoke this REST call becomes "http://localhost:8080/jersey/api/JerseyServices/helloWorld?name=Chase".
+</p>
+
+<p>
+Also included in the <a href="http://dl.dropbox.com/u/422013/bitkickers/JerseyJboss.zip">download</a> is an ANT file to build the WAR, and an HTML file that uses jQuery to invoke the REST service.
+</p>

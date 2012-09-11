@@ -1,0 +1,77 @@
+---
+layout: post
+title: Adding a .first() method to Django's QuerySet
+tags: django
+---
+
+<p>
+In my last Django project, we had a set of helper functions that we used a lot. The most used was helpers.first, which takes a query set and returns the first element, or None if the query set was empty.
+</p>
+
+<p>
+Instead of writing this:
+</p>
+
+<pre name="code" class="python">
+try:
+    object = MyModel.objects.get(key=value)
+except model.DoesNotExist:
+    object = None
+</pre>
+
+<p>
+You can write this:
+</p>
+
+<pre name="code" class="python">
+def first(query):
+    try:
+        return query.all()[0]
+    except:
+        return None
+
+object = helpers.first(MyModel.objects.filter(key=value))
+</pre>
+
+<p>
+Note, that this is not identical. The <a href="https://docs.djangoproject.com/en/dev/topics/db/queries/#retrieving-a-single-object-with-get">get method</a> will ensure that there is exactly one row in the database that matches the query. The helper.first() method will silently eat all but the first matching row. As long as you're aware of that, you might choose to use the second form in some cases, primarily for style reasons.
+</p>
+
+<p>
+But the synax on the helper is a little verbose, plus you're constantly including helpers.py. Here is a version that makes this available as a method on the end of your query set chain. All you have to do is have your models inherit from this AbstractModel.
+</p>
+
+<pre name="code" class="python">
+class FirstQuerySet(models.query.QuerySet):
+
+    def first(self):
+        try:
+            return self[0]
+        except:
+            return None
+
+
+class ManagerWithFirstQuery(models.Manager):
+
+    def get_query_set(self):
+        return FirstQuerySet(self.model)
+
+
+class AbstractModel(models.Model):
+    objects = ManagerWithFirstQuery()
+
+    class Meta:
+        abstract = True
+
+
+class MyModel(AbstractModel):
+    ...
+</pre>
+
+<p>
+Now, you can do the following.
+</p>
+
+<pre name="code" class="python">
+object = MyModel.objects.filter(key=value).first()
+</pre>

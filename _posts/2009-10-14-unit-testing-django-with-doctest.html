@@ -1,0 +1,86 @@
+---
+layout: post
+title: Unit testing Django with doctest
+tags: django, python
+---
+
+<p>
+There are two main ways to write <a href="http://docs.djangoproject.com/en/dev/topics/testing/">tests in Django</a>; doctests and unit tests. Units tests will be familiar to you if you're coming from Java. You basically write new Python code to setup and execute your tests. Doctests are a combination of documentation and unit testing. You actually write executable tests in your comments.
+</p>
+
+<p>
+Why is this is a good idea? Well, for one thing, they make sure your comments are accurate. If you change how a function behaves, your doctests will let you know if you forget to update the comments. But I mainly appreciate them because of their brevity. 
+</p>
+
+<pre name="code" class="python">
+def _lucene_location(job):
+    """Formats a Lucene query for searching by city/state
+    
+    Values must be double-quoted in case there are spaces
+    &gt;&gt;&gt; _lucene_location(Job(city="Fort Worth", state="TX"))
+    ' +JOBCITY:"Fort Worth" +JOBSTATE:"TX"'
+    
+    Need to escape quotes in the city/state values
+    &gt;&gt;&gt; _lucene_location(Job(city='"Bad" City', state="MA"))
+    ' +JOBCITY:"%22Bad%22 City" +JOBSTATE:"MA"'        
+    
+    """
+    return "".join([
+        ' +%s:"%s"' % (field_solr[attr], urllib.quote(getattr(job, attr), " "))
+        for attr in  ["city", "state"]
+        ])
+</pre>
+
+<p>
+Here we have a function that takes a Job model object and formats a Lucene search string for city and state. The primary edge case, which we are testing for, is that the city name can contain a space, so it needs to be in double-quotes. But what if the name itself has a double-quote character? Then it needs to be encoded.
+</p>
+
+<p>
+These conditions are covered by doctests, where ">>>" denotes a statement to be run in a Python interactive session, and where the following line is the expected result. I can't think of a way to express these tests with less code.
+</p>
+
+<p>
+Doctests have some downsides. They are not as flexible as unit tests. If your tests require a complicated setup procedure, that's probably better done as a unit test. The other downside I encounted was documentation. The Django website simply tells you to place your doctests in a file called tests.py. But of course, most developers will want to execute doctests that are in-line with functions in other .py files.
+</p>
+
+<p>
+The solution is easy, but was not readily apparent to me from the documentation. Simply put this in your tests.py file:
+</p>
+
+<pre name="code" class="python">
+from search.models import Job
+from search.placement import _lucene_location, _lucene_query, _fuzzy_titles
+
+__test__ = {
+    "_lucene_location": _lucene_location,
+    "_lucene_query": _lucene_query,
+    "_fuzzy_titles": _fuzzy_titles
+}
+</pre>
+
+<p>
+Here, I am importing anything my doctests might need, such as the Job model. Otherwise, I would have to clutter my doctests themselves with those imports. This would be a good place to do some setup common to the doctests, as well. __test__ is an undocumented dictionary that maps test name to callable object.
+</p>
+
+<p>
+To run the tests, just execute the following command-line:
+</p>
+
+<pre>
+&gt;python manage.py test
+Creating test database...
+...
+Creating table search_job
+...
+Installing json fixture 'initial_data' from '../powerfill/search/fixtures'.
+Installed 48 object(s) from 1 fixture(s)
+...................
+----------------------------------------------------------------------
+Ran 19 tests in 2.285s
+
+OK
+</pre>
+
+<p>
+As opposed to vanilla Python doctests, Django is actually spinning up a clean database, and populating your default fixture data. This is a great way to avoid having to mock models. Your continuous integration server could even run these tests without having a real database, by using sql lite.
+</p>

@@ -1,0 +1,34 @@
+---
+layout: post
+title: Subversion mergeinfo
+tags: 
+---
+
+<p>
+Subversion 1.5 added a feature called <a href="http://www.collab.net/community/subversion/articles/merge-info.html">mergeinfo</a>, which is just a property that can be set on any resource that tracks merges made to the resource. When you merge and then commit, you upload not only code changes, but meta-data attached to any number of other files that you did not explicitly touch.
+</p>
+
+<p>
+Supposedly, this makes re-integration merges easier. But regular commits require more work and are more error prone. My main complaint is the number of files it puts into the commit list. Aesthetically, I try to minimize the contents of my commits. Code is the enemy. So it eats away at me when I fix a bug with a single line of code, but then have to commit 40 meta-data files. But this is purely subjective.
+</p>
+
+<p>
+However, consider this. You have a file that you want to check-in, but you also have a handful of files that you have modified locally but do not wish to check-in. Maybe they are part of something else and not ready yet. Maybe they are local hacks, or over-rides that you never intend to check-in (damn, I wish subversion would let you flag checked out items as svn:ignore).
+</p>
+
+<p>
+With mergeinfo, your commit window does not just contain a list of the one file you want, plus the handful you don't want. Now you have potentially many other files to deal with. So you go through, by hand, and check/uncheck the files you want. All this manual work increases the chances that you screw it up. Maybe you just forget a mergeinfo file. But maybe you forget a file that you do want to check in, or worse, forget to uncheck a file that you <span style="font-style:italic;">don't</span> want.
+</p>
+
+<p>
+Now, better tooling could solve this. Tortoise lets you sort by whether a file is really modified, or just property modified. Most clients, however, do not. For example, neither Eclipse nor RapidSVN let you do this. Likewise, the svn command-line tool does not support filtering out mergeinfo only changes when do a status or diff. Maybe eventually the tooling will catch up to make this seamless, and <span style="font-weight:bold;">transparent</span>. Until then, I submit that this feature does more harm than good.
+</p>
+
+<p>
+Over the last few months, my team has started simply not checking in mergeinfo files. So far we have been none the worse for it. In Tortoise, we just manually uncheck them. On my Linux box, I use the following BASH script to actually revert mergeinfo changes after I merge.
+</p>
+
+<pre name="code" class="ruby">
+FILES=`svn status |grep "^ M      " |sed s/" M      "// |tr '\n', ' '`
+svn revert $FILES
+</pre>

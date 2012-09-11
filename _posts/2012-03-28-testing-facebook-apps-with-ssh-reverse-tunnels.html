@@ -1,0 +1,34 @@
+---
+layout: post
+title: testing facebook apps with ssh reverse tunnels
+tags: ssh
+---
+
+<p>
+If you're writing a Facebook app, you may have to jump through hoops to test it out against your local development machine. Facebook requires that you configure a static host name where all your login requests will originate. For logins, it will let you specify a localhost address. But other features, like OpenGraph objects, require that Facebook be able to download that webpage to see the meta tags.
+</p>
+
+<p>
+At this point, you may have a problem. Most developer desktops are behind a firewall. If you're in a corporate setting, it may be difficult to get someone to open up port 80 on a static IP and temporarily point it to your desktop. However, many of those same developers will have access to one or more servers "in the cloud". You could deploy your code there to test, but then every change would require a re-deploy. 
+</p>
+
+<p>
+Instead, it's fairly simple to setup a reverse tunnel over SSH to forward port 80 inbound traffic from a cloud server to your local desktop. It's a two step process. First, you ssh into that server as normal, but tell it to also forward a new port on its end to your local ssh port. Then, from inside that new ssh session, you forward port 80 (HTTP) connections to your local port 80.
+</p>
+
+<pre name="code" class="bash">
+ssh -R 19999:localhost:22 root@myserver.cloudhost.com
+ssh -L 80:localhost:80 -p 19999 myuser@localhost
+</pre>
+
+<p>
+At this point, you should be able to open http://myserver.cloudhost.com in a browser and have the pages served up from your local port 80. You can also change the localhost:80 part to something else, like localhost:8000 for Django apps.
+</p>
+
+<p>
+<b>Trouble-shooting: </b> 
+<ul>
+<li>Make sure you can ssh into the server normally with ssh root@myserver.cloudhost.com.</li>
+<li>Make sure you can ssh into yourself (from yourself) with ssh myuser@localhost. If not, make sure you have installed sshd (sudo apt-get install openssh-server).</li>
+</ul>
+</p>

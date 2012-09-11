@@ -1,0 +1,90 @@
+---
+layout: post
+title: Celery&#58; blacklists and custom formatting for exception emails
+tags: django, celery
+---
+
+<p>
+Celery 2.3 has a few high level knobs to turn with regards to exception emails. You can <a href="http://ask.github.com/celery/configuration.html#celery-task-error-whitelist">whitelist</a> exceptions by type. You can change the <a href="http://ask.github.com/celery/configuration.html#admins">recipients</a>, <a href="http://ask.github.com/celery/configuration.html#email-host">email servers</a> to use, etc. But there are many powerful things that you couldn't do, until now.
+</p>
+
+<p>
+Starting with the next release, you will be able to <a href="https://github.com/ask/celery/commit/40d769090769054c3a84d0bc29678ede90826d86">define a custom error mail handler</a> at the task level. From there, you can do lots of new things. You could blacklist exceptions per-task. You can change the subject of body formatting of the errors. You can hijack the email and submit the content to github as a bug, if you want.
+</p>
+
+<p>
+The mechanism for all this is the ErrorMail class, which is defined in utils.mail. Every task has a Task.ErrorMail property which designates a handler for its exception emails. By setting that property to a new class that inherits from ErrorMail, you can over-ride some or all of its methods, such as should_send(), format_subject(), format_body() and send().
+</p>
+
+<pre name="code" class="python">
+class ErrorMail(object):
+
+    # pep8.py borks on a inline signature separator and
+    # says &quot;trailing whitespace&quot; ;)
+    EMAIL_SIGNATURE_SEP = &quot;-- &quot;
+
+    #: Format string used to generate error email subjects.
+    subject = &quot;&quot;&quot;\
+        [celery@%(hostname)s] Error: Task %(name)s (%(id)s): %(exc)s
+    &quot;&quot;&quot;
+
+    #: Format string used to generate error email content.
+    body = &quot;&quot;&quot;
+Task %%(name)s with id %%(id)s raised exception:\n%%(exc)r
+
+
+Task was called with args: %%(args)s kwargs: %%(kwargs)s.
+
+The contents of the full traceback was:
+
+%%(traceback)s
+
+%(EMAIL_SIGNATURE_SEP)s
+Just to let you know,
+celeryd at %%(hostname)s.
+&quot;&quot;&quot; % {&quot;EMAIL_SIGNATURE_SEP&quot;: EMAIL_SIGNATURE_SEP}
+
+    error_whitelist = None
+
+    def __init__(self, task, **kwargs):
+        #subject=None, body=None, error_whitelist=None
+        self.task = task
+        self.email_subject = kwargs.get(&quot;subject&quot;, self.subject)
+        self.email_body = kwargs.get(&quot;body&quot;, self.body)
+        self.error_whitelist = getattr(task, &quot;error_whitelist&quot;)
+
+    def should_send(self, context, exc):
+        allow_classes = tuple(map(get_symbol_by_name,  self.error_whitelist))
+        return not self.error_whitelist or isinstance(exc, allow_classes)
+
+    def format_subject(self, context):
+        return self.subject.strip() % context
+
+    def format_body(self, context):
+        return self.body.strip() % context
+
+    def send(self, context, exc, fail_silently=True):
+        if self.should_send(context, exc):
+            self.task.app.mail_admins(self.format_subject(context),
+                                      self.format_body(context),
+                                      fail_silently=fail_silently)
+</pre>
+
+<p>
+Here is one example that formats the subject of the email with just the task name, and doesn't send the email at all for a certain set of exceptions.
+</p>
+
+<pre name="code" class="python">
+class NaiveAuthenticateServer(Task):
+    ErrorMail = MyErrorMail
+    ...
+
+class MyErrorMail(ErrorMail):
+
+    def format_subject(self, context):
+        # options: hostname, id, name, exc, traceback, args, kwargs
+        return &quot;[celery] %(name)s&quot; % context
+
+    def should_send(self, context, exc):
+        return not isinstance(exc, (ZeroDivisionError, TypeError))
+</pre>

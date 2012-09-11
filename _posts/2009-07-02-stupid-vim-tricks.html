@@ -1,0 +1,17 @@
+---
+layout: post
+title: Stupid vim tricks
+tags: vim
+---
+
+<p>
+Quick hit today. Ever open a file in vim, only to realize that you need sudo to write to it? Usually, you have to exit out of vim, open vi as sudo, and make your changes again. No more!
+</p>
+
+<pre>
+:w !sudo tee %
+</pre>
+
+<p>
+This command is writing the file (:w) to the pipe (!) that executes sudo and then copies the pipe contents (tee) to a file (%, which is a placeholder for the current file in vim). 
+</p>

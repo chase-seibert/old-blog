@@ -1,0 +1,23 @@
+---
+layout: post
+title: Converting a legacy ColdFusion app from Windows to Linux&#58; Part II
+tags: 
+---
+
+<p>
+For now, I've just decided to run ColdFusion under WINE. While I want to run it natively eventually, I don't want to undertake updating the code to use the correct case-sensitive file names. I'm sure my QA manager doesn't want me to undertake it just now, either.
+</p>
+
+<p>
+Actually running it is dead simple:
+</p>
+
+<pre>
+cd CFusionMX7/runtime/bin/
+chmod +x jrun.exe
+./jrun.exe -start coldfusion
+</pre>
+
+<p>
+With WINE installed and jrun.exe marked as executable, everything just works. File case issues are handled by WINE. Performance is excellent; I don't notice any overhead subjectively. While I would not suggest this setup for production, it's adequate for development.
+</p>

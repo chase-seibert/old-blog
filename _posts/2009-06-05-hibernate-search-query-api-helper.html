@@ -1,0 +1,94 @@
+---
+layout: post
+title: Hibernate Search - Query API helper
+tags: hibernate, lucene, hibernate search
+---
+
+<blockquote>If you are programmatically generating a query string and then parsing it with the query parser then you should seriously consider building your queries directly with the query API. In other words, the query parser is designed for human-entered text, not for program-generated text. - <a href="http://lucene.apache.org/java/2_3_2/queryparsersyntax.html">Lucene Documentation</a></blockquote>
+
+<p>
+In Hibernate Search, as in vanilla Lucene, when you create a query it's critically important to use the same Analyzer and Bridges that you used when indexing the fields. 
+</p>
+
+<p>
+Analyzers tokenize search strings into Terms. For example "a cool manager" might parse into "cool" and "manag". Notice that "manager" has been <span style="font-style:italic;">stemmed </span>into a shorter version. If you were to construct a Lucene query like "description:manager", it would not find any results. You could apply a tokenizer to the Lucene query string to correctly translate it, but that only works if all the fields in the query use the same Analyzer and are tokenized. Say you have a field isDeleted, that only has the un-tokenized values "true" and "false". If you run "+isDeleted:false +description:manager" through the Analyzer, you might get "+isDeleted:fals +description:manag" (not the missing "e" in false), which will not match anything.
+</p>
+
+<p>
+Bridges convert Objects into <a href="http://en.wikipedia.org/wiki/Lexicographical_order">lexicographic</a> text so that they can be indexed and used in range searches. Because everything is text in Lucene (and compared as text), you can't just put the value "1/1/2009" in for a date. If you did, when comparing values, Lucene would put "2/1/2008" <span style="font-style:italic;">after</span> "1/1/2009", instead of before. That's because it's comparing them as strings, left to right (just like "b" is greater than "a"). A typical bridge for dates might produce "20090101", which is lexicographically valid. When constructing queries, you obviously want to use the same bridges that you used to index the data.
+</p>
+
+<p>
+All of this should be taken as an argument for using the <a href="http://lucene.apache.org/java/2_4_0/api/org/apache/lucene/search/Query.html">Lucene Query API</a> to construct your non-static queries. Take "+isDeleted:false +description:manag +dateAdded:[20090101 to 40000101]", for example. If you are relying on the user to hand-enter a query, how are they going to know to format dates like that, and to stem "manager" to "manag"? They won't, and even if they do, they will fuck it up. Similarly, if you generate this as a string in code, you will fuck it up.
+</p>
+
+<p>
+Instead, use the Lucene Query API, which has a primitive of Term and bunches them into Queries (like BooleanQuery, RangeQuery, etc). Unfortunately, Hibernate Search does not provide any tools to help you apply the Anaylzers and Bridges you defined in your entity annotations to a given Term. So you might end up writing code that looks like:
+</p>
+
+<pre name="code" class="java">
+     BooleanQuery query = new BooleanQuery();
+     Analyzer analyzer = new StandardAnalyzer();     
+     TokenStream tokenStream = analyzer.tokenStream("description", new StringReader("cool manager"));
+     
+     Token token = new Token();
+     token = tokenStream.next(token);
+     
+     while (token != null) {
+      if (token.termLength() &gt; 0) {
+       String term = new String(token.termBuffer(), 0, token.termLength());
+       query.add(new TermQuery(new Term("description", term)), BooleanClause.Occur.MUST);       
+      }
+      token = tokenStream.next(token);
+     }
+
+     DateBridge dateBridge = new DateBridge();
+     Map params = new HashMap();
+     params.put("resolution", "day");
+     dateBridge.setParameterValues(params);
+     RangeQuery dateAdded = new RangeQuery(
+          new Term("dateAdded", dateBridge.objectToString(new GregorianCalendar(2009, Calendar.MARCH, 1).getTime())),
+          new Term("dateAdded", dateBridge.objectToString(new GregorianCalendar(3000, Calendar.JANUARY, 1).getTime())),
+          true
+      ); 
+     
+     query.add(new BooleanClause(dateAdded, BooleanClause.Occur.MUST));
+</pre>
+
+<p>
+While it's pretty verbose, the <span style="font-style:italic;">real </span>problem with the above is that it violates <a href="http://en.wikipedia.org/wiki/Don%27t_repeat_yourself">DRY</a>. You have to repeat the mappings you made in your annotations as to which Analyzers and Bridges you want to us. Wouldn't it be nice if there was some code to do this for you?
+</p>
+
+<p>
+Using reflection, I came up with a utility class that can get the correct Analyzers and Bridges at runtime, letting you write code that looks like:
+</p>
+
+<pre name="code" class="java">
+ BooleanQuery comments = SearchUtil.createQuery(
+  Note.class, 
+  "comments", 
+  "packaging c++ in 1947 hot/cold foo:bar", 
+  BooleanClause.Occur.MUST
+  );   
+
+ RangeQuery dateRange = SearchUtil.createRangeQuery(
+   Note.class, 
+   "dateAdded", 
+   new GregorianCalendar(2009, Calendar.MARCH, 1).getTime(),
+   new GregorianCalendar(3000, Calendar.JANUARY, 1).getTime()
+   );
+
+ BooleanQuery query = SearchUtil.createQuery(
+   Note.class, 
+   "isDeleted", 
+   "false", 
+   BooleanClause.Occur.MUST
+   );      
+
+ query.add(new BooleanClause(comments, BooleanClause.Occur.MUST));
+ query.add(new BooleanClause(dateRange, BooleanClause.Occur.MUST));
+</pre>
+
+<p>
+You can <a href="http://dl.dropbox.com/u/422013/bitkickers/SearchUtil.zip">download the code for SearchUtil</a> here. <span style="font-style:italic;">Note: I ripped this out of my project w/o changing packages, etc. You'll have to clean it up a little.</span>
+</p>

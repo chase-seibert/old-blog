@@ -1,0 +1,58 @@
+---
+layout: post
+title: Easier Development with Unobtrusive JavaScript, Part III
+tags: javascript
+---
+
+<p>
+<a href="/2009/06/easier-development-with-unobtrusive.html">Part I</a> defined what I mean by Unobtrusive JavaScript. <a href="/2009/06/easier-development-with-unobtrusive_19.html">Part II</a> showed some specific examples. Now I want to talk a little more about <span style="font-style:italic;">why</span> you might want to do all this.
+</p>
+
+<p>
+We have already discussed how a small subset of users don't have JavaScript, or don't have it enabled. There are also users with disabilities, and SEO issues. However, none of these are likely to sell your development manager. Time for some new arguments.
+</p>
+
+<p>
+   <b>Unobtrusive JavaScript means writing as little JavaScript as possible.</b>
+</p>
+
+<p>
+If you've implemented the behaviour on the back-end, all you need is a little <a href="/2009/10/quick-and-dirty-ajax-on-any-form.html">sprinkling</a> of JavaScript to make it dynamic. Now, why is that net benefit?
+</p>
+
+<p>
+   <b>JavaScript is harder to write, debug and refactor than back-end code.</b>
+</p>
+
+<p>
+JavaScript tooling is fairly weak. Debugging tools are browser specific. Going on the theory that less code is more maintainable than more code, and that JavaScript is in general harder to maintain than say Java, Ruby or Python, it stands to reason that less JavaScript means more maintainable code.
+</p>
+
+<p>
+   <b>JavaScript is harder to test than back-end code.</b>
+</p>
+
+<p>
+Likewise, unit and functional testing tools for JavaScript are weaker than their back-end counterparts, and browser specific to boot. The vast majority of the time, this results in zero automated testing coverage for JavaScript code.
+</p>
+
+
+<p>
+   <b>JavaScript is harder to make performant than back-end code.</b>
+</p>
+
+<p>
+This is the kicker. Typically, JavaScript is thought of as a way to improve the perceived performance of a site, by reducing page refreshes. However, it is very possible to find yourself in a position where the Ajax update is actually <a href="/2008/12/ajax-grid-performance-in-ie.html">slower</a> than a page refresh, especially in Internet Explorer.
+</p>
+
+<p>
+Often times, you may not realise this is the case until late in the development cycle. Perhaps you have not been testing on other browsers, and you find out during acceptance testing. Perhaps you waiting until the last minute to roll in new design html/css from the UI folks, and it makes the DOM insertions a lot slower. Perhaps it's the result of new content from a new feature request.
+</p>
+
+<p>
+In any case, you realise that Ajax is slower. What do you do? If you used Unobtrusive JavaScript, you can selectively disable JavaScript for certain pages or components. You can even decide whether to use the JavaScript or refresh version per-browser. You can do this will almost no code change.
+</p>
+
+<p>
+Without Unobtrusive JavaScript, you're looking at either living with the problem, or re-writing some code. Maybe a lot of code, if it's really JavaScript heavy. 
+</p>

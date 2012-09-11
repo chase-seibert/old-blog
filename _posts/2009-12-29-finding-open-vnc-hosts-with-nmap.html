@@ -1,0 +1,13 @@
+---
+layout: post
+title: Finding open VNC hosts with nmap
+tags: 
+---
+
+<p>
+Say you have a machine using DHCP that you only boot up once in a while. It's headless, so you need to remote into it. How can you find out what IP it has? Here is quick command to scan for open VNC ports on the 172.27.1.* sub-net.
+</p>
+
+<pre>
+nmap -p 5900 172.27.1.0/24 --open |grep Interesting
+</pre>

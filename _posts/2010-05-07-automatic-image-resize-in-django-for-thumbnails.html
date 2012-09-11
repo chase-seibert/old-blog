@@ -1,0 +1,34 @@
+---
+layout: post
+title: automatic image resize in Django for thumbnails
+tags: 
+---
+
+<p>
+Want to resize images uploaded to Django on the fly? It's actually very simple. This solution requires the <a href="http://www.pythonware.com/products/pil/">Python Imaging Library (PIL)</a>.
+</p>
+
+<pre name="code" class="python">
+
+import Image
+
+class Company(models.Model):
+
+    logo = models.ImageField(upload_to="static/images/logos")
+
+    def save(self, force_insert=False, force_update=False):
+        
+        super(Company, self).save(force_insert, force_update)
+
+        if self.id is not None:
+            previous = Company.objects.get(id=self.id)
+            if self.logo and self.logo != previous.logo:
+                image = Image.open(self.logo.path)
+                image = image.resize((96, 96), Image.ANTIALIAS)
+                image.save(self.logo.path)
+        
+</pre>
+
+<p>
+Updated: Django 1.2 requires that you save the file FIRST, otherwise the path will not be correct.
+</p>

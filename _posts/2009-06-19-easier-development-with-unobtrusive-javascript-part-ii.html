@@ -1,0 +1,141 @@
+---
+layout: post
+title: Easier Development with Unobtrusive JavaScript, Part II
+tags: 
+---
+
+<p>
+<a href="http://bitkickers.blogspot.com/2009/06/easier-development-with-unobtrusive.html">Last time</a>, I wrote about why you might want to make your Ajax heavy pages functional with javascript disabled. However, I dodged the issue of how to do that without writing two versions of your app. Personally, my aversion to repeating myself would likely overcome my desire provide an HTML only version. Luckily, it's relatively easy to have your cake and eat it, too.
+</p>
+
+<p>
+The project that spawned the previous post was implementing a data grid. I know, there must be a jQuery library out there, right? Actually, the requirement for having the feature work without javascript utterly precludes using a jQuery library. How would the server-side functionality be implemented? Instead, the grid control needs to be tied to the server-side technology. 
+</p>
+
+<p>
+In my case, that's ColdFusion. Now, CF8 has a fancy Ajax data grid. It also has a Flex version. Neither fallback to actually work with plain HTML if javascript or Flash are not enabled. Besides, we're actually on CF7, which has neither. So I set out to implement my own.
+</p>
+
+<blockquote>I happen to hold a hard-won minority opinion about code bases. In particular I believe, quite staunchly I might add, that the worst thing that can happen to a code base is size.  -<a href="http://steve-yegge.blogspot.com/2007/12/codes-worst-enemy.html">Steve Yegge</a></blockquote>
+
+<p>
+My last home-grown datagrid was using ALL javascript, all the time. The server actually never returned anything but JSON, even in the initial page render. While the abstraction was nice, and the payload of a given request was super-small, there were definite rendering performance issue on IE6/7/8. Other browsers were fine. Paging through the grid would typically freeze (ie, lock up) the browser for a second or so. Besides the speed issue, it just took way to much code. Rendering the data grid, and then updating the DOM for the pagination controls, rows per page, sorting icons, etc was a lot of javascript. This time, I wanted as little code as possible. 
+</p>
+
+<p>
+My strategy was simple, and effective. Develop the feature in vanilla HTML first. Get everything working, THEN sprinkle on some Ajax goodness. I ran into a bunch of gotchas, which I can boil down into one sentence of gleaned wisdom: "Use the semantically correct tag for a given UI element".
+</p>
+
+<p>
+For example, I knew I wanted pagination controls. I was trying to mimic an existing UI that used arrow icons for the next/last page buttons. If I didn't care about making it work without javascript, I might have just made them IMG tags with an onclick event handler. As it was, my initial intuition was to use an A tag. This worked fine, until I implemented the other UI elements around it. You see, I needed to keep track of all this state (page num, sort column, sort dir, search token) data between pages. 
+</p>
+
+<p>
+My next naive attempt was to starting including all these variables on each A tag. This lead to a lot of code repetition, and then to a common function to bundle up any existing variable in the URL scope and append it to all the links in the page. A few horrendous bugs later, and I realized that I was using the wrong tag. Semantically, what I really wanted was a FORM to keep track of all this data. But if the grid was in a form, what did that make the pagination buttons? BUTTONS, ie &lt;input type="button"&gt;. Styling them to be images was an interesting diversion, which resulted in CSS like the following:
+</p>
+
+<pre name="code" class="css">
+.ImageButton { 
+ border: 0px;
+ padding: 0 0 0 16px !important; /* Hide text - IE */
+ text-indent: -999em; /* Hide text - FF */
+ height: 15px;
+ width: 6px;
+ cursor: pointer;
+ background: transparent url(/Images/NextPage.gif) no-repeat scroll 0 0;
+ width: 10;
+}
+</pre>
+
+<p>
+Something else I re-learned is that if you have multiple buttons on a page, each one can have a value attribute which will be posted to the server to let you know which button was hit. I have re-invented that feature using javascript countless times in recent years. Instead of selecting items by class or ID in jQuery, the value attribute can also be used as a semantically correct hook to attach an event hander.
+</p>
+
+<pre name="code" class="javascript">
+$(".BHDataGrid input[value=FirstPage]").click(function(){ 
+   doPost(page - 1);
+});
+</pre>
+
+<p>
+The upshot of implementing without javascript is that my CFM page was generating all the HTML itself. Page number, button state and the grid itself were all generated in one shot by ColdFusion, which is really the right tool for that job. That's exactly what it's designed for.
+</p>
+
+<p>
+After everything was working, hooking up the javascript was easy. First, I attached an event handler to the FORM itself to trap a POST operation, and do it via Ajax instead:
+</p>
+
+
+<pre name="code" class="javascript">
+  $("form.dataGridForm").submit(function(event) {
+     
+   // serialize existing form vars
+   var postData = $(this).serialize();
+   postData += "&amp;ajax=true";
+   
+   //var event = event.originalEvent.explicitOriginalTarget.defaultValue;
+   postData += "&amp;grid_event=" + GRID.buttonEvent;
+   
+   $.post(
+    window.gridCallback == null ? window.location.pathname : window.gridCallback,
+    postData, 
+    function(data) {
+     $("#gridContent").html(data);
+     GRID.initGrid();
+    }, 
+    "html"
+   );    
+   
+   // prevent the actual form submit
+   return false;  
+  });
+</pre>
+
+<p>
+Woot jQuery. I'm mostly using their built-in methods for serializing a FORM to a URL encoded key/value list, making the actual POST, and then updating the grid contents with .html(). The only extras here are to add an "ajax=true" param (more on that, later), serialize which button was hit, and then return false so that the FORM doesn't go ahead and submit with its default behavior.
+</p>
+
+<p>
+<i>Note: one nice side-effect here is that if there is an exception thrown for any reason, the return false never fires, and the FORM posts as normal. Ie, the feature just works!</i>
+</p>
+
+<p>
+The ajax=true parameter is just a flag for the back-end to not render the window dressing around the grid. You see, my FORM tag actually looks like:
+</p>
+
+<pre name="code" class="html">
+&lt;FORM action="" method="POST" class="dataGridForm"&gt;
+   ...
+&lt;/FORM&gt;
+</pre>
+
+<p>
+Ie, I have not set a action URL. Instead, the browser POSTs to the current URL. This is handy for including this grid in any old page, without having to pass another URL around. On the back-end, my grid CFM just looks for this flag, and then resets the response stream to truncate any non-grid HTML.
+</p>
+
+<pre name="code" class="html">
+&lt;CFSAVECONTENT variable="tableHTML"&gt;
+ &lt;FORM action="" method="POST" class="dataGridForm"&gt;
+        ...
+&lt;/CFSAVECONTENT&gt;
+...
+&lt;CFIF StructKeyExists(form, "ajax") OR StructKeyExists(url, "ajax")&gt;
+ &lt;CFHEADER name="Expires" value="#Now()#"&gt;
+ &lt;CFCONTENT type="text/html" reset="YES"&gt;
+ &lt;CFOUTPUT&gt;#tableHTML#&lt;/CFOUTPUT&gt;
+ &lt;CFABORT&gt;
+&lt;CFELSE&gt;
+ &lt;CFOUTPUT&gt;#tableHTML#&lt;/CFOUTPUT&gt;
+&lt;/CFIF&gt;
+</pre>
+
+<p>
+And there you have it. A simple recipe to incorporate unobtrusive javascript principles into your code without writing everything twice. All in all, I only wrote about 100 lines of Javascript to Ajax up my HTML only version. 
+</p>
+
+<ul>
+<li>Start with semantically descriptive structure.</li>
+<li>Implement functionality with good-old FORM posts.</li>
+<li>Apply a presentation layer using CSS.</li>
+<li>Add behavior with javascript.</li>
+</ul>

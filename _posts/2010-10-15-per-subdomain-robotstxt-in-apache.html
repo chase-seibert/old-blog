@@ -1,0 +1,65 @@
+---
+layout: post
+title: per subdomain robots.txt in Apache
+tags: apache
+---
+
+<p>
+When I develop a website, I tend to go <a href="http://en.wikipedia.org/wiki/Subdomain">subdomain</a> crazy. If the site is crazy.net, I probably configure www.crazy.net, admin.crazy.net, static.crazy.net, youare.crazy.net, etc. Some allow concurrent logins as different users such as yourself, an admin account and maybe as a particular live user. Others are to keep your <a href="http://developer.yahoo.com/performance/rules.html#cookie_free">static/media resources</a> cookie free, as well as allow parallel sockets for html/media content. 
+</p>
+
+<p>
+In my typical use case, all of these subdomains point to the same Apache instance. So you can go to a particular relative URL at any of the subdomains, and you will get the same page. But I certainly don't want Google to index all those subdomains; I want a single canonical domain for the site. I'm hardly an expert in Apache configuration, so it took me an hour to track down the solution to this problem. 
+</p>
+
+<p>
+Essentially, I wanted www.crazy.net to serve up a permissive <a href="http://en.wikipedia.org/wiki/Robots_exclusion_standard">robots.txt</a> file, as well as a <a href="http://en.wikipedia.org/wiki/Site_map">sitemap</a>.
+</p>
+
+<pre name="code" class="bash">
+# robots.txt @ http://www.crazy.net/robots.txt
+User-agent: *
+Sitemap: http://www.crazy.net/sitemap.txt
+</pre>
+
+<p>
+However, all subdomains should return a different, restrictive robots.txt for the same URL.
+</p>
+
+<pre name="code" class="bash">
+# norobots.txt @ http://admin.crazy.net/robots.txt, http://static.crazy.net/robots.txt, etc
+User-agent: *
+Disallow: /
+</pre>
+
+<p>
+Here is a sample of my /etc/apache2/sites-available/default config file that made this happen.
+</p>
+
+<pre name="code" class="bash">
+ServerAdmin admin@example.com
+
+ExpiresActive On
+ExpiresByType text/css "access plus 12 years"
+ExpiresByType application/javascript "access plus 12 years"
+ExpiresByType image/png "access plus 12 years"
+ExpiresByType image/gif "access plus 12 years"
+ExpiresByType image/jpeg "access plus 12 years"
+FileETag none
+
+...
+
+&lt;VirtualHost *:80&gt;
+ alias /robots.txt /home/apache/website/norobots.txt
+&lt;/VirtualHost&gt;
+
+&lt;VirtualHost *:80&gt;
+ ServerName www.crazy.net
+ alias /robots.txt /home/apache/website/robots.txt
+ alias /sitemap.txt /home/apache/website/sitemap.txt
+&lt;/VirtualHost&gt;
+</pre>
+
+<p>
+Prior to this, all my directives were in a single VirtualHost. The key revelation on my part was that they don't need to be. Rather, Apache configs support inheritance from a global scope. So my VirtualHosts end up just being what's different between www.crazy.net and any other ServerName.
+</p>

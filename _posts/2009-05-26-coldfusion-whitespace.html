@@ -1,0 +1,47 @@
+---
+layout: post
+title: ColdFusion whitespace
+tags: 
+---
+
+<p>
+Quick hit today. Somehow I went six years working with ColdFusion without knowing that functions implicitly output anything inside them, including whitespace! For example, say you have the following function in english.cfc:
+</p>
+
+<pre name="code" class="html">
+    &lt;CFFUNCTION name="getHint"&gt;  
+        &lt;CFRETURN "Available only in Professional Edition."&gt;
+    &lt;/CFFUNCTION&gt;
+</pre>
+
+<p>
+And you call it from a template like so:
+</p>
+
+<pre name="code" class="html">
+    &lt;cfobject component="english" name="localise"&gt;
+    &lt;input type="Button" title="#localise.getHint()#"&gt;
+</pre>
+
+<p>
+The actual out will be:
+</p>
+
+<pre name="code" class="html">
+    &lt;input type="Button" title="
+        Available only in Professional Edition."&gt;
+</pre>
+
+<p>
+See, it's rendering the whitespace from inside the function, ie the linebreak after &lt;CFFUNCTION&gt; and the tab before &lt;CFRETURN&gt;. It only gets worse as the function gets longer. What you need to do is pass the attribute output="false" to the CFFUNCTION definition. 
+</p>
+
+<pre name="code" class="html">
+    &lt;CFFUNCTION name="getHint" output="false"&gt;  
+        &lt;CFRETURN "Available only in Professional Edition."&gt;
+    &lt;/CFFUNCTION&gt;
+</pre>
+
+<p>
+Now, I just need to find out how to make that the default...
+</p>

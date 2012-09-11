@@ -1,0 +1,54 @@
+---
+layout: post
+title: Too cute&#58; Django schema migration tools
+tags: 
+---
+
+<p>
+Like Ruby on Rails, Django uses a model API to abstract the database layer. A command-line script creates schema for new object definitions. Unlike Ruby on Rails, Django did not ship with a way to modify existing schema as your models change.
+</p>
+
+<p>
+Many projects have sprung up trying to fill this void. After watching a <a href="http://www.youtube.com/watch?gl=AU&hl=en-GB&v=VSq8m00p1FM">video</a> on a presentation by some of the early contenders, I choose <a href="http://code.google.com/p/django-evolution/">django-evolution</a> for my current project, mainly because the presenter was also a Django core developer, and came off as more of a <a href="http://blogs.microsoft.co.il/blogs/tamir/archive/2008/04/28/computer-languages-and-facial-hair-take-two.aspx">beard developer</a> than the others.
+</p>
+
+<p>
+Getting started was very easy. For the most part, migrations were smooth. But occasionally, I would hit a bug in the evolution framework. Sometimes it would be an unsupported operation, like changing a column from and int to a float. Sometimes it would be a bug related to my particular database (MySQL). Sometimes I had no idea what was wrong. You would just get a stack-trace, and have to track it down from there.
+</p>
+
+<pre name="code" class="python">
+var/lib/python-support/python2.6/MySQLdb/__init__.py:34: DeprecationWarning: the sets module is deprecated
+  from sets import ImmutableSet
+Traceback (most recent call last):
+  File "./manage.py", line 11, in &lt;module&gt;
+    execute_manager(settings)
+  File "/var/lib/python-support/python2.6/django/core/management/__init__.py", line 340, in execute_manager
+    utility.execute()
+  File "/var/lib/python-support/python2.6/django/core/management/__init__.py", line 295, in execute
+    self.fetch_command(subcommand).run_from_argv(self.argv)
+  File "/var/lib/python-support/python2.6/django/core/management/base.py", line 192, in run_from_argv
+    self.execute(*args, **options.__dict__)
+  File "/var/lib/python-support/python2.6/django/core/management/base.py", line 219, in execute
+    output = self.handle(*args, **options)
+  File "/usr/local/lib/python2.6/dist-packages/django_evolution/management/commands/evolve.py", line 87, in handle
+    hinted_evolution = diff.evolution()
+  File "/usr/local/lib/python2.6/dist-packages/django_evolution/diff.py", line 197, in evolution
+    changed_attrs[prop] = current_field_sig.get(prop, ATTRIBUTE_DEFAULTS[prop])
+KeyError: 'field_type'
+</pre>
+
+<p>
+After spending a couple hours tracking down an similar issue that was actually blocking a QA deploy, I noticed that the django-evolution mainline had only had <a href="http://code.google.com/feeds/p/django-evolution/svnchanges/basic">two check-ins</a> in the entire year of 2009. That was when I realised that I picked a winner without looking at which project was actually being actively supported.
+</p>
+
+<p>
+I briefly looked at both <a href="http://south.aeracode.org/">South</a> and <a href="http://code.google.com/p/dmigrations/">dmigrations</a>. But then I thought about the solution we use on non-Django code-bases; manual scripts. Sure, they are a little more work and they were somewhat inelegant. But they can do absolutely any data migration, and I don't remember one ever blocking a QA deploy for more than a few minutes.
+</p>
+
+<p>
+That's the core of my issue with these solutions. They are trying to be "cute", and provide a gee-wiz solution to a problem that is more of an annoyance than anything. But the most critical part of a database migration scheme is reliability. If there is even a small chance that it screws up a deploy or (god forbid) actually messes up data, then it's just not worth the time savings.
+</p>
+
+<p>
+Since moving back to sequential, numbered SQL files, we had no problems deploying schema changes. Of course, we are missing out on true database independence, but I figure we can always use syncdb to generate the entire schema from scratch if we ever do change databases.
+</p>

@@ -1,0 +1,51 @@
+---
+layout: post
+title: Apache fix for IE "webpage has expired" on back button
+tags: 
+---
+
+<p>
+When you refresh a webpage that was the result of a HTTP POST, your browser asks you if you want to reload.
+</p>
+
+<p>
+   <img src="http://lh3.ggpht.com/_EE2zVzGv1Ds/S5FfHNuReqI/AAAAAAAALKM/WVIh1IyW6vk/s800/Screenshot-Confirm.png" />
+</p>
+
+<p>
+The reason for this dialog is to stop the user from inadvertently submitting the same blog post/email message/payment details multiple times. That behaviour is standardised across all browsers. What's not standardised is what happens when you use the "Back" button to navigate to a previous POST page. In most browsers, you get the page from your cache. In IE, you get the dreaded "webpage has expired":
+</p>
+
+<p>
+   <img src="http://lh5.ggpht.com/_EE2zVzGv1Ds/S5FgR6HI5uI/AAAAAAAALKU/got-17Gpagg/s800/expired_page.png" />
+</p>
+
+<p>
+The intention here is good. This is a fool proof mechanism for keeping the user from submitting that page again. But what if your site can actually handle that? Why break the back button this way? A good counter example is a search engine. The search string may be sent via HTTP POST, but you would still like the user to be able to hit "back", change the search string, and hit submit again. In IE, you need a work-around for this.
+</p>
+
+<p>
+The most common work-around is to <a href="http://stackoverflow.com/questions/1580085/show-webpage-has-expired-on-back-button#answer-1580126">redirect the POST to a GET</a> on the server side, aka the <a href="http://www.theserverside.com/tt/articles/article.tss?l=RedirectAfterPost">PRG Pattern</a>. This adds some back-end code, but generally solves the problem. However, it can get complicated if you are doing server-side validation, as you generally want to show the form again with validation exceptions in that case. So then you have to persist the temporary state of the FORM in either the session state or the database... messy.
+</p>
+
+<p>
+Another solution is to use GETs in the first place. This is ok for some things, like Google searches, but does not work if you need to <a href="http://classicasp.aspfaq.com/forms/what-is-the-limit-on-querystring/get/url-parameters.html">pass a lot of form data</a> between pages. Also, it ignores the principle of <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.1.2">idempotence</a>, which for HTTP means that you should not use GETs for state-changes.
+</p>
+
+<p>
+The work-around I have been using recently is to not send a <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.44">Vary header</a> for IE only.
+</p>
+
+<blockquote>The Vary field value indicates the set of request-header fields that fully determines, while the response is fresh, whether a cache is permitted to use the response to reply to a subsequent request without revalidation.</blockquote>
+
+<p>
+In Apache, this is a simple configuration change in httpd.conf:
+</p>
+
+<pre name="code" class="python">
+BrowserMatch MSIE force-no-vary
+</pre>
+
+<p>
+The practical effect is that when you go "back" to a POST, IE simply gets the page from the history cache. No request at all goes to the server side. I would be interested in hearing about potential down-sides of this solution, other than the fact that the user can submit the form twice. In my case, this is handled already by the <a href="http://en.wikipedia.org/wiki/Cross-site_request_forgery">CSRF</a> token.
+</p>

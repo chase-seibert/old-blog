@@ -1,0 +1,154 @@
+---
+layout: post
+title: Deploying Django staticfiles to Heroku via Hudson/Jenkins
+tags: django, heroku, hudson
+---
+
+<p>
+Starting in Django 1.3, you can use the built-in <a href="https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/">staticfiles</a> feature to bundle up css, javascript, images and other static resources for deployment to a CDN. There are two popular Django apps, <a href="https://github.com/jezdez/django_compressor">django-compressor</a> and <a href="https://github.com/cyberdelia/django-pipeline">django-pipeline</a> that layer in additional functionality such as minification and seemless support for popular hosts like <a href="http://aws.amazon.com/s3/">Amazon S3</a>. 
+</p>
+
+<p>
+These "asset managers" both do the same basic things. They give you a mechanism to bundle multiple css and javascript files into one file, optionally minify the contents, and generate unique files names for the bundled versions. The idea behind unique file names is that you can then tell browsers to cache those files forever; any changes you make will use different URLs for the includes. They will also generate unique files names for images, and then go into your css files and replace the image file paths.
+</p>
+
+<p>
+Both libraries are a little immature; I ran into numerous issues trying to get deployment to S3 working. First I tried django-compressor paired with <a href="https://github.com/e-loue/django-storages">django-storages</a>, which can save directly to S3. Typically django-compressor creates the minified files on the fly, which would work great except that Heroku has an ephemeral file system, meaning that the files would be re-created every time a dyno process restarts. Making matters worse, the built-in S3 boto storage is really slow to sync files up to S3, especially considering most of the files do not change on any given deploy. All in all, I was looking at about 3 minutes of lag every time I wanted to start a dyno. 
+</p>
+
+<p>
+I tried using their offline compressor, and I actually got it deploying the files. But I could not get django-compressor to use the correct minified URLs; it persistently tried to reference different filenames before and after the deploy, resulting in 404s. Even though it's the most popular framework, I decided to move on and try django-pipeline. Just as well, I'm not sure I agree with their very first design decision anyway, namely that "JS/CSS belong in the templates".
+</p>
+
+<p>
+By comparison, django-pipeline was a breeze to set up. Here is my cheat-sheet:
+</p>
+
+<pre name="code" class="bash">
+pip install django-pipeline
+apt-get install yui-compressor
+</pre>
+
+<p>
+Edit settings.py:
+</>
+
+<pre name="code" class="python">
+INSTALLED_APPS = (
+    ...
+    'pipeline',
+)
+
+PIPELINE = DEBUG
+PIPELINE_YUI_BINARY = '/usr/bin/yui-compressor'
+STATICFILES_STORAGE = 'pipeline.storage.PipelineStorage'
+STATIC_ROOT = '/tmp/myapp-staticfiles' 
+# using a protocol relative URL here so that resources load from http/https accordingly
+STATIC_URL = '/static/' if DEBUG else '//s3.amazonaws.com/mys3bucket/'  
+
+# the directories stylesheets and javascript should be inside myapp/static,
+# as per the staticfiles convention. I also put an "images" directory there.
+
+PIPELINE_CSS = {
+    'base': {
+        'source_filenames': (
+          'stylesheets/reset.css',
+          'stylesheets/base.css',
+        ),
+        'output_filename': 'stylesheets/base.min.css',
+    },
+    'mobile': {
+        'source_filenames': (
+          'stylesheets/reset.css',
+          'stylesheets/mobile.css',
+        ),
+        'output_filename': 'stylesheets/mobile.min.css',
+    },
+}
+
+PIPELINE_JS = {
+    'base': {
+        'source_filenames': (
+          'javascript/jquery.min.js',
+          'javascript/jquery-ui.min.js',
+          'javascript/myapp.js',
+        ),
+        'output_filename': 'javascript/base.min.js',
+    },
+    'mobile': {
+        'source_filenames': (
+          'javascript/jquery.min.js',
+        ),
+        'output_filename': 'javascript/mobile.min.js',
+    },
+}
+</pre>
+
+<p>
+For development, you can serve up the static files from /static with the following lines in your urls.py:
+</p>
+
+<pre name="code" class="python">
+if settings.DEBUG:
+    urlpatterns += patterns('',
+        (r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.STATIC_ROOT}),
+    )
+</pre>
+
+<p>
+In your templates, you reference your css/js differently:
+</p>
+
+<pre name="code" class="html">
+&#123;% load compressed %&#125;
+&lt;html&gt;
+    &lt;head&gt;
+        &#123;% compressed_css &quot;base&quot; %&#125;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;!-- content here --&gt;
+        &#123;% compressed_js &quot;base&quot; %&#125;
+    &lt;/body&gt;
+&lt;/html&gt;
+</pre>
+
+<p>
+One tricky bit was that with both django-compressor and django-pipeline, I had significant trouble figuring out how to reference images inside my CSS files. I tried various things, with each either only working in my local development environment, or in production. Finally, I tried relative URLs, and it worked. In the past I had always used absolute relative links in the CSS.
+</p>
+
+<pre name="code" class="html">
+body {
+    background: url(../images/bg.png); /* NOT /static/images/bg.png, or images/bg.png */
+}
+</pre>
+
+<p>
+For deployment, I decided to use Hudson versus trying to get Heroku to do it via hacking Procfile. Here is the deploy script I'm currently using:
+</p>
+
+<pre name="code" class="bash">
+#!/bin/bash
+
+set -e
+
+# used to load different settings.py extension file
+export ENVIRONMENT=production  
+
+# using virtualenv to separate build python class paths
+source /var/lib/hudson/virtualenv/prod/bin/activate  
+pip install -r requirements.txt
+
+# this is the static files bit, collect the files and copy them to s3 using the fast s3cmd utility
+python manage.py collectstatic --noinput
+s3cmd sync /tmp/myapp-staticfiles/ s3://mys3bucket  # note the trailing slash, critical!
+
+heroku maintenance:on
+heroku pgbackups:capture HEROKU_POSTGRESQL_DB --expire
+git push -f heroku hudsonmerge:refs/heads/master
+heroku run python manage.py migrate --noinput --merge --ignore-ghost-migrations
+heroku maintenance:off
+</pre>
+
+<p>
+That's it. Currently, my builds take about 90 seconds to deploy, and include zero lag on dyno restarts.
+</p>

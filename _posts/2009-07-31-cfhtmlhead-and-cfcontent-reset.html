@@ -1,0 +1,33 @@
+---
+layout: post
+title: CFHTMLHEAD and CFCONTENT reset
+tags: coldfusion
+---
+
+<p>
+I ran into some trouble this week attaching my <a href='/2008/12/coldfusion-json-exception-handling.html'>JSON Exception Handling</a> to a new ColdFusion feature. Specifically, there was content from that page that survived the CFCONTENT reset tag. Instead of valid JSON, my page was outputting the following:
+</p>
+
+<pre name="code" class="html">
+&lt;title&gt;Notes&lt;/title&gt; { 
+   "error": "blah",
+   ...
+}
+</pre>
+
+<p>
+I tracked down the resilient TITLE tag to a CFHTMLHEAD tag. I have never explicitly used this tag, but I learned that it's  used to explicitly include page content in the HEAD tag of your page. It can even function retroactively, ie after the HEAD tag has appeared in your code. That's provided that you have not called CFFLUSH, I suppose.
+</p>
+
+<p>
+In any case, it was a simple fix. Though there is no way to reset that buffer in ColdFusion, you can easily <a href="http://livedocs.adobe.com/coldfusion/7/htmldocs/00000271.htm">call out</a> to the servlet page context.
+</p>
+
+<pre name="code" class="java">
+ function resetCFHtmlHead() {
+  var out = getPageContext().getOut();
+  var method = out.getClass().getDeclaredMethod("initHeaderBuffer",arrayNew(1));
+  method.setAccessible(true);
+  method.invoke(out,arrayNew(1));
+ }
+</pre>

@@ -1,0 +1,133 @@
+---
+layout: post
+title: In-context FORM help using jQuery
+tags: forms, jquery, ui
+---
+
+<p>
+The Apple store checkout form redesign introduced me to the concept of <a href="http://www.lukew.com/ff/entry.asp?968">in-context error messages</a>.
+</p>
+
+<img src="http://lh6.ggpht.com/_EE2zVzGv1Ds/TJzNshMnLOI/AAAAAAAALXM/zvhKhFN4oOI/s800/Screenshot-Secure%20Checkout%20-%20Apple%20Store%20%28U.S.%29%20-%20Google%20Chrome.png">
+
+<p>
+Basically, the new context bubble element is being used to tell the user more about this field, and potentially answer questions the user may have about how to fill out the field correctly.
+</p>
+
+<p>
+I wanted to get the same effect on a site I'm working on, but for all fields, not just fields that have failed validation. Basically, I liked showing more information while the user is in the context of editing a field, and I liked the visual metaphor.
+</p>
+
+<p>
+Here is what my version looks like.
+</p>
+
+<img src="http://lh3.ggpht.com/_EE2zVzGv1Ds/TJzQfFuGZyI/AAAAAAAALXU/AI6aarPRjas/s800/animated_context_help.gif">
+
+<p>
+I initially tried to position the bubble using just CSS, but this proved impossible. Instead, I used jQuery to get the position of the parent element, and also to compensate for the scrollbar offset. Here is the full code for the example.
+</p>
+
+<pre name="code" class="html">
+&lt;form id="myform"&gt;
+ &lt;label&gt;Password:&lt;/label&gt;
+ &lt;input name="password" value=""&gt;
+&lt;/form&gt;
+
+&lt;div id="contextual-help"&gt;
+    &lt;div class="message-box"&gt;
+        &lt;div class="close" title="Close contextual help"&gt;
+            x
+        &lt;/div&gt;
+        &lt;div class="message"&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="triangle"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"&gt;&lt;/script&gt;
+
+&lt;style&gt;
+ #myform { margin: 200px; }
+ #contextual-help { position: absolute; display: none; }
+ #contextual-help .message-box { 
+     border-radius: 20px; -moz-border-radius: 20px; -webkit-border-radius: 20px; 
+     background-color: #FFFE9D; border: 1px solid #A9A809;  padding: 1em;    
+     width: 400px;
+     font-size: 120%;
+ }
+ #contextual-help .triangle {
+  background: url("contextual-help-triangle.png") no-repeat;
+  margin-top: -1px;
+  margin-left: 40px;
+  width: 31px;
+  height: 18px;
+ }
+ #contextual-help .close {
+     cursor: pointer;
+     float: right; 
+     margin-top: -.7em; 
+     margin-right: -.5em;
+     color: #A9A809;
+     font-size: 120%;
+     font-weight: bold;
+ }
+&lt;/style&gt;
+
+&lt;script&gt;
+
+ $(document).ready(function() {
+ 
+  $("#contextual-help .close").click(function () {
+   close_context_help();
+  });
+ 
+  bind_help($("#myform input[name=password]"),
+   "Must be more than 5 characters."
+   ); 
+ });
+
+ function close_context_help() {
+  $("#contextual-help").hide();
+  $("#contextual-help").css({top: '', left: ''}); // fix for "drifting" on IE/Chrome  
+ }
+ 
+ function bind_help(input_element, message) {
+
+ 
+  input_element
+   .focus(function () {
+    var contextualHelp = $("#contextual-help");
+    contextualHelp.find(".message").html(message);   
+    var inputOffset = $(this).offset(); // top, left
+    var scrollTop = $(window).scrollTop(); // how much should we offset if the user has scrolled down the page?
+    contextualHelp.offset({ 
+     top: inputOffset.top + scrollTop - contextualHelp.height() - 2, 
+     //left: (inputOffset.left + .5 * $(this).width()) - .5 * contextualHelp.width()
+     left: inputOffset.left + 20
+    });   
+    contextualHelp.show();
+   })
+   .blur(function () {
+    close_context_help();
+   })
+   .keyup(function (event) { // keydown does not work in Firefox, keypress does not work in Chrome
+    // escape
+    if (event.keyCode == 27) {
+     close_context_help(); 
+    }
+   })
+   .keypress(function (event) {
+    // escape
+    if (event.keyCode == 27) {
+     close_context_help(); 
+    }
+   })  
+  ;
+ }
+&lt;/script&gt;
+</pre>
+
+<p>
+Finally, a like to <a href="http://lh3.ggpht.com/_EE2zVzGv1Ds/TJzNsVXtvyI/AAAAAAAALXE/xjXwUtOMTN8/s800/contextual-help-triangle.png">contextual-help-triangle.png</a> to complete the styling.
+</p>

@@ -1,0 +1,30 @@
+---
+layout: post
+title: Show username in Django 500 error emails
+tags: django
+---
+
+<p>
+By default, Django will send an email to the site admins when a 500 error occurs. These emails contain all kinds of great information such as stacktrace, HTTP headers and cookie data. Unfortunately, it does not show which user the error occurred for. This can make errors harder than necessary to reproduce.
+</p>
+
+<p>
+Actually, there IS enough data in the email to tie back to a user. Specifically, the email includes the sessionID. You can <a href="http://scottbarnham.com/blog/2008/12/04/get-user-from-session-key-in-django/">lookup a username by sessionID</a>, as long as the session is still active. But why should you have to?
+</p>
+
+<p>
+Instead, here is a simple hack to include the username in the cookies, which in turn are displayed in the error email.
+</p>
+
+<pre name="code" class="python">
+@login_required
+def home(request):                    
+    # other view code here
+    response = render_to_response("home.html", RequestContext(request, locals()))
+    response.set_cookie("username", request.user.username)
+    return response
+</pre>
+
+<p>
+Ideally, you would do this just after the user logs in. Here, I did it on the home page for a logged in user, which is the first page they are redirected to post login.
+</p>

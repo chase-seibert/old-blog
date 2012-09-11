@@ -1,0 +1,45 @@
+---
+layout: post
+title: Backing Up VirtualBox
+tags: 
+---
+
+<p>
+I've been playing with <a href="http://www.virtualbox.org/">VirtualBox</a>, a great open-source virtual machine. Mostly I've been deploying Windows guests on a Linux host. Right now I have two VMs; one for IE8 testing, and one to run MS SQL Server.
+</p>
+
+<p>
+I have noticed that VirtualBox can corrupt a VM image if it gets shut down unexpectedly. Given that it takes a significant amount of time to install an OS and get the tools you need running, I wanted to backup my VMs. 
+</p>
+
+<p>
+I also wanted the backup to succeed even if the VM was running at the time. This is especially important for the SQL Server, as I'm running it as a service all the time. More on that in a future post...
+</p>
+
+<p>
+Here is the script that I whipped up, aided by the excellent command-line tools that come with VirtualBox.
+</p>
+
+<pre name="code" class="ruby">
+#!/bin/bash
+
+# start by discarding all snapshots
+
+#from `VBoxManage list vms |grep "^\(Name\|UUID\)"
+VM=80e1cd84-0790-4c9f-a97e-97319c59431f
+
+#from `VBoxManage list hdds |grep "^\(Location\|UUID\)"
+HD=790acb86-703d-44e1-8f80-4e0229a2c054
+VDI=WindowsXP.IE.vdi
+
+# stop
+VBoxManage controlvm $VM savestate
+
+# backup (shrink happens automatically)
+rm -f /home/chase/vms/backup/$VDI
+VBoxManage clonehd $HD /home/chase/vms/backup/$VDI -remember
+</pre>
+
+<p>
+<i>Note: You must discard all snapshots before running the backup. Otherwise, the backup will only get the pre-snapshot state.</i>
+</p>

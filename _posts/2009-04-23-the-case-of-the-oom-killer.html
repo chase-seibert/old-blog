@@ -1,0 +1,29 @@
+---
+layout: post
+title: The case of the OOM Killer
+tags: java
+---
+
+<blockquote>An aircraft company discovered that it was cheaper to fly its planes with less fuel on board. The planes would be lighter and use less fuel and money was saved. On rare occasions however the amount of fuel was insufficient, and the plane would crash. This problem was solved by the engineers of the company by the development of a special OOF (out-of-fuel) mechanism. In emergency cases a passenger was selected and thrown out of the plane. (When necessary, the procedure was repeated.) A large body of theory was developed and many publications were devoted to the problem of properly selecting the victim to be ejected. Should the victim be chosen at random? Or should one choose the heaviest person? Or the oldest? Should passengers pay in order not to be ejected, so that the victim would be the poorest on board? And if for example the heaviest person was chosen, should there be a special exception in case that was the pilot? Should first class passengers be exempted? Now that the OOF mechanism existed, it would be activated every now and then, and eject passengers even when there was no fuel shortage. The engineers are still studying precisely how this malfunction is caused. - <a href="http://lwn.net/Articles/104179/">Andries Brouwer</a></blockquote>
+
+<p>
+If you have experience configuring desktops or servers, you have probably heard various <a href="http://www.linux.com/feature/121916">rules of thumb</a> about page (aka swap) files. Various sources will say that you need to reserve 1.5, 2 or 4 times the physical RAM capacity. However, rarely is an actual reason given for this rule of thumb.
+</p>
+
+<p>
+Recently, I was trouble-shooting an out of memory exception on a production server. The server in question has 64GB of RAM, 30GB of which is dedicated to a particular JVM, and 20GB to another JVM. I could see that the available physical memory never dipped bellow 10GB. The stack trace on the exception pointed to a <a href="http://java.sun.com/developer/JDCTechTips/2003/tt0304.html">Runtime.exec</a>() call, which is basically forking off a small process. In this case, it was a simple bash script. How could that be throwing an out of memory exception?
+</p>
+
+<img src="http://i6.photobucket.com/albums/y208/bastard_king/LolCatRenderer2.jpg" style="float: right; margin: 10px;"/>
+
+<p>
+It turns out that on Linux, Java's exec() actually uses the system calls for fork() and exec(). Essentially, it creates a copy of the current process, and then quickly changes the context of that process to be the new executable. The <a href="http://kerneltrap.org/node/3116">problem</a> is that when the fork initially happens, the new process fires up and requests the same 30GB memory quota that the parent had! Even though it never uses that much memory (in fact, it never uses more than a few hundred KB), the operating system still tries to guarantee that it could theoretically allocate that much.
+</p>
+
+<p>
+Various other OSes have provided <a href="http://developers.sun.com/solaris/articles/subprocess/subprocess.html#impl">alternate system calls</a> to work-around this problem. On Linux, the work-around is a kernel parameter "overcommit_memory=2". This changes the behavior of malloc() to always report that there is plenty of memory available. If you run out of memory, the system then unleahses the "<a href="http://linux-mm.org/OOM_Killer">OOM Killer</a>" to terminate random processes.
+</p>
+
+<p>
+In my case, there is a safer solution. We simply upped the swap file size from 2GB to 64GB. That way, even if a single process was taking all 64GB of RAM, it would be able to fork without running out of memory. So, here is MY rule of thumb: a Linux swap file should be at least the size of the physical memory. This is true even for servers with ridiculous amounts of physical RAM.
+</p>

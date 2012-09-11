@@ -1,0 +1,77 @@
+---
+layout: post
+title: Python smtplib long header folding using tabs instead of spaces
+tags: email, python
+---
+
+<p>
+Unless you have done a lot of work with generating and parsing emails, you are probably not intimately familiar with the details of the <a href="http://tools.ietf.org/html/rfc2822">MIME format</a>. Here is an example of a MIME encoded email:
+</p>
+
+<pre name="code" class="html">
+From: user1@example.com
+To: user2@example.com
+Subject: Christmas party!
+Mime-Version: 1.0
+Content-Type: multipart/mixed; 
+ boundary="----=_Part_20502_1870283373.1261059406023"
+Date: 17 Dec 2009 09:16:46 -0500
+
+------=_Part_20502_1870283373.1261059406023
+Content-Type: multipart/alternative; 
+ boundary="----=_Part_20503_1134508872.1261059406023"
+...
+</pre>
+
+<p>
+Typically, all lines in MIME wrap at 80 characters. For headers, the standard is to break before the last whitespace under the character limit. This is defined in <a href="http://tools.ietf.org/html/rfc2822#section-2.2.3">RFC 2822, section 2.2.3</a>. So, if you have a long subject, it might look like:
+</p>
+
+<pre name="code" class="html">
+...
+Subject: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec quis 
+ est dolor, a faucibus nisi. Curabitur et ipsum ut arcu commodo feugiat. 
+...
+</pre>
+
+<p>
+I ran into <a href="http://bugs.python.org/issue1974">bug 1974</a> in Python where the standard smptlib example was throwing an error on long subject lines.
+</p>
+
+<pre name="code" class="python">
+    from email.MIMEText import MIMEText
+    
+    msg = MIMEText(body, "html")
+    msg["From"] = "user1@example.com"
+    msg["To"] = "user2@example.com"             
+    msg["subject"] = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec quis est dolor, a faucibus nisi. Curabitur et ipsum ut arcu commodo feugiat."
+
+    ...
+</pre>
+
+<p>
+When looking at the resulting email is some clients (Outlook, Thunderbird), the subject like was concatenating the words "quis" and "est" into "quisest", instead of "quis est". It turns out that smtplib is inserting a tab character in between them, which some clients ignore.
+</p>
+
+<p>
+The solution was simple enough. Just set header fields as Header objects, instead of strings:
+</p>
+
+<pre name="code" class="python">
+    from email.MIMEText import MIMEText
+    from email.Header import Header
+    import smtplib
+
+    msg = MIMEText(body, "html")
+    msg["From"] = "powerfill@powerfill.com"
+    msg["To"] = to_addr
+    msg["subject"] = Header(subject)    
+
+    smtp = smtplib.SMTP(settings.EMAIL_HOST, settings.EMAIL_PORT)        
+    smtp.sendmail(msg["From"], [msg["To"]], msg.as_string())
+    smtp.quit()
+</pre>
+
+<p>
+<i>Edit: Don't wrap the from/to addresses in Header object. I ran into a "TypeError: unhashable instance" deploying this code to Python 2.6.</i>
+</p>

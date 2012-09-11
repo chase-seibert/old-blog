@@ -1,0 +1,30 @@
+---
+layout: post
+title: varnishlog top pages by IP address
+tags: varnish
+---
+
+<p>
+Here are some quick recipes for getting information from varnish about top offending IP addresses, which pages those IP addresses are accessing, and which IPs are hitting particular pages.
+</p>
+
+<pre name="code" class="bash">
+# top IP addresses
+varnishtop -i TxHeader -I '^X-Forwarded-For:'
+</pre>
+
+<img src='https://lh6.googleusercontent.com/-2tE7nUA43Qg/T38pAGjKU7I/AAAAAAAALqk/NXBBxhIH0iY/s729/top_ips.png'>
+
+<pre name="code" class="bash">
+# which pages the IP address 66.249.68.228 is hitting
+varnishncsa |grep 66.249.68.228 |awk '{print $7}'
+</pre>
+
+<img src='https://lh3.googleusercontent.com/-Xq-zbQdQDwY/T38pAB-f-TI/AAAAAAAALqo/Q7BZjkg9cq8/s819/pages_for_an_ip.png'>
+
+<pre name="code" class="bash">
+# IP addresses hitting the /client-perf URL
+varnishlog -m 'RxURL:/client-perf' |grep 'X-Forwarded-For'
+</pre>
+
+<img src='https://lh4.googleusercontent.com/-OjouxTryItI/T38pAC75DTI/AAAAAAAALqg/hw89ekpF8RQ/s764/ips_for_a_url.png'>

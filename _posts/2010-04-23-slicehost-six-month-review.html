@@ -1,0 +1,25 @@
+---
+layout: post
+title: Slicehost&#58; Six month review
+tags: 
+---
+
+<p>
+Six months ago, I opened an account with <a href="http://www.slicehost.com/">Slicehost</a> for a work project. They provide a <a href="http://en.wikipedia.org/wiki/Virtual_private_server">VPS</a> service, which is essentially just a virtual machine in the cloud. In our case, we are hosting a website with a traditional <a href="http://en.wikipedia.org/wiki/LAMP_%28software_bundle%29">LAMP</a> stack (but where the P is Python).
+</p>
+
+<p>
+We decided on a $250/mo "slice", which gets you 4GB or RAM on any 64-bit Linux distro you want, as well as more bandwidth than you can shake a stick at. They offer some nice web-based tools to clone VMs, manage DNS and reboot servers. But that's about it. Everything else you configure yourself, including firewalls, databases, webservers, etc. 
+</p>
+
+<p>
+That's just fine with me. All I ever want from my ISP is to be <a href="http://en.wikipedia.org/wiki/Dumb_pipe">dumb pipe</a>. I don't want your custom software on my PC (wait, what do you mean you don't "support" Linux?). Please don't throttle my connection, etc. Likewise, all I want from a VPS is a dumb terminal.
+</p>
+
+<p>
+Reliability has been awesome. Speed is great. Bandwidth seems solid. So far, the only killer feature I've used is the <a href="http://forum.slicehost.com/comments.php?DiscussionID=21">emergency console</a>. Having been locked out of the machine by a bad firewall config change, we were able to recover access without Slicehost support using their awesome Ajax based root login.
+</p>
+
+<p>
+Any bad news? Nope, not so far. But be warned: slices are like potato chips. We started thinking we would only need one, but that "clone" button is just too damn easy! All it takes is one click to spin off another instance, already configured and ready to go. So far, we spun off a demo site AND a skunkworks box.
+</p>

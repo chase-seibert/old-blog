@@ -1,0 +1,211 @@
+---
+layout: post
+title: Pulling Google Analytics data into Django
+tags: javascript, django, gdata, analytics
+---
+
+<p>
+Website analytics tools are expected to do a lot. They need to allow you generate reports on metrics like sessions, pages/time per session, bounce rates, referrals... etc. Not only that, but they need to be able to segment those reports by logged in versus anonymous users, china versus the US, etc...
+</p>
+
+<p>
+As a developer, the more you play with existing analytics tools, the more you appreciate not having to implement all this crap yourself. Just recently I was trying to track hits from social networks. My application would blast a tweet out to twitter, and then try to determine how many hits were coming back.
+</p>
+
+<p>
+Determining raw hits is easy. But I had no idea how many automated bots would hit the URLS I was posting. I had nearly 1,2000 hits in just 24  hours to the same post! Here is a short list of bot <a href="http://en.wikipedia.org/wiki/User_agent">user agents</a> collected in just one day.
+</p>
+
+<ul>
+<li>LinkedInBot</li>
+<li>TwitterJobSearch.com</li>
+<li>PycURL</li> 
+<li>labs.topsy.com</li>
+<li>postrank.com</li>
+<li>voyager/1.0</li>     
+<li>JS-Kit URL Resolver</li>
+<li>Twitterbot</li>
+<li>mxbot</li>
+<li>urllib</li>
+<li>ysearch</li>
+<li>Twingly</li>
+<li>TweetmemeBot</li>
+<li>OneRiot</li>
+<li>Googlebot</li>
+<li>inagist.com</li>
+<li>Jakarta Commons</li>
+<li>facebookexternalhit</li>
+<li>NjuiceBot</li>
+<li>Yahoo! Slurp</li>
+</ul>
+
+<p>
+Needless to say, tying to determine "real" hits by user agent was going to be both arduous and error prone.
+</p>
+
+<p>
+Enter <a href="http://www.google.com/analytics/">Google Analytics</a>, the gold standard of web analytics packages. My marketing department had already requesting we include it into the application anyway.
+</p>
+
+<p>
+It works via JavaScript, which is perfect for thwarting bots. The bots in question don't appear to execute JavaScript when they scrape a page, or if they do, Google Analytics is going above and beyond to filter them out.
+</p>
+
+<pre name="code" class="javascript">
+&lt;script type="text/javascript"&gt;
+
+ var _gaq = _gaq || [];
+ _gaq.push(['_setAccount', 'UA-XXXXXXX-X']);
+
+ // custom variables
+ _gaq.push(['_setCustomVar', 1, 'Current User', 'joe.example', 1]);
+ _gaq.push(['_setCustomVar', 2, 'Current User ID', '75', 1]);                               
+ _gaq.push(['_setCustomVar', 3, 'Record Owner ID', '101', 3]);
+ _gaq.push(['_setCustomVar', 4, 'Record Type', 'Job', 3]);
+ _gaq.push(['_setCustomVar', 5, 'Record ID', '87', 3]);
+ _gaq.push(['_trackPageview']);
+
+ (function() {
+  var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+  ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+  var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+ })();
+
+&lt;/script&gt;    
+</pre>
+
+<p>
+As you can seen, as long as I was including Google Analytics, I decided to go all out and leverage their <a href="http://code.google.com/apis/analytics/docs/tracking/gaTrackingCustomVariables.html">custom variables</a>. Basically, that allows you to slice and dice all their reports by your own custom segments. In this case, I'm allowing our marketing team to report on metrics by user and page type.
+</p>
+
+<p>
+But I also needed to include some metrics right in the product itself. To my delight, it's not only possible to pull down analytics data via the <a href="http://code.google.com/apis/analytics/docs/">Google Analytics API</a>, it's also surprisingly easy thanks to an <a href="http://code.google.com/p/gdata-python-client/">official Python library</a>. Not only that, but the API is extremely flexible.
+</p>
+
+<pre name="code" class="python">
+from django.conf import settings
+
+import gdata.analytics.client
+from gdata.sample_util import CLIENT_LOGIN, SettingsUtil
+
+gdata_client = gdata.analytics.client.AnalyticsClient(
+    source=settings.GOOGLE_ANALYTICS_APP_NAME
+    )
+
+def _login():
+    
+    settings_util = SettingsUtil(prefs={
+        "email": settings.GOOGLE_ANALYTICS_USER_EMAIL,
+        "password": settings.GOOGLE_ANALYTICS_USER_PASS,
+    })
+    settings_util.authorize_client(
+        gdata_client,
+        service=gdata_client.auth_service,
+        auth_type=CLIENT_LOGIN,
+        source=settings.GOOGLE_ANALYTICS_APP_NAME, 
+        scopes=['https://www.google.com/analytics/feeds/']
+        )
+        
+def get_views(year, week):
+    
+    _login()        
+    data_query = gdata.analytics.client.DataFeedQuery({
+        'ids': settings.GOOGLE_ANALYTICS_TABLE_ID,
+        'start-date': '2010-10-01',
+        'end-date': '2100-01-01',
+        'dimensions': 'ga:customVarValue3,ga:customVarValue4,ga:week',
+        'metrics': 'ga:pageviews',
+        'filters': 'ga:customVarValue4==Job,ga:customVarValue4==Profile;ga:week==%s;ga:year==%s' % (week, year),
+        'max-results': "10000"
+        })
+        
+    return gdata_client.GetDataFeed(data_query)
+</pre>
+
+<p>
+Here, I'm getting page view data for October, and creating a <a href="http://en.wikipedia.org/wiki/Pivot_table">pivot table</a> right in the API results by record owner and record type (either Job or Profile). I'm also grouping the results by week. The API will return up to 10,000 results, but I could easily break it into smaller chunks if necessary. 
+</p>
+
+<pre name="code" class="xml">
+&lt;?xml version='1.0' encoding='UTF-8'?&gt;
+&lt;feed xmlns='http://www.w3.org/2005/Atom' xmlns:dxp='http://schemas.google.com/analytics/2009' xmlns:openSearch='http://a9.com/-/spec/opensearch/1.1/' xmlns:gd='http://schemas.google.com/g/2005' gd:etag='W/&amp;quot;D04HQn4_fCp7I2A9Wx5VFUs.&amp;quot;' gd:kind='analytics#data'&gt;
+ &lt;id&gt;http://www.google.com/analytics/feeds/data?ids=ga:35391211&amp;amp;dimensions=ga:customVarValue3,ga:customVarValue4,ga:week&amp;amp;metrics=ga:visits&amp;amp;filters=ga:customVarValue4%3D%3DJob,ga:customVarValue4%3D%3DProfile&amp;amp;start-date=2010-10-01&amp;amp;end-date=2010-10-31&lt;/id&gt;
+ &lt;updated&gt;2010-10-08T12:25:33.044-07:00&lt;/updated&gt;
+ &lt;title&gt;Google Analytics Data for Profile XXXXXXXX&lt;/title&gt;
+ &lt;link rel='self' type='application/atom+xml' href='https://www.google.com/analytics/feeds/data?max-results=5&amp;amp;sort=-ga%3Avisits&amp;amp;end-date=2010-10-31&amp;amp;start-date=2010-10-01&amp;amp;metrics=ga%3Avisits&amp;amp;ids=ga%3A35391211&amp;amp;dimensions=ga%3AcustomVarValue3%2Cga%3AcustomVarValue4%2Cga%3Aweek&amp;amp;filters=ga%3AcustomVarValue4%3D%3DJob%2Cga%3AcustomVarValue4%3D%3DProfile'/&gt;
+ &lt;link rel='next' type='application/atom+xml' href='https://www.google.com/analytics/feeds/data?start-index=6&amp;amp;max-results=5&amp;amp;sort=-ga%3Avisits&amp;amp;end-date=2010-10-31&amp;amp;start-date=2010-10-01&amp;amp;metrics=ga%3Avisits&amp;amp;ids=ga%3A35391211&amp;amp;dimensions=ga%3AcustomVarValue3%2Cga%3AcustomVarValue4%2Cga%3Aweek&amp;amp;filters=ga%3AcustomVarValue4%3D%3DJob%2Cga%3AcustomVarValue4%3D%3DProfile'/&gt;
+ &lt;author&gt;
+  &lt;name&gt;Google Analytics&lt;/name&gt;
+ &lt;/author&gt;
+ &lt;generator version='1.0'&gt;Google Analytics&lt;/generator&gt;
+ &lt;openSearch:totalResults&gt;11&lt;/openSearch:totalResults&gt;
+ &lt;openSearch:startIndex&gt;1&lt;/openSearch:startIndex&gt;
+ &lt;openSearch:itemsPerPage&gt;5&lt;/openSearch:itemsPerPage&gt;
+ &lt;dxp:aggregates&gt;
+  &lt;dxp:metric confidenceInterval='0.0' name='ga:visits' type='integer' value='35'/&gt;
+ &lt;/dxp:aggregates&gt;
+ &lt;dxp:dataSource&gt;
+  &lt;dxp:property name='ga:profileId' value='XXXXXXX'/&gt;
+  &lt;dxp:property name='ga:webPropertyId' value='UA-XXXXXXXXX'/&gt;
+  &lt;dxp:property name='ga:accountName' value='Talladega Alpha'/&gt;
+  &lt;dxp:tableId&gt;ga:XXXXXXX&lt;/dxp:tableId&gt;
+  &lt;dxp:tableName&gt;reachrecruiters.com&lt;/dxp:tableName&gt;
+ &lt;/dxp:dataSource&gt;
+ &lt;dxp:endDate&gt;2010-10-31&lt;/dxp:endDate&gt;
+ &lt;dxp:startDate&gt;2010-10-01&lt;/dxp:startDate&gt;
+ &lt;entry gd:etag='W/&amp;quot;CUUEQX47eSp7I2A9Wx5bFEU.&amp;quot;' gd:kind='analytics#datarow'&gt;
+  &lt;id&gt;http://www.google.com/analytics/feeds/data?ids=ga:35391211&amp;amp;ga:customVarValue3=137&amp;amp;ga:customVarValue4=Job&amp;amp;ga:week=41&amp;amp;filters=ga:customVarValue4%3D%3DJob,ga:customVarValue4%3D%3DProfile&amp;amp;start-date=2010-10-01&amp;amp;end-date=2010-10-31&lt;/id&gt;
+  &lt;updated&gt;2010-10-30T17:00:00.001-07:00&lt;/updated&gt;
+  &lt;title&gt;ga:customVarValue3=137 | ga:customVarValue4=Job | ga:week=41&lt;/title&gt;
+  &lt;link rel='alternate' type='text/html' href='http://www.google.com/analytics'/&gt;
+  &lt;dxp:dimension name='ga:customVarValue3' value='137'/&gt;
+  &lt;dxp:dimension name='ga:customVarValue4' value='Job'/&gt;
+  &lt;dxp:dimension name='ga:week' value='41'/&gt;
+  &lt;dxp:metric confidenceInterval='0.0' name='ga:visits' type='integer' value='15'/&gt;
+ &lt;/entry&gt;
+ &lt;entry gd:etag='W/&amp;quot;CUUEQX47eSp7I2A9Wx5bFEU.&amp;quot;' gd:kind='analytics#datarow'&gt;
+  &lt;id&gt;http://www.google.com/analytics/feeds/data?ids=ga:35391211&amp;amp;ga:customVarValue3=138&amp;amp;ga:customVarValue4=Job&amp;amp;ga:week=41&amp;amp;filters=ga:customVarValue4%3D%3DJob,ga:customVarValue4%3D%3DProfile&amp;amp;start-date=2010-10-01&amp;amp;end-date=2010-10-31&lt;/id&gt;
+  &lt;updated&gt;2010-10-30T17:00:00.001-07:00&lt;/updated&gt;
+  &lt;title&gt;ga:customVarValue3=138 | ga:customVarValue4=Job | ga:week=41&lt;/title&gt;
+  &lt;link rel='alternate' type='text/html' href='http://www.google.com/analytics'/&gt;
+  &lt;dxp:dimension name='ga:customVarValue3' value='138'/&gt;
+  &lt;dxp:dimension name='ga:customVarValue4' value='Job'/&gt;
+  &lt;dxp:dimension name='ga:week' value='41'/&gt;
+  &lt;dxp:metric confidenceInterval='0.0' name='ga:visits' type='integer' value='7'/&gt;
+ &lt;/entry&gt;
+ &lt;entry gd:etag='W/&amp;quot;CUUEQX47eSp7I2A9Wx5bFEU.&amp;quot;' gd:kind='analytics#datarow'&gt;
+  &lt;id&gt;http://www.google.com/analytics/feeds/data?ids=ga:35391211&amp;amp;ga:customVarValue3=138&amp;amp;ga:customVarValue4=Profile&amp;amp;ga:week=41&amp;amp;filters=ga:customVarValue4%3D%3DJob,ga:customVarValue4%3D%3DProfile&amp;amp;start-date=2010-10-01&amp;amp;end-date=2010-10-31&lt;/id&gt;
+  &lt;updated&gt;2010-10-30T17:00:00.001-07:00&lt;/updated&gt;
+  &lt;title&gt;ga:customVarValue3=138 | ga:customVarValue4=Profile | ga:week=41&lt;/title&gt;
+  &lt;link rel='alternate' type='text/html' href='http://www.google.com/analytics'/&gt;
+  &lt;dxp:dimension name='ga:customVarValue3' value='138'/&gt;
+  &lt;dxp:dimension name='ga:customVarValue4' value='Profile'/&gt;
+  &lt;dxp:dimension name='ga:week' value='41'/&gt;
+  &lt;dxp:metric confidenceInterval='0.0' name='ga:visits' type='integer' value='3'/&gt;
+ &lt;/entry&gt;
+ &lt;entry gd:etag='W/&amp;quot;CUUEQX47eSp7I2A9Wx5bFEU.&amp;quot;' gd:kind='analytics#datarow'&gt;
+  &lt;id&gt;http://www.google.com/analytics/feeds/data?ids=ga:35391211&amp;amp;ga:customVarValue3=119&amp;amp;ga:customVarValue4=Job&amp;amp;ga:week=41&amp;amp;filters=ga:customVarValue4%3D%3DJob,ga:customVarValue4%3D%3DProfile&amp;amp;start-date=2010-10-01&amp;amp;end-date=2010-10-31&lt;/id&gt;
+  &lt;updated&gt;2010-10-30T17:00:00.001-07:00&lt;/updated&gt;
+  &lt;title&gt;ga:customVarValue3=119 | ga:customVarValue4=Job | ga:week=41&lt;/title&gt;
+  &lt;link rel='alternate' type='text/html' href='http://www.google.com/analytics'/&gt;
+  &lt;dxp:dimension name='ga:customVarValue3' value='119'/&gt;
+  &lt;dxp:dimension name='ga:customVarValue4' value='Job'/&gt;
+  &lt;dxp:dimension name='ga:week' value='41'/&gt;
+  &lt;dxp:metric confidenceInterval='0.0' name='ga:visits' type='integer' value='2'/&gt;
+ &lt;/entry&gt;
+ &lt;entry gd:etag='W/&amp;quot;CUUEQX47eSp7I2A9Wx5bFEU.&amp;quot;' gd:kind='analytics#datarow'&gt;
+  &lt;id&gt;http://www.google.com/analytics/feeds/data?ids=ga:35391211&amp;amp;ga:customVarValue3=44&amp;amp;ga:customVarValue4=Job&amp;amp;ga:week=41&amp;amp;filters=ga:customVarValue4%3D%3DJob,ga:customVarValue4%3D%3DProfile&amp;amp;start-date=2010-10-01&amp;amp;end-date=2010-10-31&lt;/id&gt;
+  &lt;updated&gt;2010-10-30T17:00:00.001-07:00&lt;/updated&gt;
+  &lt;title&gt;ga:customVarValue3=44 | ga:customVarValue4=Job | ga:week=41&lt;/title&gt;
+  &lt;link rel='alternate' type='text/html' href='http://www.google.com/analytics'/&gt;
+  &lt;dxp:dimension name='ga:customVarValue3' value='44'/&gt;
+  &lt;dxp:dimension name='ga:customVarValue4' value='Job'/&gt;
+  &lt;dxp:dimension name='ga:week' value='41'/&gt;
+  &lt;dxp:metric confidenceInterval='0.0' name='ga:visits' type='integer' value='2'/&gt;
+ &lt;/entry&gt;
+&lt;/feed&gt;
+</pre>
+
+<p>
+The gdata library parses this for you into native nested dictionaries. From there, it's trivial to cache it somewhere like a database for future reporting. 
+</p>

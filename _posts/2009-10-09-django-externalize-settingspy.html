@@ -1,0 +1,39 @@
+---
+layout: post
+title: Django - Externalize settings.py
+tags: django, python
+---
+
+<p>
+In Django, settings.py is where you store configuration such as database connection strings, directory paths for static and media resources, as well as caching settings. Obviously, these settings will be different between various developers, not to mention qa and production environments.
+</p>
+
+<p>
+A typical solution is to branch settings.py, and then copy in the appropriate version after a deploy. This adds an extra moving piece that you may forget. Another solution is to put logic into settings.py to branch by host name, but this is a fairly brittle approach.
+</p>
+
+<p>
+I have my settings.py file in an external directory. That way, it doesn't get checked into source control, or over-written by a deploy. I put this in the settings.py file under my Django project, along with any default settings:
+</p>
+
+<pre name="code" class="python">
+import sys
+import os.path
+
+def _load_settings(path):    
+    print "Loading configuration from %s" % (path)
+    if os.path.exists(path):
+        settings = {}
+        # execfile can't modify globals directly, so we will load them manually
+        execfile(path, globals(), settings)
+        for setting in settings:
+            globals()[setting] = settings[setting]
+     
+ _load_settings("/usr/local/conf/local_settings.py")
+</pre>
+
+<p>
+<i>
+Note: This is very dangerous if you can't trust local_settings.py.
+</i>
+</p>

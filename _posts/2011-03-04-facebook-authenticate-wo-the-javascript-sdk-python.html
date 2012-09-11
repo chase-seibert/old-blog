@@ -1,0 +1,98 @@
+---
+layout: post
+title: Facebook&#58; Authenticate w/o the JavaScript SDK (Python)
+tags: javascript, facebook, python, unobtrusive
+---
+
+<p>
+If you're using the <a href="http://developers.facebook.com/docs/reference/javascript/">Facebook JavaScript SDK</a> to implement Facebook connect, your site may be more fragile than you think. Last weekend, I ran into an issue where an unrelated JavaScript error (the dreaded <a href="http://www.enterprisedojo.com/2010/12/19/beware-the-trailing-comma-of-death/">comma of death</a>) caused IE7 users to fail trying to connect to Facebook. To make the site more robust, I decided to implement a non-JavaScript fallback.
+</p>
+
+<p>
+Normally with Facebook connect, the login links have event handlers attached to them via JavaScript, such as this jQuery code.
+</p>
+
+<pre name="code" class="javascript">
+$("#facebook-login-button").click(function () {
+ FB.login(function(response) {  
+  if (response.session) {
+   window.location = "/facebook/authenticated";
+  } 
+ }, { perms: "email" });
+ return false;
+});
+</pre>
+
+<p>
+Normally that URL has a null href, like a pound symbol. We are still going to attach the Facebook handler, but we're also going to supply a fall back href.
+</p>
+
+<pre name="code" class="html">
+<a href="&#123;&#123; request|facebook_oauth_url_refresh:'email' &#125;&#125;" id="facebook-login-button">connect to Facebook</a>
+</pre>
+
+<p>
+Generating the correct Facebook URL to redirect the user to, and handling the "code" handed back by Facebook is done in Python/Django:
+</p>
+
+<pre name="code" class="python">
+import urllib
+import json
+
+@register.filter()
+def facebook_oauth_url(request, perms=None, next=None):
+    return get_oauth_url(request, perms, next)
+
+# generates the URL to put into the facebook connect login link as a non-js fallback
+def get_oauth_url(request, perms=None, next=None): 
+    
+    client_id = settings.FACEBOOK_TOKEN
+    
+    # there are various kinds of users that needs to authenticate via Facebook
+    # each needs to be taken back to a different page, and possibly use different perms
+    request.session["facebook_next"] = next
+    if perms == None:
+        perms = "email,publish_stream"
+        
+    redirect_uri = reverse("facebook_login", prefix=settings.SITE_URL)
+    return "https://graph.facebook.com/oauth/authorize?client_id=%(client_id)s&amp;scope=%(perms)s&amp;redirect_uri=%(redirect_uri)s" % locals()
+
+# handles the "facebook_login" request; back from Facebook's side
+def login(request):
+     
+    code = request.REQUEST.get("code")
+    if code:
+        
+        access_token_url = "https://graph.facebook.com/oauth/access_token?"
+        
+        args = {}
+        args["client_id"] = settings.FACEBOOK_TOKEN
+        args["client_secret"] = settings.FACEBOOK_SECRET
+ # facebook_login is THIS url, need to pass something in or the token will not be generated
+        args["redirect_uri"] = reverse("facebook_login", prefix=settings.SITE_URL)
+        args["code"] = code
+        
+        url = access_token_url + urlencode(args)
+        file = urllib.urlopen(url)
+        
+        try:
+            contents = file.read()
+            
+            if file.getcode() == 200:
+                access_token = cgi.parse_qs(contents).get("access_token")[-1]                
+                return HttpResponse("Got OAuth token: " + access_token)    
+                
+            else:                                
+                response = _parse_json(contents)
+                print "Facebook error code: " + response.get("error")
+                    
+        except ValueError, e:
+            print "Error connecting to Facebook. %s" % e
+        finally:
+            file.close()
+
+</pre>
+
+<p>
+That's it! Once you have the access token, you can make your API calls. I use the <a href="https://github.com/facebook/python-sdk">Facebook GraphAPI SDK for Python</a>.
+</p>

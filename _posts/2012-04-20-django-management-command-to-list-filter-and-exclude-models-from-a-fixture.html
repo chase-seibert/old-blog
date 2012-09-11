@@ -1,0 +1,119 @@
+---
+layout: post
+title: Django management command to list, filter and exclude models from a fixture
+tags: django
+---
+
+<p>
+Dumping Django data to a fixture and loading it back up again are accomplished with the built-in management commands <a href="https://docs.djangoproject.com/en/dev/ref/django-admin/?from=olddocs#dumpdata-appname-appname-appname-model">dumpdata</a> and <a href="https://docs.djangoproject.com/en/dev/ref/django-admin/?from=olddocs#loaddata-fixture-fixture">loaddata</a>. However, loading a fixture into an existing database is a little trickier than loading it into an empty database. Because the fixture json contains the original primary keys of the records, you can get integrity errors.
+</p>
+
+<p>
+Recently, I had a use case where I wanted to recover from this situation by excluding some models from the fixture. What I came up with is a new management command called copydata that takes an existing fixture file and can list, filter and exclude a subset of the models. 
+</p>
+
+<pre name="code" class="python">
+from django.core.management.base import BaseCommand
+from optparse import make_option
+import json
+
+
+class Command(BaseCommand):
+
+    operation = None
+    filters = []
+    excludes = []
+
+    args = '&lt;file [--list|--filter|--exclude]&gt;'
+    help = 'Copy/filter JSON fixture data to strip out certain models. ' \
+        'Useful if certain parts of a fixture are failing.'
+
+    option_list = BaseCommand.option_list + (
+            make_option('--list',
+                action='store_true',
+                dest='list',
+                default=False,
+                help='List the models in a fixture'),
+            make_option('--filter',
+                action='store',
+                dest='filter',
+                default=False,
+                help='Output the fixture with only these models, ' \
+                    'comma-separated list.'),
+            make_option('--exclude',
+                action='store',
+                dest='exclude',
+                default=False,
+                help='Output the fixture without these models, ' \
+                    'comma-separated list.'),
+            )
+
+    def handle(self, file_path=None, list=False, filter=None, exclude=None, **options):
+
+        if list:
+            self.operation = 'list'
+        if filter:
+            self.filters = filter.split(',')
+            self.operation = 'copy'
+        if exclude:
+            self.excludes = exclude.split(',')
+            self.operation = 'copy'
+
+        self.call('init')
+        for record in json.load(open(file_path)):
+            self.call('iter', record)
+        self.call('final')
+
+    def call(self, func_postfix, *args, **kwargs):
+        func_name = self.operation + '_' + func_postfix
+        if hasattr(self, func_name):
+            func = getattr(self, func_name)
+            func(*args, **kwargs)
+
+    def list_init(self):
+        self.model_set = set()
+
+    def list_iter(self, record):
+        self.model_set.add(record.get('model'))
+
+    def list_final(self):
+        for model in list(self.model_set):
+            print model
+
+    def copy_init(self):
+        self.json_out = []
+
+    def copy_iter(self, record):
+
+        if self.filters and record.get('model') not in self.filters:
+            return
+
+        if self.excludes and record.get('model') in self.excludes:
+            return
+
+        self.json_out.append(record)
+
+    def copy_final(self):
+        print json.dumps(self.json_out, indent=4)
+</pre>
+
+<p>
+After saving this file as copydata.py inside the <a href="https://docs.djangoproject.com/en/dev/howto/custom-management-commands/">management/commands</a> directory of your Django application, you can do the following.
+<p>
+
+<pre name="code" class="bash">
+&gt;./manage.py dumpdata myapp &gt; /tmp/fixture.json
+
+&gt;./manage.py copydata /tmp/fixture.json --list
+myapp.friend
+myapp.invite
+myapp.profile
+
+&gt;./manage.py copydata /tmp/fixture.json --filter myapp.friend &gt; /tmp/just_friends.json
+
+&gt;./manage.py copydata /tmp/fixture.json --exclude myapp.friend &gt; /tmp/just_invites_and_profiles.json
+</pre>
+
+<p>
+If you still have access to the database where the fixture was dumped from, it's more straight forward to just dump the data again and use the built-in appname.Model arguments on the command-line, though you will need to list ALL of them in the exclude case.
+</p>
