@@ -15,8 +15,17 @@
     <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
     <link href='http://fonts.googleapis.com/css?family=Varela' rel='stylesheet' type='text/css'>
 
-
     <link href="{{ site.baseurl}}/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+    <link rel="canonical" href="{{ site.baseurl }}{{ page.url }}" />
+
+    <meta property="og:title" content="{{ page.title }}"/>
+    <meta property="og:type" content="article"/>
+    <meta property="og:url" content="http://chase-seibert.github.com{{ site.baseurl }}{{ page.url }}"/>
+    <meta property="og:site_name" content="{{ site.default_page_title }}"/>
+    <meta property="fb:admins" content="692280244"/>
+    <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
   </head>
   <body>
     <div class="container-fluid">
@@ -31,7 +40,7 @@
             </div>
             <div class="span3">
 
-                <h2 class="title"><a href="{{ site.baseurl }}/index.html">Chase Seibert | blog</a></h2>
+                <h2 class="title"><a href="{{ site.baseurl }}/index.html">{{ site.default_page_title }}</a></h2>
                 <blockquote class="sub-title">Facts, hacks and attacks from my life as a web application developer</blockquote>
 
                 <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
@@ -76,6 +85,19 @@
     <script type="text/javascript">
         dp.SyntaxHighlighter.BloggerMode();
         dp.SyntaxHighlighter.HighlightAll("code");
+    </script>
+    <script type="text/javascript">
+
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-34759164-1']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+
     </script>
   </body>
 </html>
