@@ -1,6 +1,6 @@
-comments
-import existing posts
-    dates, titles, code snippets, images, quotes
 re-style, look for cool examples
     use two levels of fonts
+new comments
+import old comments?
+    could add them as a static section on the page
 test on iPhone

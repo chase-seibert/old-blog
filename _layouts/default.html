@@ -3,38 +3,60 @@
   <head>
     <title>{{ page.title }}</title>
     <link href="{{ site.baseurl }}/css/bootstrap.css" rel="stylesheet">
+    <link href="{{ site.baseurl }}/css/bootstrap-responsive.css" rel="stylesheet">
     <link href="{{ site.baseurl }}/css/pygments.css" rel="stylesheet">
+
     <link href="{{ site.baseurl }}/css/shCore.css" rel="stylesheet">
     <link href="{{ site.baseurl }}/css/shThemeDefault.css" rel="stylesheet">
+
+    <link href="{{ site.baseurl }}/css/base.css" rel="stylesheet">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Varela' rel='stylesheet' type='text/css'>
+
+
     <link href="{{ site.baseurl}}/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
   </head>
   <body>
-    <div class="row">
-        <div class="span9">
-            <h1><a href="{{ site.baseurl }}/index.html">Chase Seibert | blog</a></h1>
-            <p>
-                Facts, hacks and attacks from my life as a web application developer
-            </p>
+    <div class="container-fluid">
+        <div class="row">
         </div>
-    </div>
-    <div class="row">
-        <div class="span7">
-            {{ content }}
-        </div>
-        <div class="span2">
-            <a href="http://stackexchange.com/users/4942/chase-seibert"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+        <div class="row">
+            <div class="span9">
+                {% if page.title != site.default_page_title %}
+                    <h1>{{ page.title }}</h1>
+                {% endif %}
+                {{ content }}
+            </div>
+            <div class="span3">
 
-            {% if site.related_posts %}
-                <div id="related">
-                  <h3>Related Posts</h3>
-                  <ul class="posts">
-                    {% for post in site.related_posts limit:3 %}
-                    <li><span>{{ post.date | date_to_string }}</span> &raquo; <a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a></li>
-                    {% endfor %}
-                  </ul>
+                <h2 class="title"><a href="{{ site.baseurl }}/index.html">Chase Seibert | blog</a></h2>
+                <blockquote class="sub-title">Facts, hacks and attacks from my life as a web application developer</blockquote>
+
+                <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                {% if site.related_posts %}
+                    <div id="related">
+                      <h4>Related Posts</h4>
+                      <ul class="posts">
+                        {% for post in site.related_posts limit:3 %}
+                        <li><a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a></li>
+                        {% endfor %}
+                      </ul>
+                {% endif %}
+
+                <div class="socials">
+                    <h4>Social Links</h4>
+                    <ul>
+                        <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                        <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                        <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                        <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                    </ul>
                 </div>
-            {% endif %}
 
+            </div>
         </div>
     </div>
     <script src="http://code.jquery.com/jquery-latest.js"></script>
