@@ -1,6 +1,3 @@
-new comments
-import old comments?
-    could add them as a static section on the page
 fix indentation
 fix internal links
 hosts images locally

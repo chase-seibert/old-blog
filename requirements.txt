@@ -1,3 +1,5 @@
 django
 html2text
 BeautifulSoup
+disqus-python
+simplejson

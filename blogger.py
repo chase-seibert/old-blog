@@ -10,10 +10,9 @@ import codecs
 from BeautifulSoup import BeautifulSoup
 import html2text
 import re
-from django.utils.encoding import smart_str, force_unicode
-from xml.sax import saxutils
-from xml.sax.saxutils import XMLGenerator
-from xml.sax.xmlreader import AttributesNSImpl
+from disqusapi import DisqusAPI, APIError
+import time
+
 
 def get_options():
     parser = OptionParser()
@@ -23,8 +22,10 @@ def get_options():
         help='directory to output Markdown files to')
     parser.add_option('-m', '--maxposts', dest='maxposts',
         help='Max number of posts to write out, useful for tracking down Liquid templating errors')
-    parser.add_option('-c', '--comments', dest='comments',
-        help='file to write Disqus comments XML to')
+    parser.add_option('-t', '--disqustoken', dest='auth_token',
+        help='Disqus API token')
+    parser.add_option('-d', '--disquforum', dest='forum',
+        help='Disqus forum name')
     global options
     (options, args) = parser.parse_args()
     if not options.filename:
@@ -122,116 +123,60 @@ def write_markdown_file(post):
         print slug
         file.write(content)
 
-def escape(value):
-    return strip_illegal_xml_characters(force_unicode(saxutils.escape(smart_str(value))))
+def write_comments_api(posts):
+    disqus = DisqusAPI(      "JGC93iwGnDI88T83c6Vo4HrdOz80HrY0iO0piHH9HHd3vfncKo02Zph2QKuyoMSr",
+            "zdtWtTUcwRT9PJDj5cQG5J25eq2l626ANNZVFL3zamKjm1fVbtLXy0UQ2QpWrYnL")
+    access_token="57f05a99c25345328eb86a35490dc79b"
 
-def escape_html(value):
-    return strip_illegal_xml_characters(force_unicode(smart_str(value)))
+    for id, post in posts.items():
+        if not post.get("comments"):
+            continue
 
-# http://maxharp3r.wordpress.com/2008/05/15/pythons-minidom-xml-and-illegal-unicode-characters/
-def strip_illegal_xml_characters(input):
+        thread_id = None
+        title = post.get("title")
+        date_added = post.get("date")
+        url = "http://chase-seibert.github.com/blog/%s/%02d/%02d/%s.html" % (
+                date_added.year,
+                date_added.month,
+                date_added.day,
+                slugify(title))
+        print url
 
-    if input:
+        try:
+            thread = disqus.threads.create(
+                access_token=access_token,
+                method="POST",
+                forum="chaseseibertblog",
+                title=title,
+                url=url)
+            print "Created thread: " + thread.get("id")
+            thread_id = thread.get("id")
+        except APIError:
+            # already exists
+            thread = disqus.threads.list(
+                access_token=access_token,
+                forum="chaseseibertblog",
+                thread="link:%s" % url,
+                )[0]
+            print "Thread already exists: " + thread.get("id")
+            thread_id = thread.get("id")
 
-        import re
+        for comment in post.get("comments", []):
 
-        # unicode invalid characters
-        RE_XML_ILLEGAL = u'([\u0000-\u0008\u000b-\u000c\u000e-\u001f\ufffe-\uffff])' + \
-                         u'|' + \
-                         u'([%s-%s][^%s-%s])|([^%s-%s][%s-%s])|([%s-%s]$)|(^[%s-%s])' % \
-                          (unichr(0xd800),unichr(0xdbff),unichr(0xdc00),unichr(0xdfff),
-                           unichr(0xd800),unichr(0xdbff),unichr(0xdc00),unichr(0xdfff),
-                           unichr(0xd800),unichr(0xdbff),unichr(0xdc00),unichr(0xdfff),
-                           )
-        input = re.sub(RE_XML_ILLEGAL, "", input)
+            try:
 
-        # ascii control characters, note the following are valid:
-        #     \x09 ^I \t (Horizontal tab)
-        #     \x0A ^J \f (Line feed)
-        #     \x0D ^M \r (Carriage return)
-        input = re.sub(r"[\x01-\x08\x0B-\x0C\x0E-\x1F\x7F]", "", input)
+                new_comment = disqus.posts.create(
+                    access_token=access_token,
+                    method="POST",
+                    thread=thread_id,
+                    message=comment.get("message"),
+                    #author_name=comment.get("author"),
+                    #author_email="noreply@blogger.com",
+                    date=time.mktime(comment.get("date").timetuple()))
 
-    return input
-
-def tag(logger, name, contents, attrs={}):
-    logger.startElementNS((None, name), name, attrs)
-    logger.characters(escape_html(contents))
-    logger.endElementNS((None, name), name)
-
-def cdata(logger, name, contents, attrs={}):
-    logger.startElementNS((None, name), name, attrs)
-    if contents:
-        logger._out.write('<![CDATA[')
-        logger._out.write(smart_str(escape(contents)))
-        logger._out.write(']]>')
-    logger.endElementNS((None, name), name)
-
-def write_comments_file(posts):
-
-    with codecs.open(options.comments, mode="wb") as file:
-        logger = XMLGenerator(file, 'UTF-8')
-        logger.startDocument()
-        #logger.startPrefixMapping(prefix, uri)
-        logger.startElementNS((None, 'rss'), 'rss',
-            AttributesNSImpl({}, {}))
-
-        logger.startElementNS((None, 'channel'), 'channel',
-            AttributesNSImpl({
-                (None, "xmlns:content"): "http://purl.org/rss/1.0/modules/content/",
-                (None, "xmlns:dsq"): "http://www.disqus.com/",
-                (None, "xmlns:dc"): "http://purl.org/dc/elements/1.1/",
-                (None, "xmlns:wp"): "http://wordpress.org/export/1.0/",
-                }, {}))
-
-        count = 0
-        for id, post in posts.items():
-
-            if not post.get("comments"):
-                continue
-
-            date_added = post.get("date")
-            url = "/blog/%s/%02d/%02d/%s" % (
-                    date_added.year,
-                    date_added.month,
-                    date_added.day,
-                    slugify(post.get("title")))
-
-            logger.startElementNS((None, 'item'), 'item',
-                AttributesNSImpl({}, {}))
-
-            tag(logger, "title", "re: " + post.get("title"))
-            tag(logger, "link", "http://chase-seibert.github.com" + url)
-            cdata(logger, "content:encoded", post.get("content"))
-            tag(logger, "dsq:thread_identifier", url)
-            tag(logger, "wp:post_date_gmt", post.get("date").strftime("%Y-%m-%d %H:%M:%S"))
-            tag(logger, "wp:comment_status", "open")
-
-            for comment in post.get("comments", []):
-
-                message = comment.get("message")
-
-                if message:
-
-                    logger.startElementNS((None, 'wp:comment'), 'wp:comment',
-                        AttributesNSImpl({}, {}))
-                        
-                    tag(logger, "wp:comment_id", count)
-                    tag(logger, "wp:comment_author", comment.get("author"))
-                    tag(logger, "wp:comment_date_gmt", comment.get("date").strftime("%Y-%m-%d %H:%M:%S"))
-                    tag(logger, "wp:comment_content", comment.get("message"))
-                    tag(logger, "wp:comment_approved", 1)
-                    tag(logger, "wp:comment_parent", 0)
-
-                    count += 1
-
-                    logger.endElementNS((None, 'wp:comment'), 'wp:comment')
-
-            logger.endElementNS((None, 'item'), 'item')
-
-        logger.endElementNS((None, 'channel'), 'channel')
-
-        logger.endElementNS((None, 'rss'), 'rss')
-        logger.endDocument()
+                print "Created comment: " + new_comment.get("id")
+            except UnicodeEncodeError:
+                pass
 
 def main():
 
@@ -245,8 +190,8 @@ def main():
             if count <= int(options.maxposts or 10000):
                 write_markdown_file(post)
 
-    if options.comments:
-        write_comments_file(posts)
+    if options.auth_token:
+        write_comments_api(posts)
 
 if __name__ == "__main__":
     main()
