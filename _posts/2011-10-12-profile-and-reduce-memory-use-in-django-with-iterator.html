@@ -9,7 +9,7 @@ For the most part, objects allocated by Django are short-lived, and are eligible
 </p>
 
 <p>
-This wasn't too surprising because we were initially using Django templating to create the file, which keeps the entire response in memory while it's still being composed. But even after we <a href="/2011/06/creating-large-xml-files-in-python-with.html">moved to a SAX parser</a>, which is specifically designed for running with little memory by streaming the file, we were still running out of memory occasionally.
+This wasn't too surprising because we were initially using Django templating to create the file, which keeps the entire response in memory while it's still being composed. But even after we <a href="/blog/2011/06/24/creating-large-xml-files-in-python-with-saxutils.html">moved to a SAX parser</a>, which is specifically designed for running with little memory by streaming the file, we were still running out of memory occasionally.
 </p>
 
 <p>
@@ -26,7 +26,7 @@ from django.core.management.base import BaseCommand
 from myapp.helpers.scheduler import write_job_board_feed
 import uuid
 
-class Command(BaseCommand):    
+class Command(BaseCommand):
     def handle(self, *args, **options):
         write_job_board_feed(&quot;simplyhired&quot;, &quot;&quot;, &quot;justjobs&quot;, nocache=uuid.uuid4())
 
@@ -38,7 +38,7 @@ With that, I was set to launch this process using pdb, the <a href="http://docs.
 </p>
 
 <pre name="code" class="bash">
-chase@chase:~$ pdb ./manage.py xmlmemtest 
+chase@chase:~$ pdb ./manage.py xmlmemtest
 -&gt; from django.core.management import execute_manager
 (Pdb) r
 

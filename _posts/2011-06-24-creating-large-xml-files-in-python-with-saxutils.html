@@ -24,7 +24,7 @@ In the past, when I needed to produce an XML file problematically, I typically t
 </pre>
 
 <p>
-You get the idea. Once you start including free text data from real users, you pretty quickly run into issues with invalid XML. Typically, you need some combination of escaping (like <a href="http://docs.python.org/library/xml.sax.utils.html">saxutils.escape</a>) and stripping (for control character that are illegal in XML). For whatever reason, it's pretty common for the XML parsers themselves not to give you the tools you need to produce valid XML from imperfect data. You can counter this with a XML cleaning library such as <a href="http://sourceforge.net/projects/foursuite/">4Suite</a>, or <a href="/2011/05/stripping-control-characters-in-python.html">write your own</a>.
+You get the idea. Once you start including free text data from real users, you pretty quickly run into issues with invalid XML. Typically, you need some combination of escaping (like <a href="http://docs.python.org/library/xml.sax.utils.html">saxutils.escape</a>) and stripping (for control character that are illegal in XML). For whatever reason, it's pretty common for the XML parsers themselves not to give you the tools you need to produce valid XML from imperfect data. You can counter this with a XML cleaning library such as <a href="http://sourceforge.net/projects/foursuite/">4Suite</a>, or <a href="/blog/2011/05/20/stripping-control-characters-in-python.html">write your own</a>.
 </p>
 
 <p>
@@ -32,7 +32,7 @@ This solution is inelegant, but it works. However, if you need to produce very l
 </p>
 
 <p>
-Using an XML parser to actually compose XML is much more robust, even if the code is somewhat less straight forward. You could use a DOM parser, but that wouldn't solve your memory issue; the whole XML document must still be kept in memory before it can be written. Instead, you can use a <a href="http://en.wikipedia.org/wiki/Simple_API_for_XML#XML_processing_with_SAX">SAX parser</a>, which is explicitly designed for streaming. 
+Using an XML parser to actually compose XML is much more robust, even if the code is somewhat less straight forward. You could use a DOM parser, but that wouldn't solve your memory issue; the whole XML document must still be kept in memory before it can be written. Instead, you can use a <a href="http://en.wikipedia.org/wiki/Simple_API_for_XML#XML_processing_with_SAX">SAX parser</a>, which is explicitly designed for streaming.
 </p>
 
 <p>
@@ -45,14 +45,14 @@ from xml.sax.xmlreader import AttributesNSImpl
 from website.helpers import xml_helper
 import types
 from django.utils.encoding import smart_str, force_unicode
-from xml.sax import saxutils   
-    
+from xml.sax import saxutils
+
 def strip_illegal_xml_characters(input):
-    
+
     if input:
-            
+
         import re
-        
+
         # unicode invalid characters
         RE_XML_ILLEGAL = u'([\u0000-\u0008\u000b-\u000c\u000e-\u001f\ufffe-\uffff])' + \
                          u'|' + \
@@ -62,44 +62,44 @@ def strip_illegal_xml_characters(input):
                            unichr(0xd800),unichr(0xdbff),unichr(0xdc00),unichr(0xdfff),
                            )
         input = re.sub(RE_XML_ILLEGAL, "", input)
-                        
+
         # ascii control characters
         input = re.sub(r"[\x01-\x1F\x7F]", "", input)
-            
+
     return input
 
 def escape_xml(value):
-    return strip_illegal_xml_characters(force_unicode(smart_str(value))) 
+    return strip_illegal_xml_characters(force_unicode(smart_str(value)))
 
 class SimpleSaxWriter():
-    
+
     def __init__(self, output, encoding, top_level_tag=u"jobs"):
         logger = XMLGenerator(output, encoding)
         logger.startDocument()
         attrs = AttributesNSImpl({}, {})
-        logger.startElementNS((None, top_level_tag), top_level_tag, attrs)        
+        logger.startElementNS((None, top_level_tag), top_level_tag, attrs)
         self._logger = logger
         self.top_level_tag = top_level_tag
-        
-    def start_tag(self, name):                
+
+    def start_tag(self, name):
         attrs = AttributesNSImpl({}, {})
         self._logger.startElementNS((None, name), name, attrs)
 
-    def end_tag(self, name):                
+    def end_tag(self, name):
         self._logger.endElementNS((None, name), name)
-        
+
     def simple_tag(self, name, contents):
-        
+
         if contents:
-            
+
             if not isinstance(contents, types.UnicodeType):
                 raise TypeError("XML character data must be passed in as a unicode object")
-                    
+
             self.start_tag(name)
             # saxutils will let invalid XML though, left to it's own devices
-            self._logger.characters(escape_xml(contents))                                    
+            self._logger.characters(escape_xml(contents))
             self.end_tag(name)
-                
+
     def write_entry(self, level, msg):
         raise NotImplementedError()
 
@@ -114,21 +114,21 @@ Given that framework, an implementing class might look like:
 </p>
 
 <pre name="code" class="python">
-class JobWriter(SimpleSaxWriter):        
-    
+class JobWriter(SimpleSaxWriter):
+
     def write_entry(self, level, job):
-        
+
         from website.helpers.tags import label
         from website import helpers
-        
+
         self.start_tag("job")
-        
+
         self.simple_tag("title", job.title)
         self.simple_tag("job-board-name", unicode(settings.JOB_FEED_SITE_NAME))
 
  ...
-        
-        self.start_tag("description")        
+
+        self.start_tag("description")
         self.simple_tag("summary", job.description_plaintext)
         self.end_tag("description")
 
@@ -139,7 +139,7 @@ class JobWriter(SimpleSaxWriter):
 To actually write to disk, you need to pass in a file. Notice that I'm using mode "wb", because saxutils will produce a byte stream, and that I'm NOT passing an encoding, even though I'm dealing with UTF-8 data. That's because Python will <a href="http://stackoverflow.com/questions/934160/write-to-utf-8-file-in-python">guess wrong</a> in that case, and try to output ASCII.
 </p>
 
-<pre name="code" class="python">    
+<pre name="code" class="python">
     file = codecs.open("test.xml", mode="wb")
     feed = JobWriter(file, "UTF-8")
     for job in jobs: # just a list of objects from Django's orm, could be anything
