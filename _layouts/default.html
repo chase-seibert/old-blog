@@ -15,6 +15,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
         <link href='http://fonts.googleapis.com/css?family=Varela' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
 
         <link href="{{ site.baseurl}}/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
 
@@ -37,6 +38,7 @@
                 <div class="span9">
                     {% if page.title != site.default_page_title %}
                         <h1>{{ page.title }}</h1>
+                        <div class="post-date">{{ page.date|date_to_string }}</div>
                     {% endif %}
                     {{ content }}
                 </div>

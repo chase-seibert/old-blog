@@ -37,9 +37,15 @@ h1, h2, h3, h4, h5, h6 {
     text-shadow: 1px 1px 1px white;
 }
 
+.post-date {
+    margin-bottom: 1em;
+    color: #646464;
+    font-size: 80%;
+}
+
 .dp-highlighter {
-    font-family: Monaco !important;
-    font-size: 14px;
+    font-family: Ubuntu Mono !important;
+    font-size: 13px;
     background-color: inherit;
 }
 
