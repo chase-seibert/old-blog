@@ -4,24 +4,24 @@ layout: nil
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-<title>Chase Seibert | blog</title>
- <link href="http://chase-seibert.github.com/blog/atom.xml" rel="self"/>
- <link href="http://chase-seibert.github.com/blog/" />
- <updated>{{ site.time |date_to_xmlschema }}</updated>
- <id>http://chase-seibert.github.com/blog/</id>
- <author>
-   <name>Chase Seibert</name>
-   <email>chase.seibert+blog@gmail.com</email>
- </author>
+    <title>{{ site.default_page_title }}</title>
+    <link href="http://chase-seibert.github.com/blog/atom.xml" rel="self"/>
+    <link href="http://chase-seibert.github.com/blog/" />
+    <updated>{{ site.time |date_to_xmlschema }}</updated>
+    <id>http://chase-seibert.github.com/blog/</id>
+    <author>
+        <name>Chase Seibert</name>
+        <email>chase.seibert+blog@gmail.com</email>
+    </author>
 
- {% for post in site.posts %}
- <entry>
-   <title>{{ post.title }}</title>
-   <link href="{{ site.baseurl }}{{ post.url }}"/>
-   <updated>{{ post.date |date_to_xmlschema }}</updated>
-   <id>http://chase-seibert.github.com/blog/{{ post.id }}</id>
-   <content type="html">{{ post.content |xml_escape }}</content>
- </entry>
- {% endfor %}
+    {% for post in site.posts limit:10 %}
+        <entry>
+            <title>{{ post.title }}</title>
+            <link href="{{ site.baseurl }}{{ post.url }}"/>
+            <updated>{{ post.date |date_to_xmlschema }}</updated>
+            <id>http://chase-seibert.github.com/blog/{{ post.id }}</id>
+            <content type="html">{{ post.content |xml_escape }}</content>
+        </entry>
+    {% endfor %}
 
 </feed>

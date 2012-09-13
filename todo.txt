@@ -1,4 +1,5 @@
 fix indentation
+add dates to top of posts
 fix internal links
 hosts images locally
 304s
