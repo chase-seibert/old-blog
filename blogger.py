@@ -12,6 +12,11 @@ import html2text
 import re
 from disqusapi import DisqusAPI, APIError
 import time
+from gdata import service
+import gdata
+import atom
+from gdata.sample_util import CLIENT_LOGIN, SettingsUtil
+import gdata.blogger.client
 
 
 def get_options():
@@ -26,6 +31,8 @@ def get_options():
         help='Disqus API token')
     parser.add_option('-d', '--disquforum', dest='forum',
         help='Disqus forum name')
+    parser.add_option('-r', '--redirect', dest='redirect',
+        help='Redirect old blogger posts')
     global options
     (options, args) = parser.parse_args()
     if not options.filename:
@@ -124,9 +131,12 @@ def write_markdown_file(post):
         file.write(content)
 
 def write_comments_api(posts):
-    disqus = DisqusAPI(      "JGC93iwGnDI88T83c6Vo4HrdOz80HrY0iO0piHH9HHd3vfncKo02Zph2QKuyoMSr",
-            "zdtWtTUcwRT9PJDj5cQG5J25eq2l626ANNZVFL3zamKjm1fVbtLXy0UQ2QpWrYnL")
-    access_token="57f05a99c25345328eb86a35490dc79b"
+    disqus = DisqusAPI(
+        os.environ.get('DISQUS_SECRET'),
+        os.environ.get('DISQUS_APIKEY'),
+        )
+
+    access_token = os.environ.get('DISQUS_ACCESS_TOKEN')
 
     for id, post in posts.items():
         if not post.get("comments"):
@@ -178,6 +188,67 @@ def write_comments_api(posts):
             except UnicodeEncodeError:
                 pass
 
+def _login():
+
+    blogger_service = service.GDataService(
+        os.environ.get('GOOGLE_USERNAME'),
+        os.environ.get('GOOGLE_PASSWORD'))
+    blogger_service.source = 'import from bitkickers'
+    blogger_service.service = 'blogger'
+    blogger_service.account_type = 'GOOGLE'
+    blogger_service.server = 'www.blogger.com'
+    blogger_service.ProgrammaticLogin()
+
+    # Authenticate using ClientLogin, AuthSub, or OAuth.
+    #client = gdata.blogger.client.BloggerClient()
+    #gdata.sample_util.authorize_client(
+    #    client, service='blogger', source='Blogger_Python_Sample-2.0',
+    #    scopes=['http://www.blogger.com/feeds/'])    
+
+    return blogger_service
+
+def redirect_blogger(posts):
+
+    blogger_service = _login()
+
+    #query = service.Query()
+    #query.feed = '/feeds/default/blogs'
+    #feed = blogger_service.Get(query.ToUri())
+    #blog_id = feed.entry[0].GetSelfLink().href.split("/")[-1]
+    blog_id = '7663029716914672257'
+
+    template = '<link rel="canonical" href="%(url)s" /><script type="text/javascript">window.location = "%(url)s";</script>'
+
+    feed = blogger_service.GetFeed('/feeds/' + blog_id + '/posts/default')
+    while feed:
+        for entry in feed.entry:
+
+            title = entry.title.text
+            print title
+            post = get_post_by_title(posts, title)
+            
+            date_added = post.get("date")
+            url = "http://chase-seibert.github.com/blog/%s/%02d/%02d/%s.html" % (
+                    date_added.year,
+                    date_added.month,
+                    date_added.day,
+                    slugify(title))
+
+            new_content = template % dict(url=url)
+
+            entry.content = atom.Content(content_type='html', text=new_content)
+            blogger_service.Put(entry, entry.GetEditLink().href)
+
+        try:
+            feed = blogger_service.GetFeed(feed.GetNextLink().href)
+        except AttributeError:
+            feed = None
+
+def get_post_by_title(posts, title):
+    for _, post in posts.items():
+        if post.get("title") == title:
+            return post
+
 def main():
 
     get_options()
@@ -192,6 +263,9 @@ def main():
 
     if options.auth_token:
         write_comments_api(posts)
+
+    if options.redirect:
+        redirect_blogger(posts)
 
 if __name__ == "__main__":
     main()

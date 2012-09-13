@@ -3,3 +3,4 @@ html2text
 BeautifulSoup
 disqus-python
 simplejson
+gdata
