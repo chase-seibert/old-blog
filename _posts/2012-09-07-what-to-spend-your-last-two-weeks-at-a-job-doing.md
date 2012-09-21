@@ -2,7 +2,6 @@
 layout: post
 title: What to spend your last two weeks at a job doing
 tags:
-published: false
 ---
 
 So, you've given your notice at your job. Now what? First off, **stop coding**.
