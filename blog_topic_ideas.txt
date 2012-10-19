@@ -1,0 +1,11 @@
+new disqus API import comments
+blog from blogger to github pages
+celery rdb
+django perf, _id, extra queries
+osx tips - home/end, double-click, delete/navigate by word in Terminal
+PRG + best practices wiki
+database shard internally vs separate dbs
+
+projects:
+vim give a tab a static name
+django unit tests report - csv report w/ time, db read?, db write?, network?, django test client?, pass/fail, package/file
