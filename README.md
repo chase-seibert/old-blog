@@ -16,3 +16,7 @@ jekyll --server
 ```
 
 You should now be able to open http://localhost:4000/blog/index.html
+
+# Publish
+
+* [Markdown syntax guide](http://en.wikipedia.org/wiki/Markdown#Syntax_examples)

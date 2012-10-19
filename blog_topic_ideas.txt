@@ -9,3 +9,4 @@ database shard internally vs separate dbs
 projects:
 vim give a tab a static name
 django unit tests report - csv report w/ time, db read?, db write?, network?, django test client?, pass/fail, package/file
+dumpdata/loaddata w/ ORM versus fixtures
