@@ -1,12 +1,14 @@
-new disqus API import comments
-blog from blogger to github pages
-celery rdb
-django perf, _id, extra queries
-osx tips - home/end, double-click, delete/navigate by word in Terminal
-PRG + best practices wiki
-database shard internally vs separate dbs
+pip install local libs + making a pip
+    http://www.pip-installer.org/en/latest/requirements.html#requirements-file-format
+    http://stackoverflow.com/questions/4155914/how-to-create-a-python-2-x-package-simple-case
+gmail -Re: -Fwd:
+ttyrec
+pytz already imported
+logging from iPython/dbshell in Django 
+mocking open() and print output capture
 
 projects:
 vim give a tab a static name
 django unit tests report - csv report w/ time, db read?, db write?, network?, django test client?, pass/fail, package/file
 dumpdata/loaddata w/ ORM versus fixtures
+open source migratron
