@@ -4,11 +4,18 @@ pip install local libs + making a pip
 gmail -Re: -Fwd:
 ttyrec
 pytz already imported
-logging from iPython/dbshell in Django 
 mocking open() and print output capture
+dbshell logging round 2 - non-interactive sessions
+    tee does not support batch mode -http://dev.mysql.com/doc/refman/5.0/en/mysql-commands.html
+    verbose to echo input - http://forums.mysql.com/read.php?61,3923,6104#msg-6104
+    stdout, stderr - http://stackoverflow.com/questions/2996887/how-to-replicate-tee-behavior-in-python-when-using-subprocess
+    replacing a method on a loaded class - http://stackoverflow.com/questions/972/adding-a-method-to-an-existing-object
+    detecting aaty - http://docs.python.org/2/library/os.html
+
 
 projects:
 vim give a tab a static name
 django unit tests report - csv report w/ time, db read?, db write?, network?, django test client?, pass/fail, package/file
 dumpdata/loaddata w/ ORM versus fixtures
 open source migratron
+***python raw_input w/ editor like git
