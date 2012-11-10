@@ -18,4 +18,4 @@ vim give a tab a static name
 django unit tests report - csv report w/ time, db read?, db write?, network?, django test client?, pass/fail, package/file
 dumpdata/loaddata w/ ORM versus fixtures
 open source migratron
-***python raw_input w/ editor like git
+vim/git mksession w/ branch name, restore session w/ branch name
