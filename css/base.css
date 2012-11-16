@@ -37,7 +37,7 @@ h1, h2, h3, h4, h5, h6 {
     text-shadow: 1px 1px 1px white;
 }
 
-.content img { 
+.content img {
     display: block;
     margin: 1em;
 }
@@ -91,4 +91,33 @@ h1, h2, h3, h4, h5, h6 {
 
 .dp-highlighter .tools a:first-child {
     display: inherit;
+}
+
+blockquote {
+    border-left: 5px solid #DDD;
+    padding: 1em;
+    background-color: #EFEFEF;
+}
+
+blockquote p {
+    color: #333;
+    font-size: 1em;
+}
+
+blockquote p:first-child:before,
+blockquote p:last-child:after {
+    font-size: 3em;
+    line-height:.1em;
+    vertical-align:-.4em;
+    color: #ccc;
+}
+
+blockquote p:first-child:before {
+    content: open-quote;
+    margin-right:.25em;
+}
+
+blockquote p:last-child:after {
+    content: close-quote;
+    margin-left:.25em;
 }
