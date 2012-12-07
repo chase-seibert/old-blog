@@ -121,3 +121,7 @@ blockquote p:last-child:after {
     content: close-quote;
     margin-left:.25em;
 }
+
+#disqus_thread {
+    margin-top: 3em;
+}
