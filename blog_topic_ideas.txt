@@ -2,8 +2,12 @@ gmail -Re: -Fwd:
 ttyrec
 latex cookbook
 django multi column join stuff
-django-nose-lint
+shell/dbshell read-only
+p3p/newrelic/third party/fb and google/cooie set versus send
+python thread/segfault
+celery autoreload amqp
 
 projects:
 vim give a tab a static name
 open source migratron
+pidgin html
