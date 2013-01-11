@@ -2,14 +2,14 @@ ttyrec
 latex cookbook
 django multi column join stuff
 p3p/newrelic/third party/fb and google/cooie set versus send
-python thread/segfault
 celery autoreload amqp
-new year tweets - #2012pythonmeme
-mock datetime.now
-celery rdb usage
+rdb usage
+vim/grep/color
+ssh port forward for db connections
+bypass_pyflakes
 
 projects:
 vim give a tab a static name
-open source migratron
+open source migratron**
 pidgin html
 vim clickable links
