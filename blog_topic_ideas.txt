@@ -7,6 +7,9 @@ rdb usage
 vim/grep/color
 ssh port forward for db connections
 bypass_pyflakes
+ssh port forward + multi-hop
+django query cache
+mlocate
 
 projects:
 vim give a tab a static name
