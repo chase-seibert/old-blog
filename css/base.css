@@ -131,3 +131,17 @@ blockquote p:last-child:after {
 #disqus_thread {
     margin-top: 3em;
 }
+
+table {
+    border: 1px solid black;
+    margin: .5em;
+}
+
+table th {
+    text-align: left;
+}
+
+table th, table td{
+    padding: .5em;
+    border: 1px solid black;
+}
