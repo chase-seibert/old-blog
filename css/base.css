@@ -135,6 +135,7 @@ blockquote p:last-child:after {
 table {
     border: 1px solid black;
     margin: .5em;
+    margin-bottom: 1.5em;
 }
 
 table th {
