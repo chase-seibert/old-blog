@@ -22,7 +22,7 @@ So how can we get an OSX host machine to update the touch file in the guest Linu
 First, you need to install fswatch locally.
 
 {% highlight bash %}
-brew install fsnotify
+brew install fswatch
 {% endhighlight%}
 
 Then, fork off a process watching your code directory, and pinging the remote daemon. I'm assuming that your VM has an entry in your hosts file called `vagrant-vm`. You can also use a static IP. The daemon will be listening on port 9001. *Note: fswatch does not currently take an extension filter, so this will restart uWSGI on ANY file change.*
