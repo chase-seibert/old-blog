@@ -80,4 +80,4 @@ static/js/bad_file.js: line 611, col 45, Extra comma. (it breaks older versions 
 But we rely on individual engineers to install the automation and run it, which they
 can also opt-out on for individual commits and files. In any case, it turned out to be
 a one character fix after about 3 hours of work. In the future, I would save some
-time by just running jshint on the entire repo. 
+time by just running jshint on the entire repo.
