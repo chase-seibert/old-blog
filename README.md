@@ -37,16 +37,20 @@ sudo gem install jekyll
 ## OSX
 
 ```
-brew install ruby
-sudo easy_install Pygments
-sudo gem update --system
-sudo gem install jekyll
+brew update
+brew install ruby rbenv ruby-build
+eval "$(rbenv init -)"  # update PATH
+echo 'eval "$(rbenv init -)"' >> ~/.bash_profile  # and update PATH in future shells
+rbenv install
+gem install bundler
+bundle install  # may need to re-open shell to get updated PATH
+bundle exec jekyll serve
 ```
 
 # Run it!
 
 ```bash
-jekyll --server
+bundle exec jekyll serve --watch
 ```
 
 You should now be able to open [http://localhost:4000/blog/index.html](http://localhost:4000/blog/index.html)

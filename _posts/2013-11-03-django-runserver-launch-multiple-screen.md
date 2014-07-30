@@ -19,6 +19,7 @@ screen -t coding vim ~/code
 When I first saw this, I thought we could use it to launch our various services. What I did was write a custom Django management command that dynamically writes a `.screenrc` file and executes it. You can run all the services, or specify just a few. Our services are launched by settings corresponding environment variables, which can be done on the command line itself.
 
 {% highlight python %}
+{% raw %}
 import os
 
 from django.template.base import Template
@@ -97,6 +98,7 @@ select 0
 
     def run(self):
         os.execlp('screen', 'screen', '-c', self.rc_path)
+{% endraw %}
 {% endhighlight %}
 
 The resulting `.screenrc` files ends up looking like (added comments):

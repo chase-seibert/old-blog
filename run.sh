@@ -1,3 +1,3 @@
 xdg-open http://localhost:4000/blog/index.html
 open http://localhost:4000/blog/index.html
-jekyll --server 4000
+bundle exec jekyll serve --watch

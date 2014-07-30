@@ -3,3 +3,4 @@
 _site
 .ropeproject
 .idea
+Gemfile.lock
