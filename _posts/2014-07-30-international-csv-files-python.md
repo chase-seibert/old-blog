@@ -33,7 +33,7 @@ long as you avoid encodings like UTF-16 that use NULs. UTF-8 is recommended.
 
 Instead, they suggest that you use a a custom `UnicodeWriter` class.
 
-{% highlight python %}
+```python
 class UnicodeWriter:
     """
     A CSV writer which will write rows to CSV file "f",
@@ -62,7 +62,7 @@ class UnicodeWriter:
     def writerows(self, rows):
         for row in rows:
             self.writerow(row)
-{% endhighlight %}
+```
 
 However, even with this handy class, you will find that Excel 2007, 2010 and 2013 will
 [fail to detect the UTF-8 encoding](http://stackoverflow.com/questions/155097/microsoft-excel-mangles-diacritics-in-csv-files#answer-155176).
