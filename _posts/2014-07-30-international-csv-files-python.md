@@ -128,3 +128,14 @@ the delimiter.
 
 *Note: this line will show up in most spreadsheet applications as the first line of your data. So users may have to
 manually delete the first two every time they start working with a file.*
+
+
+## More Fun
+
+After some more research, it turns out that Mac Excel simply [does not support UTF-8](http://answers.microsoft.com/en-us/mac/forum/macoffice2011-macexcel/mac-excel-converts-utf-8-characters-to-underlines/7c4cdaa7-bfa3-41a2-8482-554ae235227b?msgId=c8295574-a053-48a6-b419-51523ce2a247)
+at all. So forget it ever working there.
+
+Also, writing BOTH the BOM and the `sep=,` will cause Windows Excel to [forget about the BOM](http://stackoverflow.com/questions/20395699/sep-statement-breaks-utf8-bom-in-csv-file-which-is-generated-by-xsl#answer-23513342)
+you just specified. So, you basically need to choose whether you want unicode characters to show up correctly, or
+whether you want to have the columns separated automatically.
+
