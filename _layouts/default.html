@@ -40,22 +40,31 @@
 
             <div class="row">
 
-                <div class="span9 content">
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
                     {% if page.title != site.default_page_title %}
-                        <h1>{{ page.title }}</h1>
-                        {% if page.date %}
-                            <div class="post-date">{{ page.date|date_to_string }}</div>
-                        {% endif %}
+                        <h1>
+                            {{ page.title }}
+                            {% if page.date %}
+                                <span class="post-date subtitle">{{ page.date|date_to_string }}</span>
+                            {% endif %}
+                        </h1>
                     {% endif %}
                     {{ content }}
                 </div>
 
-                <div class="span3">
+                <div class="span2">
 
-                    <h2 class="title"><a href="{{ site.baseurl }}/index.html">{{ site.default_page_title }}</a></h2>
-                    <blockquote class="sub-title">Facts, hacks and attacks from my life as a web application developer</blockquote>
+                    <h2 class="title"><a href="{{ site.baseurl }}/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
 
                     <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
 
                     {% if page.tags %}
                         <div class="tags">

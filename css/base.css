@@ -3,7 +3,8 @@ body {
     font-size: 18px;
     line-height: 30px;
     color: #282828;
-    background-color: #f3f2ee;
+    background-color: #f3f3f3;
+    padding-top: 1em;
 }
 
 li {
@@ -19,11 +20,9 @@ a, a:visited, a:hover {
     margin-bottom: 0px;
 }
 
-.sub-title {
-    padding-left: 0px;
-    margin-left: 0px;
-    font-style: italic;
-    border-left: inherit;
+.subtitle {
+    margin-top: -1em;
+    margin-bottom: 1em;
 }
 
 .stackoverflow {
@@ -54,7 +53,14 @@ h4 {
 .post-date {
     margin-bottom: 1em;
     color: #646464;
-    font-size: 80%;
+    font-size: 14px;
+    white-space: nowrap;
+    font-style: normal;
+    font-weight: normal;
+}
+
+h2 {
+    font-size: 24px;
 }
 
 .dp-highlighter {
@@ -155,4 +161,9 @@ table th {
 table th, table td{
     padding: .5em;
     border: 1px solid black;
+}
+
+ul.archive  {
+    list-style: none;
+    margin: 0;
 }
