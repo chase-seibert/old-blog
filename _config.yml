@@ -1,5 +1,4 @@
-auto: true
-pygments: true
+highlighter: pygments
 baseurl: /blog
 default_page_title: Chase Seibert | blog
 markdown: redcarpet

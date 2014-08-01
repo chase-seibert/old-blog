@@ -1,6 +1,7 @@
 .DS_Store
 *.pyc
-_site
+_site/*
 .ropeproject
 .idea
 Gemfile.lock
+!_site/tag
