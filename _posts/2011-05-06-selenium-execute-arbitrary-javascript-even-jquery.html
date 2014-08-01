@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Selenium&#58; Execute arbitrary javascript (even jQuery)
-tags: jquery, selenium
+tags: jquery selenium
 ---
 
 <p>
@@ -13,7 +13,7 @@ For example, the Selenium IDE has not been sufficient for us to automatically ge
 </p>
 
 <p>
-As a web developer, when I run into issues like this with Selenium, I find myself wishing that I could just use jQuery. It's such a familiar tool, that I often think of how I would implement something with jQuery, and then attempt to translate that into the Selenium API. 
+As a web developer, when I run into issues like this with Selenium, I find myself wishing that I could just use jQuery. It's such a familiar tool, that I often think of how I would implement something with jQuery, and then attempt to translate that into the Selenium API.
 </p>
 
 <p>
@@ -46,7 +46,7 @@ Assuming you already have jQuery loaded in your application, un-checking all the
 
 <pre name="code" class="python">
 class MyTest(SeleniumTestCase):
-   def runTest(self):               
+   def runTest(self):
       javascript(self.selenium, "$('input[type=checkbox]').attr('checked', false);")
 </pre>
 

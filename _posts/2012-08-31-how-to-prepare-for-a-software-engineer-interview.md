@@ -1,7 +1,7 @@
 ---
 layout: post
 title: How to prepare for a software engineer interview
-tags: interview, workplace, career
+tags: interview workplace career
 ---
 
 Interviews for software engineering positions are equal measures normal job
@@ -34,8 +34,8 @@ going to be running it.
 
 The key to keeping your composure is to practice breaking test problems down into five
 stages. *Restate* the problem as they have given it to you. Come up with *examples*,
-including edge cases. Work out an *algorithm* by doing the problem by hand on the 
-whiteboard. Only then do you write some *code*. Finally, reason out loud about the 
+including edge cases. Work out an *algorithm* by doing the problem by hand on the
+whiteboard. Only then do you write some *code*. Finally, reason out loud about the
 *time* your algorithm will take to run. This is known as **REACT**.
 
 

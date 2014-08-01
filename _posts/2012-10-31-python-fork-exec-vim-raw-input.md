@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Using $EDITOR and a less paging from Python command line apps
-tags: python, git
+tags: python git
 ---
 
 Python's built-in [raw_input()](http://docs.python.org/2/library/functions.html#raw_input) function is a quick and dirty way to get text input from the user in your Python command line application. But it's really only optimal for a very small input string. Also, it can't provide a default value that the user can then edit. For more substantial input, many Linux tools use your $EDITOR environment variable to launch a visual editor, potentially with default text.

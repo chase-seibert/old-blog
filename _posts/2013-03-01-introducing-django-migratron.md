@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Introducing Django Migratron
-tags: python, django
+tags: python django
 ---
 
 [Django Migratron](https://github.com/chase-seibert/django-migratron) is a schema migration tool for Django. Why write another schema migration tool? Here is how we stack up against other tools.

@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Java replaceAll() File.separator
-tags: java, regex
+tags: java regex
 ---
 
 <p>
@@ -14,18 +14,18 @@ Using <a href="http://www.regexbuddy.com/">RegexBuddy</a>, I came up with a rege
 
 <pre name="code" class="java">
  protected static String stripRedundantSeparators(String path) {
-  return path.replaceAll("(?&lt;!^)(\\\\|/){2,}", File.separator);  
+  return path.replaceAll("(?&lt;!^)(\\\\|/){2,}", File.separator);
  }
 </pre>
 
 <p>
-However, my unit test threw a StringIndexOutOfBoundsException. Messing around with it, I came up with the following working code. 
+However, my unit test threw a StringIndexOutOfBoundsException. Messing around with it, I came up with the following working code.
 </p>
 
 
 <pre name="code" class="java">
  protected static String stripRedundantSeparators(String path) {
-  return path.replaceAll("(?&lt;!^)(\\\\|/){2,}", "@").replace("@".charAt(0), File.separatorChar);  
+  return path.replaceAll("(?&lt;!^)(\\\\|/){2,}", "@").replace("@".charAt(0), File.separatorChar);
  }
 </pre>
 

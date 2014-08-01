@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Django/Haystack&#58; latitude/longitude radius search w/ SOLR
-tags: solr, lucene, django, haystack
+tags: solr lucene django haystack
 ---
 
 <p>
@@ -9,12 +9,12 @@ tags: solr, lucene, django, haystack
 </p>
 
 <blockquote>
-There aren't words to express how badly I want to incorporate 
-geospatial search. However, I'm waiting on Solr 1.5's official 
-implementation, as well as seeing if the Xapian folks land their GIS 
-branch. I haven't pursued the third-party options because it makes the 
-setup more complex and there's no guarantees on compatibility, which 
-increase my support headaches. 
+There aren't words to express how badly I want to incorporate
+geospatial search. However, I'm waiting on Solr 1.5's official
+implementation, as well as seeing if the Xapian folks land their GIS
+branch. I haven't pursued the third-party options because it makes the
+setup more complex and there's no guarantees on compatibility, which
+increase my support headaches.
    - <a href="http://groups.google.com/group/django-haystack/browse_thread/thread/f88d625679941d77">Daniel, Haystack Google Group</a>
 </blockquote>
 
@@ -49,7 +49,7 @@ site.register(Job, JobIndex)
 </pre>
 
 <p>
-What's the deal with that default of "000000000000000"? Because everything is a string in SOLR, I have decided to encode lat/long as a string between "000000000000000" and "999999999999999". The actual "geo2solr" algorithm for the mapping can be arbitrary, as long as the outputs maintain relative comparability when compared as strings. i.e., a > b implies that geo2solr(a) > geo2solr(b). 
+What's the deal with that default of "000000000000000"? Because everything is a string in SOLR, I have decided to encode lat/long as a string between "000000000000000" and "999999999999999". The actual "geo2solr" algorithm for the mapping can be arbitrary, as long as the outputs maintain relative comparability when compared as strings. i.e., a > b implies that geo2solr(a) > geo2solr(b).
 </p>
 
 <pre name="code" class="python">

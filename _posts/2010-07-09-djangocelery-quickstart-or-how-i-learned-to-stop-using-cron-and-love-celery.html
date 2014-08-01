@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Django/Celery Quickstart (or, how I learned to stop using cron and love celery)
-tags: django, celery
+tags: django celery
 ---
 
 <p>
@@ -17,7 +17,7 @@ For Django sites, <a href="http://ask.github.com/celery/getting-started/introduc
 </p>
 
 <p>
-Note: Celery typically runs with RabbitMQ as the back-end. For just task scheduling, this may be overkill. This guide starts out using kombu, which is backed by the database Django is already using. 
+Note: Celery typically runs with RabbitMQ as the back-end. For just task scheduling, this may be overkill. This guide starts out using kombu, which is backed by the database Django is already using.
 </p>
 
 <ol>
@@ -60,8 +60,8 @@ from celery.decorators import periodic_task
 
 # this will run every minute, see http://celeryproject.org/docs/reference/celery.task.schedules.html#celery.task.schedules.crontab
 @periodic_task(run_every=crontab(hour="*", minute="*", day_of_week="*"))
-def test():    
-    print "firing test task"                  
+def test():
+    print "firing test task"
 </pre>
 </li>
 
@@ -79,7 +79,7 @@ At this point, you should see your celery tasks in the console output, and you s
 </p>
 
 <pre name="code" class="bash">
-[2012-03-02 09:34:49,170: WARNING/MainProcess]  
+[2012-03-02 09:34:49,170: WARNING/MainProcess]
 
  -------------- celery@chase-VirtualBox v2.5.1
 ---- **** -----
@@ -93,7 +93,7 @@ At this point, you should see your celery tasks in the console output, and you s
 -- ******* ----
 --- ***** ----- [Queues]
  --------------   . celery:      exchange:celery (direct) binding:celery
-                  
+
 
 [Tasks]
   . myapp.tasks.test

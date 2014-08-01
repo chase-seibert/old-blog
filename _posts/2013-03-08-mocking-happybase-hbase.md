@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Mocking HappyBase for unit testing HBase code
-tags: python, hbase
+tags: python hbase
 ---
 
 [HappyBase](https://github.com/wbolster/happybase) is a friendly interface to interact with [HBase](http://hbase.apache.org/) from Python. It lets you perform basic HBase operations like `get`, `put` and `scan`. But say you have a bunch of puts littered around your code. How do you unit test that? One method would be to mock out the happy base calls themselves, and just assert that they are called with specific parameters. But what if you want to test the final state of the HBase tables after a series of operations?

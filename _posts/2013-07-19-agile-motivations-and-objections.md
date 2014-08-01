@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Agile Motivations and Objections
-tags: agile, scrum
+tags: agile scrum
 ---
 
 Often when I first start talking to someone new about Agile and/or Scrum, they have questions and occasionally objections. More often they just don't understand the motivation for trying a new development process. It's rare that these biases against Scrum persist, which is probably a testament to how common-sense it all is.

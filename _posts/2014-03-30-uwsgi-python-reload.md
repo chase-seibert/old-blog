@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Reload Python inside uWSGI as fast as humanely possible
-tags: python, uwsgi
+tags: python uwsgi
 ---
 
 The Django development web server you get when you execute `./manage.py runserver` optimizes for one thing; fast hot reloading when you change your Python code. It does almost nothing else well, by design.

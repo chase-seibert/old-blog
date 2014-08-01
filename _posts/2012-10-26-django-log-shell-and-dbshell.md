@@ -2,7 +2,7 @@
 ---
 layout: post
 title: Logging Django shell and dbshell sessions
-tags: django, logging
+tags: django logging
 ---
 
 The Django [shell management command](https://docs.djangoproject.com/en/dev/ref/django-admin/#shell) is a supremely useful tool for developers to explore and potentially modify data in their applications, both during development and in production. For jobs where that does not perform well enough, or you need lower level access to the data, the [dbshell command](https://docs.djangoproject.com/en/dev/ref/django-admin/#dbshell) gives you even more power.

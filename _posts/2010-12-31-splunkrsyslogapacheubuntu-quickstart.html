@@ -1,11 +1,11 @@
 ---
 layout: post
 title: Splunk/Rsyslog/Apache/Ubuntu Quickstart
-tags: splunk, syslog, rsyslog, apache
+tags: splunk syslog rsyslog apache
 ---
 
 <p>
-I've been using <a href="http://www.splunk.com/">Splunk</a> for several years. It's a great tool for log file visualization and analytics. One thing I use it for is to <a href="http://www.splunk.com/base/Documentation/latest/User/InteractiveFieldExtractionExample">generate a graph of average milliseconds</a> per request on an apache instance. Up until recently, I was running this directly on the production web server. 
+I've been using <a href="http://www.splunk.com/">Splunk</a> for several years. It's a great tool for log file visualization and analytics. One thing I use it for is to <a href="http://www.splunk.com/base/Documentation/latest/User/InteractiveFieldExtractionExample">generate a graph of average milliseconds</a> per request on an apache instance. Up until recently, I was running this directly on the production web server.
 </p>
 
 <p>
@@ -100,7 +100,7 @@ vim /opt/splunk/etc/apps/search/default/transforms.conf
 # add the following to define setSourceApache and setSourcePostfix
 [setSourceApache]
 DEST_KEY = MetaData:Sourcetype
-# any log line that contains apache2 
+# any log line that contains apache2
 REGEX = apache2
 FORMAT = sourcetype::apache
 

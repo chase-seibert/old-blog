@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Dynamic Attributes in Python
-tags: python, tutorial
+tags: python tutorial
 ---
 
 One of the strengths of a dynamic language is that it allows you to more easily work introspection and light weight meta-programming into your every day code. In Python, one of the primary ways of taking advantage of the dynamic nature of the language is through attribute access.

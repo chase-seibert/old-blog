@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Measure navigation timing with javascript
-tags: performance, javascript
+tags: performance javascript
 ---
 
 <p>
@@ -9,13 +9,13 @@ Historically, site administrators would measure their site performance by timing
 </p>
 
 <p>
-With the advent of decent browser-based timing information, developers and admins realized just how much of the picture they were previously missing. Now, with sites like <a href="http://www.yottaa.com/">yotta</a>, you can get this information without even sullying your own browser. 
+With the advent of decent browser-based timing information, developers and admins realized just how much of the picture they were previously missing. Now, with sites like <a href="http://www.yottaa.com/">yotta</a>, you can get this information without even sullying your own browser.
 </p>
 
 <img src="https://lh6.googleusercontent.com/_EE2zVzGv1Ds/TbHWqftXBpI/AAAAAAAALcM/nuwPQHZoqiw/s800/yotta-timeline.png">
 
 <p>
-Notice that the "signup" HTML itself came back in just 158 milliseconds. This is the number you would see in typical apache log analyzer tools. But according to the browser based timing, the user did not see anything on the page for over 900ms. Even then, they could not fully interact with the page for over 2 seconds. 
+Notice that the "signup" HTML itself came back in just 158 milliseconds. This is the number you would see in typical apache log analyzer tools. But according to the browser based timing, the user did not see anything on the page for over 900ms. Even then, they could not fully interact with the page for over 2 seconds.
 </p>
 
 <p>
@@ -56,7 +56,7 @@ function store_client_performance_data() {
         }
 
         fetchStartTime = t.fetchStart - earliestTime;
-        responseEndTime = t.responseEnd - earliestTime;       
+        responseEndTime = t.responseEnd - earliestTime;
         loadEventEndTime = t.loadEventEnd - earliestTime;
 
         jQuery.cookie("clientSidePerformance",
@@ -76,5 +76,5 @@ if (Object.prototype.hasOwnProperty.call(window, "performance")) {
 </pre>
 
 <p>
-The only tricky part here is that you can't be sure when the page will stop loading. Instead, we run this function every second until loadEventEnd is non-zero. 
+The only tricky part here is that you can't be sure when the page will stop loading. Instead, we run this function every second until loadEventEnd is non-zero.
 </p>

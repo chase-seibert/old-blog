@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Django Performance&#58; Latency Kills
-tags: performance, django, latency
+tags: performance django latency
 ---
 
 <p>
@@ -19,11 +19,11 @@ Note that the page made 70 queries. The first three, shown on the left, averaged
 </p>
 
 <p>
-Where are all these queries coming from? Some are done automatically by the framework, such as the session lookup or model permissions checks. Some are done as soon as you access a property on a model, such as request.user. But most of them you're doing yourself, via statements such as Model.objects.filter(...), etc. 
+Where are all these queries coming from? Some are done automatically by the framework, such as the session lookup or model permissions checks. Some are done as soon as you access a property on a model, such as request.user. But most of them you're doing yourself, via statements such as Model.objects.filter(...), etc.
 </p>
 
 <p>
-They pile up fast. In my experience, it's not unusual for relatively simple pages to get into the 50 to 100 query range. I have some report pages that are doing over 1,000 queries in under 300 milliseconds! 
+They pile up fast. In my experience, it's not unusual for relatively simple pages to get into the 50 to 100 query range. I have some report pages that are doing over 1,000 queries in under 300 milliseconds!
 </p>
 
 <p>
@@ -39,11 +39,11 @@ But the hidden killer here is server to server latency. We're used to thinking a
 </p>
 
 <p>
-But inside your hosting environment, server to server latency should be much lower. Amazon EC2 hovers <a href="https://forums.aws.amazon.com/message.jspa?messageID=189782">around .5 milliseconds</a>. Yes, half of one millisecond. My experience on Slicehost/Rackspace has been similar. 
+But inside your hosting environment, server to server latency should be much lower. Amazon EC2 hovers <a href="https://forums.aws.amazon.com/message.jspa?messageID=189782">around .5 milliseconds</a>. Yes, half of one millisecond. My experience on Slicehost/Rackspace has been similar.
 </p>
 
 <p>
-However, what would happen if that latency spiked to "just" 10 milliseconds? Your 100 query page just jumped from 50 milliseconds of latency overhead to <b>one full second</b>. The 1,000 query page? That just went from half a second to 10 full seconds! That kind of slowness can obliterate any other performance work you're doing. 
+However, what would happen if that latency spiked to "just" 10 milliseconds? Your 100 query page just jumped from 50 milliseconds of latency overhead to <b>one full second</b>. The 1,000 query page? That just went from half a second to 10 full seconds! That kind of slowness can obliterate any other performance work you're doing.
 </p>
 
 <p>

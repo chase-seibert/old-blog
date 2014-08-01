@@ -1,11 +1,11 @@
 ---
 layout: post
 title: Reduce javascript UI code with Django forms
-tags: javascript, django, unobtrusive
+tags: javascript django unobtrusive
 ---
 
 <p>
-Typically, I try to implement a dynamic UI feature without javascript on the first pass. Then, I layer in a little javascript goodness to make it more responsive. Whenever I stray from this practice, I inevitably end up re-discovering why I started doing this in the first place. At some point, I become horrified at the amount of javascript I have written, and disheartened at how long it's taking to modify. In short, things have gotten complicated. 
+Typically, I try to implement a dynamic UI feature without javascript on the first pass. Then, I layer in a little javascript goodness to make it more responsive. Whenever I stray from this practice, I inevitably end up re-discovering why I started doing this in the first place. At some point, I become horrified at the amount of javascript I have written, and disheartened at how long it's taking to modify. In short, things have gotten complicated.
 </p>
 
 <blockquote>
@@ -120,7 +120,7 @@ $(document).ready(function() {
    type: form.attr(&quot;method&quot;),
    success: function (data) {
     parentRow.find(&quot;.content&quot;).toggleClass(&quot;record-disabled&quot;);
-    parentRow.find(&quot;.block&quot;).toggleClass(&quot;record-disabled&quot;);    
+    parentRow.find(&quot;.block&quot;).toggleClass(&quot;record-disabled&quot;);
    }
   });
 

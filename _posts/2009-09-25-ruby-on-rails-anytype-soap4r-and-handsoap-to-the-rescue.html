@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Ruby on Rails&#58; anyType, soap4r and handsoap to the rescue
-tags: rails, soap
+tags: rails soap
 ---
 
 <blockquote>
@@ -50,13 +50,13 @@ The soap4r generated classes output a packet without the namespaces on the id ta
 </p>
 
 <pre>
-java.lang.IllegalArgumentException: Provided id of the wrong type for class com.bullhorn.entity.job.JobOrder. 
+java.lang.IllegalArgumentException: Provided id of the wrong type for class com.bullhorn.entity.job.JobOrder.
 Expected: class java.lang.Integer, got class org.apache.xerces.dom.ElementNSImpl
  at org.hibernate.ejb.AbstractEntityManagerImpl.find(AbstractEntityManagerImpl.java:196)
  at com.bullhorn.dataservice.jpa.BhEntityManagerImpl.find(BhEntityManagerImpl.java:62)
  at com.bullhorn.dataservice.serviceImpl.BaseService.find(BaseService.java:29)
  ...
-Caused by: org.hibernate.TypeMismatchException: Provided id of the wrong type for class com.bullhorn.entity.job.JobOrder. 
+Caused by: org.hibernate.TypeMismatchException: Provided id of the wrong type for class com.bullhorn.entity.job.JobOrder.
 Expected: class java.lang.Integer, got class org.apache.xerces.dom.ElementNSImpl
  at org.hibernate.event.def.DefaultLoadEventListener.onLoad(DefaultLoadEventListener.java:109)
  at org.hibernate.impl.SessionImpl.fireLoad(SessionImpl.java:905)
@@ -116,7 +116,7 @@ class ApiService &lt; Handsoap::Service
     node = response/"//return"
     { :client =&gt; (node/"//client").to_s, :corporationId =&gt; (node/"//corporationId").to_s , :userId =&gt; (node/"//userId").to_s}
   end
-  
+
   def find(state)
     soap_action = ''
     response = invoke('tns:find', soap_action) do |message|
@@ -128,7 +128,7 @@ class ApiService &lt; Handsoap::Service
         i.add "corporationId", session[:corporationId]
         i.add "userId", session[:userId]
       end
-      
+
       message.add "entityName", state[:entityName]
 
       # ids are set to "anyType" in the WSDL, and our end-point enforces that these namespaces be in the post
@@ -140,7 +140,7 @@ class ApiService &lt; Handsoap::Service
 
     end
   end
-  
+
 end
 </pre>
 

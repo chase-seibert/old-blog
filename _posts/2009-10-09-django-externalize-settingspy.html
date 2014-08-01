@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Django - Externalize settings.py
-tags: django, python
+tags: django python
 ---
 
 <p>
@@ -20,7 +20,7 @@ I have my settings.py file in an external directory. That way, it doesn't get ch
 import sys
 import os.path
 
-def _load_settings(path):    
+def _load_settings(path):
     print "Loading configuration from %s" % (path)
     if os.path.exists(path):
         settings = {}
@@ -28,7 +28,7 @@ def _load_settings(path):
         execfile(path, globals(), settings)
         for setting in settings:
             globals()[setting] = settings[setting]
-     
+
  _load_settings("/usr/local/conf/local_settings.py")
 </pre>
 

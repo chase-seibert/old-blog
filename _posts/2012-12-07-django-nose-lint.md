@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Django Nose Lint Quickstart - Enforce fast unit tests
-tags: django, testing
+tags: django testing
 ---
 
 In the battle for blazing fast unit tests, you need all the tools you can get at your disposal. Enter [django-nose-lint](https://github.com/chase-seibert/django-nose-lint), a new [Nose](https://nose.readthedocs.org/en/latest/) plugin that lets you enforce certain runtime constraints on your test suite. You can just flat out fail tests that take over a configurable amount of time. You can also get more granular and fail tests that try to do certain slow stuff. For example, using the [Django test client](https://docs.djangoproject.com/en/dev/topics/testing/#module-django.test.client).

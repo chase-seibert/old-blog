@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Per user timezones in Django
-tags: timezone, django
+tags: timezone django
 ---
 
 <p>
@@ -23,9 +23,9 @@ def ago(date_time):
         span = timesince(date_time)
         span = span.split(",")[0] # just the most significant digit
         if span == "0 minutes":
-            return "seconds ago"        
-        return "%s ago" % span 
-    return date(date_time)  
+            return "seconds ago"
+        return "%s ago" % span
+    return date(date_time)
 </pre>
 
 <p>
@@ -56,10 +56,10 @@ With this definition, you can use a standard ModelForm, without overriding the f
 
 <pre name="code" class="javascript">
 var selects = $("select#id_timezone");
-if (selects.length &gt; 0 &amp;&amp; selects.val() == "") {  
+if (selects.length &gt; 0 &amp;&amp; selects.val() == "") {
  var offset_minutes = new Date().getTimezoneOffset();
  var offset = 100 * offset_minutes / 60;
- var default_value = _first_timezone_match(selects, offset);  
+ var default_value = _first_timezone_match(selects, offset);
  selects.val(default_value);
 }
 
@@ -86,14 +86,14 @@ import pytz
 
 # need to translate to a non-naive timezone, even if timezone == settings.TIME_ZONE, so we can compare two dates
 def to_user_timezone(date, profile):
-    timezone = profile.timezone if profile.timezone else settings.TIME_ZONE               
+    timezone = profile.timezone if profile.timezone else settings.TIME_ZONE
     return date.replace(tzinfo=pytz.timezone(settings.TIME_ZONE)).astimezone(pytz.timezone(timezone))
-    
+
 def to_system_timezone(date, profile):
-    timezone = profile.timezone if profile.timezone else settings.TIME_ZONE               
+    timezone = profile.timezone if profile.timezone else settings.TIME_ZONE
     return date.replace(tzinfo=pytz.timezone(timezone)).astimezone(pytz.timezone(settings.TIME_ZONE))
-    
-def now_timezone():   
+
+def now_timezone():
     return datetime.datetime.now().replace(tzinfo=pytz.timezone(settings.TIME_ZONE)).astimezone(pytz.timezone(settings.TIME_ZONE))
 </pre>
 

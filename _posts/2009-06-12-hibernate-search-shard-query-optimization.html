@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Hibernate Search - Shard Query Optimization
-tags: hibernate, lucene, hibernate search
+tags: hibernate lucene hibernate-search
 ---
 
 <p>
@@ -13,7 +13,7 @@ In my current project, we have another reason. We're breaking down indexes by cu
 </p>
 
 <p>
-Unfortunately, Hibernate Search defaults to searching ALL the shards, and then merging the result sets. While some of this can be done in parallel, in the end the search is much slower than before. While this strategy is necessary in the hashing case, it's needlessly wasteful in the customer case. 
+Unfortunately, Hibernate Search defaults to searching ALL the shards, and then merging the result sets. While some of this can be done in parallel, in the end the search is much slower than before. While this strategy is necessary in the hashing case, it's needlessly wasteful in the customer case.
 </p>
 
 <p>
@@ -21,7 +21,7 @@ Granted, the customer case was definitely not the initial shard use case. But it
 </p>
 
 <p>
-I actually got to work with the Hibernate Search maintainers to provide this functionality. 
+I actually got to work with the Hibernate Search maintainers to provide this functionality.
 </p>
 
 <pre>
@@ -58,7 +58,7 @@ Here is your entity, with the filter defined.
 <pre name="code" class="java">
 @Indexed(index="Email")
 // this "impl" is only a flag, not the actual filter class
-@FullTextFilterDef(name="shard", impl=ShardSensitiveOnlyFilter.class) 
+@FullTextFilterDef(name="shard", impl=ShardSensitiveOnlyFilter.class)
 public class Email {
 ...
 </pre>
@@ -69,7 +69,7 @@ Here is the filter.
 
 <pre name="code" class="java">
 public class ShardFilter {
-  
+
     private Integer index;
 
     public void setIndex(Integer setIndex) {
@@ -84,10 +84,10 @@ public class ShardFilter {
     }
 
     @Factory
-    public Filter getFilter() {        
+    public Filter getFilter() {
   Query query = new TermQuery(new Term("index", index.toString()));
         return new CachingWrapperFilter(new QueryWrapperFilter(query));
-    } 
+    }
 
 }
 </pre>
@@ -97,11 +97,11 @@ Here is your indexing strategy, which implements the new method getDirectoryProv
 </p>
 
 <pre name="code" class="java">
-public class SpecificShardingStrategy extends IdHashShardingStrategy { 
+public class SpecificShardingStrategy extends IdHashShardingStrategy {
 
  @Override
  public DirectoryProvider&lt;?&gt;[] getDirectoryProvidersForQuery(FullTextFilterImplementor[] filters) {
-    
+
   FullTextFilter filter = getFilter(filters, "shard");
   if (filter == null) {
    return getDirectoryProvidersForAllShards();
@@ -116,7 +116,7 @@ public class SpecificShardingStrategy extends IdHashShardingStrategy {
    if (filter.getName().equals(name)) return filter;
   }
   return null;
- } 
+ }
 
 }
 </pre>

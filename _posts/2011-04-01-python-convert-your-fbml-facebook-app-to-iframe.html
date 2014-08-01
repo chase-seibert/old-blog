@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Python&#58; Convert your FBML Facebook app to IFRAME
-tags: facebook, python
+tags: facebook python
 ---
 
 <p>
@@ -24,7 +24,7 @@ import simplejson as json
 
 def base64_url_decode(inp):
     padding_factor = (4 - len(inp) % 4) % 4
-    inp += "="*padding_factor 
+    inp += "="*padding_factor
     return base64.b64decode(unicode(inp).translate(dict(zip(map(ord, u'-_'), u'+/'))))
 
 def parse_signed_request(signed_request, secret=None):
@@ -42,10 +42,10 @@ def parse_signed_request(signed_request, secret=None):
     else:
         if secret:
             expected_sig = hmac.new(secret, msg=payload, digestmod=hashlib.sha256).digest()
-    
+
     if secret and sig != expected_sig:
         return None
-    
+
     return data
 
 def get_facebook_page_id(request):
@@ -54,15 +54,15 @@ def get_facebook_page_id(request):
         signed_request = request.REQUEST.get("signed_request")
         if signed_request and "." in signed_request:
             data = parse_signed_request(signed_request)
-            #{'user_id': 'XXX', 'algorithm': 'HMAC-SHA256', 'expires': 0, 
-            # 'oauth_token': 'XXX', 
-            # 'user': {'locale': 'en_US', 'country': 'us', 'age': {'min': 21&#125;&#125;, 'issued_at': 1301682530, 'page': 
+            #{'user_id': 'XXX', 'algorithm': 'HMAC-SHA256', 'expires': 0,
+            # 'oauth_token': 'XXX',
+            # 'user': {'locale': 'en_US', 'country': 'us', 'age': {'min': 21&#125;&#125;, 'issued_at': 1301682530, 'page':
             # {'admin': True, 'liked': False, 'id': 'XXX'&#125;&#125;
-            page = data.get("page")            
+            page = data.get("page")
             if page:
                 facebook_page_id = page.get("id")
-                
-    return facebook_page_id  
+
+    return facebook_page_id
 </pre>
 
 <p>
@@ -75,11 +75,11 @@ The second big change was that you must style your apps yourself if you want it 
 
 <pre name="code" class="html">
 /* put a facebook-app class on your BODY element, or a box div around all your content */
-.facebook-app { 
+.facebook-app {
     font-size: 11px;
     color: #333;
     font-family: 'lucida grande', tahoma, verdana, arial;
-} 
+}
 .facebook-app a { color: #3B5998; text-decoration: none; }
 </pre>
 

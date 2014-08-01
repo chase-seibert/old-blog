@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Stripping control characters in Python
-tags: regex, python
+tags: regex python
 ---
 
 <p>
@@ -10,11 +10,11 @@ Want to remove ASCII control characters from a string? Have Unicode control char
 
 <pre name="code" class="python">
 def strip_control_characters(input):
-    
+
     if input:
-            
+
         import re
-        
+
         # unicode invalid characters
         RE_XML_ILLEGAL = u'([\u0000-\u0008\u000b-\u000c\u000e-\u001f\ufffe-\uffff])' + \
                          u'|' + \
@@ -24,10 +24,10 @@ def strip_control_characters(input):
                            unichr(0xd800),unichr(0xdbff),unichr(0xdc00),unichr(0xdfff),
                            )
         input = re.sub(RE_XML_ILLEGAL, "", input)
-                        
+
         # ascii control characters
         input = re.sub(r"[\x01-\x1F\x7F]", "", input)
-            
+
     return input
 </pre>
 

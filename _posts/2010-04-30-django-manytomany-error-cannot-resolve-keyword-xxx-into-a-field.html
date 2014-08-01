@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Django ManyToMany error&#58; "Cannot resolve keyword XXX into a field"
-tags: django, python
+tags: django python
 ---
 
 <p>This week I was doing some refactoring, and started getting the following exception in Django's admin site. This was under Django 1.1.1, and Python 2.6.4.
@@ -51,7 +51,7 @@ Exception Value: Cannot resolve keyword 'company' into field.
 </pre>
 
 <p>
-Having made quite a number of changes before noticing this, it took some time to track down. It turned out that it started happening when I moved an import. Eventually, I found <a href="http://code.djangoproject.com/ticket/1796">Django Ticket #1796</a>. While that ticket is marked as "Fixed", it does not actually appear to be fixed in all cases. 
+Having made quite a number of changes before noticing this, it took some time to track down. It turned out that it started happening when I moved an import. Eventually, I found <a href="http://code.djangoproject.com/ticket/1796">Django Ticket #1796</a>. While that ticket is marked as "Fixed", it does not actually appear to be fixed in all cases.
 </p>
 
 <p>
@@ -63,7 +63,7 @@ In my case, the ManyToMany relationship in question was a field on a Company mod
 </p>
 
 <pre name="code" class="python">
-class Company(models.Model): 
+class Company(models.Model):
 
     ...
 
@@ -81,7 +81,7 @@ I also have a UserProfile model which extends the base User model:
 
 
 <pre name="code" class="python">
-class UserProfile(models.Model):              
+class UserProfile(models.Model):
     user = models.ForeignKey(User, unique=True)
     company = models.ForeignKey(Company)
     phone = PhoneNumberField()

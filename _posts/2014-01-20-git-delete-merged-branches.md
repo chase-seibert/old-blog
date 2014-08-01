@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Python script to delete merged git branches
-tags: git, python
+tags: git python
 ---
 
 One of the great things about git is how fast it is. You can create a new branch, or switch to another branch, almost as fast as you can type the command. This tends to lower the impedance of branching. As a result, many individuals and teams will naturally converge on a process where they create many, many branches.

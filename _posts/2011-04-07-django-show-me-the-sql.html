@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Django&#58; show me the sql!
-tags: sql, django
+tags: sql django
 ---
 
 <p>
@@ -12,7 +12,7 @@ This week, I noticed that there was a select query in our production system with
 In Django, it's pretty easy to ask the framework for the SQL in question. You can use the <a href="https://github.com/robhudson/django-debug-toolbar">Debug toolbar</a>, but in my case, this wasn't something that was running in a view. Instead, I used the interactive shell.
 </p>
 
-<pre name="code" class="python"> 
+<pre name="code" class="python">
 ./manage.py shell
 from django.db import connection
 from myapp.models import MyModel

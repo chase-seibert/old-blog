@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Switching from Ubuntu Unity to LXDE
-tags: linux, ubuntu, lxde
+tags: linux ubuntu lxde
 ---
 
 Canonical was founded with the goal of bringing polish, consistency and _usability_ to the Linux desktop. Derided unfairly by some as not contributing much technically to the open source ecosystem, Ubuntu has been undeniably popular, becoming for the last five years the closest thing we have to a de facto standard distribution. I myself switched to using Linux full time coinciding with this phenomenon, drawn by the mixture of freedom, power and flexibility. For the first time in my experience, Linux mostly "just worked".

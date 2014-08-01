@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Write CSV data into Hive and Python
-tags: python, hive
+tags: python hive
 ---
 
 [Apache Hive](http://hive.apache.org/) is a high level SQL-like interface to Hadoop. It lets you execute mostly unadulterated SQL, like this:

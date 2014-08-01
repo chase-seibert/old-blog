@@ -1,7 +1,7 @@
 ---
 layout: post
 title: jQuery&#58; remove (script) tags from a string of html
-tags: screenscraping, javascript, jquery
+tags: screenscraping javascript jquery
 ---
 
 <p>
@@ -13,5 +13,5 @@ var page_content = $(&quot;html&quot;).clone().find(&quot;script,noscript,style&
 </pre>
 
 <p>
-That's it! I then POST the html content to the back-end with an ajax call. The key bit is the clone(), which copies the entire page so that we can remove element from the copy and not without removing it from the UI the users if viewing. 
+That's it! I then POST the html content to the back-end with an ajax call. The key bit is the clone(), which copies the entire page so that we can remove element from the copy and not without removing it from the UI the users if viewing.
 </p>

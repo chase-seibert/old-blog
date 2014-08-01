@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Backing up gmail to Dropbox using getmail on Linux
-tags: backup, gmail, dropbox
+tags: backup gmail dropbox
 ---
 
 <p>
@@ -45,7 +45,7 @@ message_log_syslog = True
 </pre>
 
 <p>
-You can test whether your configuration working by running getmail manually from the command line. The initial download can take a while to begin if you have thousands of messages. The actual download will likewise take a long time for large mailboxes. While it's in progress, you will get a series of log messages on the console (and in syslog). 
+You can test whether your configuration working by running getmail manually from the command line. The initial download can take a while to begin if you have thousands of messages. The actual download will likewise take a long time for large mailboxes. While it's in progress, you will get a series of log messages on the console (and in syslog).
 </p>
 
 <pre name="code" class="bash">
@@ -72,7 +72,7 @@ SimpleIMAPSSLRetriever:chase.seibert@gmail.com@imap.gmail.com:993:
 </pre>
 
 <p>
-I choose to configure getmail to use a single <a href="http://en.wikipedia.org/wiki/Mbox">mbox file</a>, but you can also use one file per message. In addition to this large file, getmail will keep a smaller index file in ~/.getmail. 
+I choose to configure getmail to use a single <a href="http://en.wikipedia.org/wiki/Mbox">mbox file</a>, but you can also use one file per message. In addition to this large file, getmail will keep a smaller index file in ~/.getmail.
 </p>
 
 <p>

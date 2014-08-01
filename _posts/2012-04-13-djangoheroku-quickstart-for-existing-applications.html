@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Django/Heroku quickstart for existing applications
-tags: django, heroku
+tags: django heroku
 ---
 
 <p>
@@ -13,7 +13,7 @@ wget -qO- https://toolbelt.heroku.com/install.sh | sh
 heroku login
 heroku create --stack cedar
 echo 'web: python manage.py runserver 0:$PORT' > Procfile
-heroku addons:add shared-database 
+heroku addons:add shared-database
 git push heroku master  # if you're in a branch locally, you can git push -f heroku localbranch:refs/heads/master
 heroku run python manage.py syncdb
 heroku ps:scale web=1
@@ -102,9 +102,9 @@ Heroku gives you SSL for free, at least when you're on *.herokuapp.com. The only
 </p>
 
 <pre name="code" class="python">
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https') 
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 </pre>
 
 <p>
-Finally, I had to migrate my old data. If you're going from Postgres -> Postres, or MySQL -> MySQL, just use the herokup database restore tools. If you need to migrate from one to the other, things get a lot trickier. In my case, I ended up exporting to a JSON file, and re-importing. This was very buggy; I would not recommend it. 
+Finally, I had to migrate my old data. If you're going from Postgres -> Postres, or MySQL -> MySQL, just use the herokup database restore tools. If you need to migrate from one to the other, things get a lot trickier. In my case, I ended up exporting to a JSON file, and re-importing. This was very buggy; I would not recommend it.
 </p>

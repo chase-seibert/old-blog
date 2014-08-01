@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Backup your Amazon order history with Python
-tags: python, mechanize, beautifulsoup
+tags: python mechanize beautifulsoup
 ---
 
 <p>
@@ -10,7 +10,7 @@ Ever wanted to download your Amazon order history? Maybe you want to get it into
 
 <pre name="code" class="python">
 import sys
-from optparse import OptionParser  
+from optparse import OptionParser
 import datetime
 import mechanize
 from BeautifulSoup import BeautifulSoup
@@ -42,10 +42,10 @@ def _parse_orders(html):
                         "title": _text(title),
                         "link": link["href"],
                         "image": image["src"]
-                  })     
+                  })
       return orders
 
-if __name__ == '__main__': 
+if __name__ == '__main__':
 
       options = getOptions()
 

@@ -1,13 +1,13 @@
 ---
 layout: post
 title: Hibernate Search - Query API helper
-tags: hibernate, lucene, hibernate search
+tags: hibernate lucene hibernate-search
 ---
 
 <blockquote>If you are programmatically generating a query string and then parsing it with the query parser then you should seriously consider building your queries directly with the query API. In other words, the query parser is designed for human-entered text, not for program-generated text. - <a href="http://lucene.apache.org/java/2_3_2/queryparsersyntax.html">Lucene Documentation</a></blockquote>
 
 <p>
-In Hibernate Search, as in vanilla Lucene, when you create a query it's critically important to use the same Analyzer and Bridges that you used when indexing the fields. 
+In Hibernate Search, as in vanilla Lucene, when you create a query it's critically important to use the same Analyzer and Bridges that you used when indexing the fields.
 </p>
 
 <p>
@@ -28,16 +28,16 @@ Instead, use the Lucene Query API, which has a primitive of Term and bunches the
 
 <pre name="code" class="java">
      BooleanQuery query = new BooleanQuery();
-     Analyzer analyzer = new StandardAnalyzer();     
+     Analyzer analyzer = new StandardAnalyzer();
      TokenStream tokenStream = analyzer.tokenStream("description", new StringReader("cool manager"));
-     
+
      Token token = new Token();
      token = tokenStream.next(token);
-     
+
      while (token != null) {
       if (token.termLength() &gt; 0) {
        String term = new String(token.termBuffer(), 0, token.termLength());
-       query.add(new TermQuery(new Term("description", term)), BooleanClause.Occur.MUST);       
+       query.add(new TermQuery(new Term("description", term)), BooleanClause.Occur.MUST);
       }
       token = tokenStream.next(token);
      }
@@ -50,8 +50,8 @@ Instead, use the Lucene Query API, which has a primitive of Term and bunches the
           new Term("dateAdded", dateBridge.objectToString(new GregorianCalendar(2009, Calendar.MARCH, 1).getTime())),
           new Term("dateAdded", dateBridge.objectToString(new GregorianCalendar(3000, Calendar.JANUARY, 1).getTime())),
           true
-      ); 
-     
+      );
+
      query.add(new BooleanClause(dateAdded, BooleanClause.Occur.MUST));
 </pre>
 
@@ -65,25 +65,25 @@ Using reflection, I came up with a utility class that can get the correct Analyz
 
 <pre name="code" class="java">
  BooleanQuery comments = SearchUtil.createQuery(
-  Note.class, 
-  "comments", 
-  "packaging c++ in 1947 hot/cold foo:bar", 
+  Note.class,
+  "comments",
+  "packaging c++ in 1947 hot/cold foo:bar",
   BooleanClause.Occur.MUST
-  );   
+  );
 
  RangeQuery dateRange = SearchUtil.createRangeQuery(
-   Note.class, 
-   "dateAdded", 
+   Note.class,
+   "dateAdded",
    new GregorianCalendar(2009, Calendar.MARCH, 1).getTime(),
    new GregorianCalendar(3000, Calendar.JANUARY, 1).getTime()
    );
 
  BooleanQuery query = SearchUtil.createQuery(
-   Note.class, 
-   "isDeleted", 
-   "false", 
+   Note.class,
+   "isDeleted",
+   "false",
    BooleanClause.Occur.MUST
-   );      
+   );
 
  query.add(new BooleanClause(comments, BooleanClause.Occur.MUST));
  query.add(new BooleanClause(dateRange, BooleanClause.Occur.MUST));

@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Per-request Query Caching in Django
-tags: python, cache
+tags: python cache
 ---
 
 The Django ORM is a wonderful thing. It makes it so easy to access the database, that sometimes you forget that it's even happening. That is, until you open [django-debug-toolbar](https://github.com/django-debug-toolbar/django-debug-toolbar) and see that you're suddenly running hundreds of queries! Not only that, but looking at the actual queries, many of them are duplicates! You think "Where did all these queries come from? Stupid coworkers, not writing efficient code!" Then you inevitably realize that half of the extra queries were ones you wrote yourself. How does this happen?

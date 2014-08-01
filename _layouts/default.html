@@ -57,6 +57,19 @@
 
                     <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
 
+                    {% if page.tags %}
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                {% for tag in page.tags %}
+                                    <li>
+                                        <a href="/blog/tag/{{ tag l}}">{{ tag }}</a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+
                     {% if site.related_posts %}
                         <div id="related">
                             <h4>Related Posts</h4>

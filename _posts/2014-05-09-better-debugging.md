@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Better debugging through healthy living
-tags: process, debugging
+tags: process debugging
 ---
 
 Debugging code is more of an art than a science. It's an art form that you will have plenty of time to practice as a software engineer.

@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Python/Django&#58; First Impressions
-tags: django, python
+tags: django python
 ---
 
 <p>
@@ -39,7 +39,7 @@ def id_value_long(objs):
 
 # this is equivalent to id_value_long()
 def id_value(objs):
-   return map(lambda obj: (obj.id, str(obj)), objs) 
+   return map(lambda obj: (obj.id, str(obj)), objs)
 </pre>
 
         </li>
@@ -59,10 +59,10 @@ def id_value(objs):
 
 class SearchForm(forms.Form):
    job = forms.ChoiceField(label="Source Job")
-   query = forms.ChoiceField(label="Query Options")           
-  
+   query = forms.ChoiceField(label="Query Options")
+
    def __init__(self, jobs, queries, *args, **kwargs):
-       super(SearchForm, self).__init__(*args, **kwargs)   
+       super(SearchForm, self).__init__(*args, **kwargs)
        # ChoiceField needs id/value pairs, not full model objects
        self.fields["job"].choices = id_value(jobs)
        self.fields["query"].choices = id_value(queries)
@@ -70,7 +70,7 @@ class SearchForm(forms.Form):
 ...
 
 &lt;FORM action="&#123;% url results_link %&#125;" method="get"&gt;
- &#123;&#123; form.as_p &#125;&#125;   
+ &#123;&#123; form.as_p &#125;&#125;
  &lt;INPUT type="submit" value="Search"/&gt;
 &lt;/FORM&gt;
 </pre>

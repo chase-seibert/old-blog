@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Happybase Connection Pooling
-tags: python, hbase
+tags: python hbase
 ---
 
 Wrote a simple connection pool for [Happybase](https://github.com/wbolster/happybase) using [socketpool](https://pypi.python.org/pypi/socketpool).

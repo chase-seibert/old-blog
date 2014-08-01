@@ -1,11 +1,11 @@
 ---
 layout: post
 title: Deploying Django staticfiles to Heroku via Hudson/Jenkins
-tags: django, heroku, hudson
+tags: django heroku hudson
 ---
 
 <p>
-Starting in Django 1.3, you can use the built-in <a href="https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/">staticfiles</a> feature to bundle up css, javascript, images and other static resources for deployment to a CDN. There are two popular Django apps, <a href="https://github.com/jezdez/django_compressor">django-compressor</a> and <a href="https://github.com/cyberdelia/django-pipeline">django-pipeline</a> that layer in additional functionality such as minification and seemless support for popular hosts like <a href="http://aws.amazon.com/s3/">Amazon S3</a>. 
+Starting in Django 1.3, you can use the built-in <a href="https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/">staticfiles</a> feature to bundle up css, javascript, images and other static resources for deployment to a CDN. There are two popular Django apps, <a href="https://github.com/jezdez/django_compressor">django-compressor</a> and <a href="https://github.com/cyberdelia/django-pipeline">django-pipeline</a> that layer in additional functionality such as minification and seemless support for popular hosts like <a href="http://aws.amazon.com/s3/">Amazon S3</a>.
 </p>
 
 <p>
@@ -13,7 +13,7 @@ These "asset managers" both do the same basic things. They give you a mechanism 
 </p>
 
 <p>
-Both libraries are a little immature; I ran into numerous issues trying to get deployment to S3 working. First I tried django-compressor paired with <a href="https://github.com/e-loue/django-storages">django-storages</a>, which can save directly to S3. Typically django-compressor creates the minified files on the fly, which would work great except that Heroku has an ephemeral file system, meaning that the files would be re-created every time a dyno process restarts. Making matters worse, the built-in S3 boto storage is really slow to sync files up to S3, especially considering most of the files do not change on any given deploy. All in all, I was looking at about 3 minutes of lag every time I wanted to start a dyno. 
+Both libraries are a little immature; I ran into numerous issues trying to get deployment to S3 working. First I tried django-compressor paired with <a href="https://github.com/e-loue/django-storages">django-storages</a>, which can save directly to S3. Typically django-compressor creates the minified files on the fly, which would work great except that Heroku has an ephemeral file system, meaning that the files would be re-created every time a dyno process restarts. Making matters worse, the built-in S3 boto storage is really slow to sync files up to S3, especially considering most of the files do not change on any given deploy. All in all, I was looking at about 3 minutes of lag every time I wanted to start a dyno.
 </p>
 
 <p>
@@ -42,9 +42,9 @@ INSTALLED_APPS = (
 PIPELINE = DEBUG
 PIPELINE_YUI_BINARY = '/usr/bin/yui-compressor'
 STATICFILES_STORAGE = 'pipeline.storage.PipelineStorage'
-STATIC_ROOT = '/tmp/myapp-staticfiles' 
+STATIC_ROOT = '/tmp/myapp-staticfiles'
 # using a protocol relative URL here so that resources load from http/https accordingly
-STATIC_URL = '/static/' if DEBUG else '//s3.amazonaws.com/mys3bucket/'  
+STATIC_URL = '/static/' if DEBUG else '//s3.amazonaws.com/mys3bucket/'
 
 # the directories stylesheets and javascript should be inside myapp/static,
 # as per the staticfiles convention. I also put an "images" directory there.
@@ -132,10 +132,10 @@ For deployment, I decided to use Hudson versus trying to get Heroku to do it via
 set -e
 
 # used to load different settings.py extension file
-export ENVIRONMENT=production  
+export ENVIRONMENT=production
 
 # using virtualenv to separate build python class paths
-source /var/lib/hudson/virtualenv/prod/bin/activate  
+source /var/lib/hudson/virtualenv/prod/bin/activate
 pip install -r requirements.txt
 
 # this is the static files bit, collect the files and copy them to s3 using the fast s3cmd utility

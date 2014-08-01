@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Ignore pyflakes warnings with bypass_pyflakes
-tags: python, pyflakes
+tags: python pyflakes
 ---
 
 [Pyflakes](https://github.com/kevinw/pyflakes) is a popular linter for python, even if it [isn't being maintained](https://github.com/kevinw/pyflakes/commits/master) anymore. One [long](http://stackoverflow.com/questions/5033727/how-do-i-get-pyflakes-to-ignore-a-statement) [standing](https://github.com/kevinw/pyflakes/pull/22) request is to allow ignoring of specific warnings with comments, like many other linters allow.

@@ -1,7 +1,7 @@
 ---
 layout: post
 title: In-context FORM help using jQuery
-tags: forms, jquery, ui
+tags: forms jquery ui
 ---
 
 <p>
@@ -50,9 +50,9 @@ I initially tried to position the bubble using just CSS, but this proved impossi
 &lt;style&gt;
  #myform { margin: 200px; }
  #contextual-help { position: absolute; display: none; }
- #contextual-help .message-box { 
-     border-radius: 20px; -moz-border-radius: 20px; -webkit-border-radius: 20px; 
-     background-color: #FFFE9D; border: 1px solid #A9A809;  padding: 1em;    
+ #contextual-help .message-box {
+     border-radius: 20px; -moz-border-radius: 20px; -webkit-border-radius: 20px;
+     background-color: #FFFE9D; border: 1px solid #A9A809;  padding: 1em;
      width: 400px;
      font-size: 120%;
  }
@@ -65,8 +65,8 @@ I initially tried to position the bubble using just CSS, but this proved impossi
  }
  #contextual-help .close {
      cursor: pointer;
-     float: right; 
-     margin-top: -.7em; 
+     float: right;
+     margin-top: -.7em;
      margin-right: -.5em;
      color: #A9A809;
      font-size: 120%;
@@ -77,35 +77,35 @@ I initially tried to position the bubble using just CSS, but this proved impossi
 &lt;script&gt;
 
  $(document).ready(function() {
- 
+
   $("#contextual-help .close").click(function () {
    close_context_help();
   });
- 
+
   bind_help($("#myform input[name=password]"),
    "Must be more than 5 characters."
-   ); 
+   );
  });
 
  function close_context_help() {
   $("#contextual-help").hide();
-  $("#contextual-help").css({top: '', left: ''}); // fix for "drifting" on IE/Chrome  
+  $("#contextual-help").css({top: '', left: ''}); // fix for "drifting" on IE/Chrome
  }
- 
+
  function bind_help(input_element, message) {
 
- 
+
   input_element
    .focus(function () {
     var contextualHelp = $("#contextual-help");
-    contextualHelp.find(".message").html(message);   
+    contextualHelp.find(".message").html(message);
     var inputOffset = $(this).offset(); // top, left
     var scrollTop = $(window).scrollTop(); // how much should we offset if the user has scrolled down the page?
-    contextualHelp.offset({ 
-     top: inputOffset.top + scrollTop - contextualHelp.height() - 2, 
+    contextualHelp.offset({
+     top: inputOffset.top + scrollTop - contextualHelp.height() - 2,
      //left: (inputOffset.left + .5 * $(this).width()) - .5 * contextualHelp.width()
      left: inputOffset.left + 20
-    });   
+    });
     contextualHelp.show();
    })
    .blur(function () {
@@ -114,15 +114,15 @@ I initially tried to position the bubble using just CSS, but this proved impossi
    .keyup(function (event) { // keydown does not work in Firefox, keypress does not work in Chrome
     // escape
     if (event.keyCode == 27) {
-     close_context_help(); 
+     close_context_help();
     }
    })
    .keypress(function (event) {
     // escape
     if (event.keyCode == 27) {
-     close_context_help(); 
+     close_context_help();
     }
-   })  
+   })
   ;
  }
 &lt;/script&gt;

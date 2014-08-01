@@ -1,7 +1,7 @@
 ---
 layout: post
 title: django-celery&#58; blacklist errors by class
-tags: django, celery
+tags: django celery
 ---
 
 <p>
@@ -37,17 +37,17 @@ class email_errors(object):
         def some_task():
             pass
     """
-    
+
     default_error_blacklist = [SoftTimeLimitExceeded, ]
-    
+
     def __init__(self, error_blacklist=[]):
         self.error_blacklist = error_blacklist
-        self.error_blacklist.extend(self.default_error_blacklist)       
-        
+        self.error_blacklist.extend(self.default_error_blacklist)
+
     def __call__(self, task):
         task.unsynchronized_run = task.run
         @wraps(task.unsynchronized_run)
-        def wrapper(*args, **kwargs):        
+        def wrapper(*args, **kwargs):
         try:
             task.unsynchronized_run(*args, **kwargs)
         except Exception, e:
@@ -61,13 +61,13 @@ class email_errors(object):
 
 def get_stacktrace(error):
     return "".join(traceback.format_exception(type(error), error, sys.exc_traceback))
-    
+
 
 def mail_exception(error, prefix=None):
     """ Mails an exception w/ stacktrace to ADMINS, can pass a prefix like '[celery]' """
     try:
         stacktrace = get_stacktrace(error)
-        print stacktrace             
+        print stacktrace
         for subject in _error_subjects(error):
             try:
                 if prefix:

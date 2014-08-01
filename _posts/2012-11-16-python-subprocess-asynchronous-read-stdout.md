@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Python Subprocess Asynchronous Read Stdout
-tags: python, subprocess, threads
+tags: python subprocess threads
 ---
 
 Python has a great standard library when it comes to invoking [external processes](http://docs.python.org/2/library/subprocess.html). But one weakness it does have is that it's not easy to communicate with a subprocess while it's running, i.e. streaming its stdout. If you look at the documentation for `popen`, you will repeatedly see caveats like the following from the Python docs for [Popen.communicate](http://docs.python.org/2/library/subprocess.html#subprocess.Popen.communicate):

@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Redirect console output to a Django HttpResponse
-tags: django, python
+tags: django python
 ---
 
 <p>
@@ -13,21 +13,21 @@ import sys
 from django.http import HttpResponse
 
 def print_http_response(f):
-    """ Wraps a python function that prints to the console, and 
+    """ Wraps a python function that prints to the console, and
     returns those results as a HttpResponse (HTML)"""
-    
+
     class WritableObject:
         def __init__(self):
             self.content = []
         def write(self, string):
-            self.content.append(string)     
-    
+            self.content.append(string)
+
     def new_f(*args, **kwargs):
         printed = WritableObject()
         sys.stdout = printed
         f(*args, **kwargs)
-        sys.stdout = sys.__stdout__    
-        return HttpResponse(['&lt;BR&gt;' if c == '\n' else c for c in printed.content ])         
+        sys.stdout = sys.__stdout__
+        return HttpResponse(['&lt;BR&gt;' if c == '\n' else c for c in printed.content ])
     return new_f
 </pre>
 

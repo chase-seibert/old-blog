@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Mount a Windows file share in Linux
-tags: ubuntu, smb
+tags: ubuntu smb
 ---
 
 <p>
@@ -46,7 +46,7 @@ Here are the basic steps to mount a Windows share under Linux:
    <li>Add the following line, replacing <b>backup</b> with your mount dir, <b>//offilefiles/backup</b> with your share, just like in Windows but with forward slashes, and credentials with your file location.:
          <pre>
          //officefiles/backup /mnt/backup smbfs credentials=/home/chase/.smbcredentials,uid=1000 0 0
-         </pre> 
+         </pre>
    </li>
 
    <li>Reload fstab, at which point you should be able to list that mount directory.

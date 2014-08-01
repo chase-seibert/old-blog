@@ -1,7 +1,7 @@
 ---
 layout: post
 title: HBase/Pig/Python Quickstart on OSX
-tags: hbase, pig, hadoop, python
+tags: hbase pig hadoop python
 ---
 
 Having spent a good chunk of the last two weeks getting a prototype analytics system running, I thought I would write up my findings. I was pleased to find that installing all the pieces was smooth via [Homebrew](http://mxcl.github.com/homebrew/), but getting them all to play together was less smooth.

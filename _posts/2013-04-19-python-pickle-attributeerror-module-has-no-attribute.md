@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Python pickle AttributeError 'module' object has no attribute 'foobar'
-tags: python, pickle
+tags: python pickle
 ---
 
 Ran into an interesting edge case with [pickle](http://docs.python.org/2/library/pickle.html) this week. I had a producer task that was querying objects from a database, and pickling them plus a reference to a callback function to pass to worker tasks. Everything was working fine, but I was getting sick of logging into a [Django shell](https://docs.djangoproject.com/en/dev/intro/tutorial01/#playing-with-the-api) to invoke the workers with test data. So I wrote a quick `__main__` function in my task code to do the same thing.

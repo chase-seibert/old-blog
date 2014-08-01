@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Varnish caching for unauthenticated Django views
-tags: csrf, django, varnish
+tags: csrf django varnish
 ---
 
 <blockquote>
@@ -25,7 +25,7 @@ To use Varnish with Django, you just have to be careful about when you're using 
 </p>
 
 <p>
-In general, those are the only two cookie Django will set, and either of those constitutes a page that should not be cached. In addition, you may have other cookies, such as Google Analytics. One solution is to strip these out in vcl_recv(), before they get passed to the back-end. Note: this does not mean that the client will no longer have access to them. As far as the client is concerned, the cookie is still set on your site. You're just not passing to to the webservers. 
+In general, those are the only two cookie Django will set, and either of those constitutes a page that should not be cached. In addition, you may have other cookies, such as Google Analytics. One solution is to strip these out in vcl_recv(), before they get passed to the back-end. Note: this does not mean that the client will no longer have access to them. As far as the client is concerned, the cookie is still set on your site. You're just not passing to to the webservers.
 </p>
 
 <pre name="code" class="javascript">

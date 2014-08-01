@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Pulling Google Analytics data into Django
-tags: javascript, django, gdata, analytics
+tags: javascript django gdata analytics
 ---
 
 <p>
@@ -19,10 +19,10 @@ Determining raw hits is easy. But I had no idea how many automated bots would hi
 <ul>
 <li>LinkedInBot</li>
 <li>TwitterJobSearch.com</li>
-<li>PycURL</li> 
+<li>PycURL</li>
 <li>labs.topsy.com</li>
 <li>postrank.com</li>
-<li>voyager/1.0</li>     
+<li>voyager/1.0</li>
 <li>JS-Kit URL Resolver</li>
 <li>Twitterbot</li>
 <li>mxbot</li>
@@ -59,7 +59,7 @@ It works via JavaScript, which is perfect for thwarting bots. The bots in questi
 
  // custom variables
  _gaq.push(['_setCustomVar', 1, 'Current User', 'joe.example', 1]);
- _gaq.push(['_setCustomVar', 2, 'Current User ID', '75', 1]);                               
+ _gaq.push(['_setCustomVar', 2, 'Current User ID', '75', 1]);
  _gaq.push(['_setCustomVar', 3, 'Record Owner ID', '101', 3]);
  _gaq.push(['_setCustomVar', 4, 'Record Type', 'Job', 3]);
  _gaq.push(['_setCustomVar', 5, 'Record ID', '87', 3]);
@@ -71,7 +71,7 @@ It works via JavaScript, which is perfect for thwarting bots. The bots in questi
   var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
  })();
 
-&lt;/script&gt;    
+&lt;/script&gt;
 </pre>
 
 <p>
@@ -93,7 +93,7 @@ gdata_client = gdata.analytics.client.AnalyticsClient(
     )
 
 def _login():
-    
+
     settings_util = SettingsUtil(prefs={
         "email": settings.GOOGLE_ANALYTICS_USER_EMAIL,
         "password": settings.GOOGLE_ANALYTICS_USER_PASS,
@@ -102,13 +102,13 @@ def _login():
         gdata_client,
         service=gdata_client.auth_service,
         auth_type=CLIENT_LOGIN,
-        source=settings.GOOGLE_ANALYTICS_APP_NAME, 
+        source=settings.GOOGLE_ANALYTICS_APP_NAME,
         scopes=['https://www.google.com/analytics/feeds/']
         )
-        
+
 def get_views(year, week):
-    
-    _login()        
+
+    _login()
     data_query = gdata.analytics.client.DataFeedQuery({
         'ids': settings.GOOGLE_ANALYTICS_TABLE_ID,
         'start-date': '2010-10-01',
@@ -118,12 +118,12 @@ def get_views(year, week):
         'filters': 'ga:customVarValue4==Job,ga:customVarValue4==Profile;ga:week==%s;ga:year==%s' % (week, year),
         'max-results': "10000"
         })
-        
+
     return gdata_client.GetDataFeed(data_query)
 </pre>
 
 <p>
-Here, I'm getting page view data for October, and creating a <a href="http://en.wikipedia.org/wiki/Pivot_table">pivot table</a> right in the API results by record owner and record type (either Job or Profile). I'm also grouping the results by week. The API will return up to 10,000 results, but I could easily break it into smaller chunks if necessary. 
+Here, I'm getting page view data for October, and creating a <a href="http://en.wikipedia.org/wiki/Pivot_table">pivot table</a> right in the API results by record owner and record type (either Job or Profile). I'm also grouping the results by week. The API will return up to 10,000 results, but I could easily break it into smaller chunks if necessary.
 </p>
 
 <pre name="code" class="xml">
@@ -207,5 +207,5 @@ Here, I'm getting page view data for October, and creating a <a href="http://en.
 </pre>
 
 <p>
-The gdata library parses this for you into native nested dictionaries. From there, it's trivial to cache it somewhere like a database for future reporting. 
+The gdata library parses this for you into native nested dictionaries. From there, it's trivial to cache it somewhere like a database for future reporting.
 </p>

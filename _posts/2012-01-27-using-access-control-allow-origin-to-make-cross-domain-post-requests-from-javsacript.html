@@ -1,11 +1,11 @@
 ---
 layout: post
 title: Using Access-Control-Allow-Origin to make cross domain POST requests from javsacript
-tags: javascript, django, security
+tags: javascript django security
 ---
 
 <p>
-Making ajax calls from javascript, even without a framework like jQuery, is pretty trivial. However, once you try to make the same request cross-domain, it gets hard fast. This is due to the security model all modern browsers use, known as the <a href="http://en.wikipedia.org/wiki/Same_origin_policy">same origin policy</a>. This policy makes sense in a lot of ways, but it's also somewhat broken and antiquated on the web today. 
+Making ajax calls from javascript, even without a framework like jQuery, is pretty trivial. However, once you try to make the same request cross-domain, it gets hard fast. This is due to the security model all modern browsers use, known as the <a href="http://en.wikipedia.org/wiki/Same_origin_policy">same origin policy</a>. This policy makes sense in a lot of ways, but it's also somewhat broken and antiquated on the web today.
 </p>
 
 <p>
@@ -23,7 +23,7 @@ For cross domain ajax requests, the same origin policy is "broken" in the sense 
 </p>
 
 <p>
-Recently, <a href="http://www.ibm.com/developerworks/library/wa-aj-jsonp1">JSONP</a> has emerged as a standard 
+Recently, <a href="http://www.ibm.com/developerworks/library/wa-aj-jsonp1">JSONP</a> has emerged as a standard
 to allow cross domain requests. It's something of a hack that works by returning an executable javascript function from a script tag request. It also exposes you to potential javascript injection vulnerabilities if you are not in control of the remote host. On the plus side, it's provided seamlessly as a <a href="http://api.jquery.com/jQuery.getJSON/">feature in recent jQuery</a> versions.
 </p>
 

@@ -1,11 +1,11 @@
 ---
 layout: post
 title: postfix&#58; only enable sasl for some relays
-tags: python, postfix
+tags: python postfix
 ---
 
 <p>
-Some mail hosts, like <a href="http://sendgrid.com/">SendGrid</a>, require you to use <a href="http://asg.web.cmu.edu/sasl/">SASL</a> authentication to relay mail through their systems. Many of those same hosts only want you to send mail for verified, double-opt-in squeaky clean recipients. But what if you have a subset of recipients that are not verified, and you want to continue sending mail to those yourself? 
+Some mail hosts, like <a href="http://sendgrid.com/">SendGrid</a>, require you to use <a href="http://asg.web.cmu.edu/sasl/">SASL</a> authentication to relay mail through their systems. Many of those same hosts only want you to send mail for verified, double-opt-in squeaky clean recipients. But what if you have a subset of recipients that are not verified, and you want to continue sending mail to those yourself?
 </p>
 
 <p>
@@ -24,7 +24,7 @@ def send_message(to_user, from_addr, subject, body):
     connection = get_connection()
     headers = {"X-Recipient-Verified": to_user.is_verified}
     message = EmailMessage(
-        subject, body, from_addr, [to_user.email], 
+        subject, body, from_addr, [to_user.email],
         connection=connection, headers=headers)
     message.send()
 </pre>
@@ -55,7 +55,7 @@ header_size_limit = 4096000
 </pre>
 
 <p>
-Where this config differs from the <a href="http://docs.sendgrid.com/documentation/get-started/integrate/examples/postfix/">SendGrid documentation</a> is the smtp_sasl_password_maps setting. They suggest you get started by using the static mapping. This works fine as long as you're ONLY sending through SendGrid. But in our case, we need to enable SASL conditionally. 
+Where this config differs from the <a href="http://docs.sendgrid.com/documentation/get-started/integrate/examples/postfix/">SendGrid documentation</a> is the smtp_sasl_password_maps setting. They suggest you get started by using the static mapping. This works fine as long as you're ONLY sending through SendGrid. But in our case, we need to enable SASL conditionally.
 </p>
 
 <p>

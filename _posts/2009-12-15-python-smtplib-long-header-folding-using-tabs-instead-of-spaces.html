@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Python smtplib long header folding using tabs instead of spaces
-tags: email, python
+tags: email python
 ---
 
 <p>
@@ -13,12 +13,12 @@ From: user1@example.com
 To: user2@example.com
 Subject: Christmas party!
 Mime-Version: 1.0
-Content-Type: multipart/mixed; 
+Content-Type: multipart/mixed;
  boundary="----=_Part_20502_1870283373.1261059406023"
 Date: 17 Dec 2009 09:16:46 -0500
 
 ------=_Part_20502_1870283373.1261059406023
-Content-Type: multipart/alternative; 
+Content-Type: multipart/alternative;
  boundary="----=_Part_20503_1134508872.1261059406023"
 ...
 </pre>
@@ -29,8 +29,8 @@ Typically, all lines in MIME wrap at 80 characters. For headers, the standard is
 
 <pre name="code" class="html">
 ...
-Subject: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec quis 
- est dolor, a faucibus nisi. Curabitur et ipsum ut arcu commodo feugiat. 
+Subject: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec quis
+ est dolor, a faucibus nisi. Curabitur et ipsum ut arcu commodo feugiat.
 ...
 </pre>
 
@@ -40,10 +40,10 @@ I ran into <a href="http://bugs.python.org/issue1974">bug 1974</a> in Python whe
 
 <pre name="code" class="python">
     from email.MIMEText import MIMEText
-    
+
     msg = MIMEText(body, "html")
     msg["From"] = "user1@example.com"
-    msg["To"] = "user2@example.com"             
+    msg["To"] = "user2@example.com"
     msg["subject"] = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec quis est dolor, a faucibus nisi. Curabitur et ipsum ut arcu commodo feugiat."
 
     ...
@@ -65,9 +65,9 @@ The solution was simple enough. Just set header fields as Header objects, instea
     msg = MIMEText(body, "html")
     msg["From"] = "powerfill@powerfill.com"
     msg["To"] = to_addr
-    msg["subject"] = Header(subject)    
+    msg["subject"] = Header(subject)
 
-    smtp = smtplib.SMTP(settings.EMAIL_HOST, settings.EMAIL_PORT)        
+    smtp = smtplib.SMTP(settings.EMAIL_HOST, settings.EMAIL_PORT)
     smtp.sendmail(msg["From"], [msg["To"]], msg.as_string())
     smtp.quit()
 </pre>

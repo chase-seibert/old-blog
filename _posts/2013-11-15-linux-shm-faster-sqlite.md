@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Faster Django/sqlite runserver with /dev/shm
-tags: django, linux
+tags: django linux
 ---
 
 When you're writing software, the feedback loop is king. Whether you're implementing new functionality, changing server configuration or writing unit tests, the speed of your feedback cycle is critical. The ideal scenario is that you make a change, and you can immediately see and effect. For web apps, this means that you should be able to save your Python/HTML/CSS/Javascript code, `ALT-TAB` to your browser, hit refresh, and see the changes. Any lag introduced in that cycle is bad; the more lag, the worse off you are.

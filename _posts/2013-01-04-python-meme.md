@@ -1,7 +1,7 @@
 ---
 layout: post
 title: New Year Python Meme 2012
-tags: python, pythonmeme
+tags: python pythonmeme
 ---
 
 View all [#2012pythonmeme](https://twitter.com/search?q=%232012pythonmeme) posts by the community.

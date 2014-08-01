@@ -1,7 +1,7 @@
 ---
 layout: post
 title: How to not get caught in spam filters
-tags: email, spam, postfix
+tags: email spam postfix
 ---
 
 <p>
@@ -41,7 +41,7 @@ Make sure you're not an open relay
 </h4>
 
 <p>
-If you want to STAY off blacklists, you at the very least need to make sure you're not an <a href="http://en.wikipedia.org/wiki/Open_mail_relay">open relay</a>. Basically, you should not accept and definitely not send out any mail that's not destined for a domain you actually own. Testing can be done via telnet, or via a <a href="http://www.abuse.net/relay.html">web-based tool</a>. 
+If you want to STAY off blacklists, you at the very least need to make sure you're not an <a href="http://en.wikipedia.org/wiki/Open_mail_relay">open relay</a>. Basically, you should not accept and definitely not send out any mail that's not destined for a domain you actually own. Testing can be done via telnet, or via a <a href="http://www.abuse.net/relay.html">web-based tool</a>.
 </p>
 
 <h4>
@@ -49,7 +49,7 @@ Reverse DNS (aka PTR records)
 </h4>
 
 <p>
-Another very common check is whether your IP address is named, or unnamed. The idea here is that dynamic IPs, such as those given to home users by their ISP, generally don't need to have names associated with them. A lot of spam these days comes from <a href="http://en.wikipedia.org/wiki/Zombie_computer">zombied home machines</a>. 
+Another very common check is whether your IP address is named, or unnamed. The idea here is that dynamic IPs, such as those given to home users by their ISP, generally don't need to have names associated with them. A lot of spam these days comes from <a href="http://en.wikipedia.org/wiki/Zombie_computer">zombied home machines</a>.
 </p>
 
 <p>
@@ -73,7 +73,7 @@ Postmaster IS strictly required by the RFC. Root is a legacy version of postmast
 </p>
 
 <p>
-Inbound email is a whole other subject. But the basic gist is that you need an <a href="http://en.wikipedia.org/wiki/MX_record">MX record</a> for example.com, and it needs to point to a server that can accept mail for example.com. If you don't have an existing inbound server, or don't want to run your own, many <a href="http://www.google.com/apps/intl/en/business/index.html">hosted alternatives</a> exists. 
+Inbound email is a whole other subject. But the basic gist is that you need an <a href="http://en.wikipedia.org/wiki/MX_record">MX record</a> for example.com, and it needs to point to a server that can accept mail for example.com. If you don't have an existing inbound server, or don't want to run your own, many <a href="http://www.google.com/apps/intl/en/business/index.html">hosted alternatives</a> exists.
 </p>
 
 <p>
@@ -89,7 +89,7 @@ Mail servers communicate via a protocol called SMTP. It's actually a plain-text 
 </p>
 
 <p>
-Many spammers set this to a bogus value, or try to use the recipient's host name or IP address, which is nonsensical. In any case, the correct thing to do is for you to set it to your domain. 
+Many spammers set this to a bogus value, or try to use the recipient's host name or IP address, which is nonsensical. In any case, the correct thing to do is for you to set it to your domain.
 </p>
 
 <p>
@@ -115,7 +115,7 @@ Monitoring
 </h4>
 
 <p>
-That just about covers anti-anti-spam 101. As mentioned, this will likely be an ongoing effort, and you need to keep on top of how it's going. Ideally, there would be an administrator who would be alerted if emails are bouncing due to spam filters. For postfix, I would recommend <a href="http://linux.die.net/man/1/pflogsumm">pflogsumm</a>.  
+That just about covers anti-anti-spam 101. As mentioned, this will likely be an ongoing effort, and you need to keep on top of how it's going. Ideally, there would be an administrator who would be alerted if emails are bouncing due to spam filters. For postfix, I would recommend <a href="http://linux.die.net/man/1/pflogsumm">pflogsumm</a>.
 </p>
 
 <pre name="code" class="bash">

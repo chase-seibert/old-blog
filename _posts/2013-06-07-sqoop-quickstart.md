@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Sqoop/HBase Quickstart on Linux
-tags: sqoop, hadoop, hbase
+tags: sqoop hadoop hbase
 ---
 
 [Sqoop](http://sqoop.apache.org/) is a tool for bulk copying data between a relational database like MySQL and HDFS or another Hadoop based data store like Hive or HBase. It can either export a table or set of tables, or you can specify a custom SQL query to pull the data out. It's the best solution out there for moving massive data sets; it can even fan out sqoop workers to a configurable number of Hadoop data nodes, which will all run partitioned versions of the main SQL query in parallel.

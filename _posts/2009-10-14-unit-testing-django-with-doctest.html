@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Unit testing Django with doctest
-tags: django, python
+tags: django python
 ---
 
 <p>
@@ -9,21 +9,21 @@ There are two main ways to write <a href="http://docs.djangoproject.com/en/dev/t
 </p>
 
 <p>
-Why is this is a good idea? Well, for one thing, they make sure your comments are accurate. If you change how a function behaves, your doctests will let you know if you forget to update the comments. But I mainly appreciate them because of their brevity. 
+Why is this is a good idea? Well, for one thing, they make sure your comments are accurate. If you change how a function behaves, your doctests will let you know if you forget to update the comments. But I mainly appreciate them because of their brevity.
 </p>
 
 <pre name="code" class="python">
 def _lucene_location(job):
     """Formats a Lucene query for searching by city/state
-    
+
     Values must be double-quoted in case there are spaces
     &gt;&gt;&gt; _lucene_location(Job(city="Fort Worth", state="TX"))
     ' +JOBCITY:"Fort Worth" +JOBSTATE:"TX"'
-    
+
     Need to escape quotes in the city/state values
     &gt;&gt;&gt; _lucene_location(Job(city='"Bad" City', state="MA"))
-    ' +JOBCITY:"%22Bad%22 City" +JOBSTATE:"MA"'        
-    
+    ' +JOBCITY:"%22Bad%22 City" +JOBSTATE:"MA"'
+
     """
     return "".join([
         ' +%s:"%s"' % (field_solr[attr], urllib.quote(getattr(job, attr), " "))

@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Keep Track of Vim Tabs Per Git Branch
-tags: django, view, prg
+tags: django view prg
 ---
 
 [Mylyn](http://www.eclipse.org/mylyn/) is a "task lifecycle management framework" plugin for Eclipse. I'm not 100% sure what that means, but I know I really liked one particular feature. On teams where everything you worked on was a JIRA ticket, Mylyn let you associate source code files with a particular JIRA ticket. You would tell it that you were woring on ticket X, and it would keep track of which files you had open. If you started working on task X again at a later date, it could open all those same files again.

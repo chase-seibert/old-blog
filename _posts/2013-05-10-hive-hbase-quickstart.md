@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Hive with HBase Quickstart
-tags: hbase, hive
+tags: hbase hive
 ---
 
 Though there is some [decent documentation](https://cwiki.apache.org/confluence/display/Hive/HBaseIntegration), I found that setting up Hive with a HBase back-end to be somewhat fiddly. Hopefully this guide will help you get started quicker. This article presumes that you already have HBase set up. If not, see my [HBase quickstart](http://chase-seibert.github.io/blog/2013/02/01/getting-starting-with-hbase-and-pig.html).

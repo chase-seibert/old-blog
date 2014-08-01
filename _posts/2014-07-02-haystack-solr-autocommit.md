@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Enabling SOLR autocommit with a custom Haystack backend
-tags: python, haystack, solr
+tags: python haystack solr
 ---
 
 By default [Django Haystack](http://haystacksearch.org/) makes updates to your Solr index available for

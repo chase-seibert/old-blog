@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Hadoop from a Python Perspective
-tags: Python, hbase, hadoop
+tags: python hbase hadoop
 ---
 
 I'm just coming off a project where we decided to use Hadoop for the first time. We're a Python shop developing an analytics feature. We have about 150m records we need to analyze daily, or approx 20GB of data. Even in our initial discussions, we knew that we could do this with our existing stack of Python and MySQL. But we wanted to "get our feet wet" with Hadoop, and gain some experience with it to see if we could make use of it more broadly.

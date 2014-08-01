@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Introducing Django Pyfixtures
-tags: django, fixtures
+tags: django fixtures
 ---
 
 [Django fixtures](https://docs.djangoproject.com/en/dev/howto/initial-data/) were initially touted as a great way to pre-populate your database, mainly for testing. Over time, various community leaders have suggested that fixtures are [slow](http://pyvideo.org/video/699/testing-and-django), [brittle](http://lincolnloop.com/blog/2012/may/3/fixtures-and-factories/), should be [bundled](http://nedbatchelder.com/blog/201206/tldw_speedily_practical_largescale_tests.html) instead of loaded from scratch for every unit test and should probably be replaced with class [factories](https://github.com/dnerdy/factory_boy).

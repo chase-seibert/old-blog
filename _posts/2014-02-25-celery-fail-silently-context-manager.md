@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Celery fail silently context manager
-tags: python, celery
+tags: python celery
 ---
 
 [Celery](http://www.celeryproject.org/) ships with an configuration option called [CELERY_ALWAYS_EAGER](http://celery.readthedocs.org/en/latest/configuration.html#celery-always-eager) which causes all tasks to be executed immediately instead of being asynchronously executed on workers. This can be very useful for unit tests. Instead of running a real message queue and separate worker processes, your unit tests can execute all in one process and still run the necessary tasks.

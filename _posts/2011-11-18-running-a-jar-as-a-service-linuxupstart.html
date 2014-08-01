@@ -1,11 +1,11 @@
 ---
 layout: post
 title: Running a JAR as a service (Linux/upstart)
-tags: java, upstart, ubuntu
+tags: java upstart ubuntu
 ---
 
 <p>
-Running a java JAR as a daemon in Linux is fairly easy, but it took me some digging to figure out how. This is using the new <a href="http://upstart.ubuntu.com/">upstart</a> init script functionality, which is included in recent distributions of Ubuntu. 
+Running a java JAR as a daemon in Linux is fairly easy, but it took me some digging to figure out how. This is using the new <a href="http://upstart.ubuntu.com/">upstart</a> init script functionality, which is included in recent distributions of Ubuntu.
 </p>
 
 <p>
@@ -25,7 +25,7 @@ stop on shutdown
 
 expect fork
 
-script   
+script
     cd /home/chase/bullhorn/tools/sauceconnect
     java -jar /home/chase/bullhorn/tools/sauceconnect/Sauce-Connect.jar USERNAME PASSWORD >/var/log/sauceconnect.log 2>&1
     emit sauceconnect_running

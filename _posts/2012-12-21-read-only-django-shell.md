@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Read only Django shell
-tags: django, shell
+tags: django shell
 ---
 
 Say you have a bunch of developers that occasionally need Django shell access to production, but you want this to be an exceptional event. Here is a drop-in replacement for `./manage.py shell` that defaults to read-only mode, but lets the developer switch to writable mode on the fly, while notifying the team.

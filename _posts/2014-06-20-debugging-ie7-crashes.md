@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Debugging an IE7 browser crash (manual git bisect)
-tags: ie7, javascript, git
+tags: ie7 javascript git
 ---
 
 Every once in a while, you have to put in a heroic effort to diagnose a bug. When

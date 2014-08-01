@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Fixing styling incompatibility with Google Charts and Twitter Bootstrap
-tags: bootstrap, gcharts
+tags: bootstrap gcharts
 ---
 
 Ran into a vexing issue this week when we upgraded to using [Twitter Bootstrap](http://twitter.github.io/bootstrap/). Some of our analytics graphs using [Google Charts](https://developers.google.com/chart/interactive/docs/index) were suddenly broken in IE 7/8/9. Instead of the expected 100px wide bar graphs, they were just a few pixels wide.

@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Sanitize HTML with Beautiful Soup
-tags: xss, plaintext, beautifulsoup
+tags: xss plaintext beautifulsoup
 ---
 
 <p>
@@ -26,25 +26,25 @@ import os
 import urllib2
 
 def safe_html(html):
-    
+
     if not html:
         return None
 
     # remove these tags, complete with contents.
     blacklist = ["script", "style" ]
-    
+
     whitelist = [
         "div", "span", "p", "br", "pre",
         "table", "tbody", "thead", "tr", "td", "a",
         "blockquote",
-        "ul", "li", "ol", 
-        "b", "em", "i", "strong", "u", "font"                 
+        "ul", "li", "ol",
+        "b", "em", "i", "strong", "u", "font"
         ]
 
     try:
         # BeautifulSoup is catching out-of-order and unclosed tags, so markup
-        # can't leak out of comments and break the rest of the page.            
-        soup = BeautifulSoup(html)        
+        # can't leak out of comments and break the rest of the page.
+        soup = BeautifulSoup(html)
     except HTMLParseError, e:
         # special handling?
         raise e
@@ -70,15 +70,15 @@ def safe_html(html):
         comment.extract()
 
     safe_html = unicode(soup)
-    
+
     if safe_html == ", -":
-        return None   
-    
+        return None
+
     return safe_html
-    
+
 def _attr_name_whitelisted(attr_name):
     return attr_name.lower() in ["href", "style", "color", "size", "bgcolor", "border"]
-     
+
 def safe_css(attr, css):
     if attr == "style":
         return re.sub("(width|height):[^;]+;", "", css)
@@ -86,7 +86,7 @@ def safe_css(attr, css):
 
 def plaintext(input):
     """Converts HTML to plaintext, preserving whitespace."""
-    
+
     # from http://effbot.org/zone/re-sub.htm#unescape-html
     def _unescape(text):
         def fixup(m):
@@ -108,7 +108,7 @@ def plaintext(input):
                     pass
             return text # leave as is
         return re.sub("&amp;#?\w+;", fixup, text)
-        
+
     input = safe_html(input) # basic sanitation first
     text = "".join(BeautifulSoup("&lt;body&gt;%s&lt;/body&gt;" % input).body(text=True))
     text = text.replace("xml version='1.0' encoding='%SOUP-ENCODING%'", "") # strip BS meta-data

@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Ubuntu + Cisco VPN from the command-line
-tags: vpn, ubuntu
+tags: vpn ubuntu
 ---
 
 <p>
@@ -45,7 +45,7 @@ If you have iptables setup to only allow white listed outbound traffic, you may 
 # add the following rules
 -A OUTPUT -p tcp -m tcp --dport 500 -j ACCEPT
 -A OUTPUT -p udp -m udp --dport 500 -j ACCEPT
--A OUTPUT -p esp -j ACCEPT 
+-A OUTPUT -p esp -j ACCEPT
 
 # exit vim
 &gt;iptables-restore &lt;/etc/iptables.conf

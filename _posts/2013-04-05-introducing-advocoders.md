@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Introducing Advocoders
-tags: opensource, blog
+tags: opensource blog
 ---
 
 Hiring engineers is tough, especially right now with a general shortage of qualified candidates and record demand. Good companies realize they need involve their engineering team to help recruit. That could mean hosting drink ups, sending the team to conferences and old fashioned professional networking. But what about your engineering blog?

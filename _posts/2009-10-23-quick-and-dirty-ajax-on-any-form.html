@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Quick and dirty Ajax on any FORM
-tags: javascript, jquery, ajax
+tags: javascript jquery ajax
 ---
 
 <p>
@@ -52,34 +52,34 @@ What does this have to do with Ajax? Well, it makes Ajax a breeze. Here is a gen
 
 <pre name="code" class="javascript">
 $(document).ready(function() {
- bind(); 
+ bind();
 })
 
 function bind() {
  var form = $("#results-form");
  if (form) {
-  
+
   $("input[type=submit]").click(function(e) {
 
-   // disable the form buttons so the user can't submit twice   
+   // disable the form buttons so the user can't submit twice
    $("input[type=submit]").click(function(){ return false; });
 
    var form = $("#results-form");
    var button = this;
    var url = "ajax=true&amp;" + button.name + "=" + button.value + "&amp;";
-   
+
    document.body.style.cursor = 'wait';
-   
-   $.post(form[0].action, url + form.serialize(), function (data) {    
+
+   $.post(form[0].action, url + form.serialize(), function (data) {
 
     document.body.style.cursor = 'auto';
-    
+
     $("#contentDiv").html(data);
-        
+
     // re-bind new html for next Ajax call
-    bind();    
+    bind();
    });
-   
+
    return false;
   });
  }

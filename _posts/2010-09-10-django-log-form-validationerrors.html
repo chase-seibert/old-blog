@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Django log form ValidationErrors
-tags: forms, django
+tags: forms django
 ---
 
 <p>
@@ -17,7 +17,7 @@ In Django, there is a relatively easy way to log any form validation errors that
 </p>
 
 <pre name="code" class="python">
-class MyForm(Form):             
+class MyForm(Form):
     def is_valid(self):
         is_valid = super(MyForm, self).is_valid(self)
         if not is_valid:

@@ -1,7 +1,7 @@
 ---
 layout: post
 title: nginx + SSL reverse proxy tutorial
-tags: nginx, ssl
+tags: nginx ssl
 ---
 
 <p>
@@ -25,7 +25,7 @@ sudo -s
 nginx=stable # use nginx=development for latest development version
 echo &quot;deb http://ppa.launchpad.net/nginx/$nginx/ubuntu lucid main&quot; &gt; /etc/apt/sources.list.d/nginx-$nginx-lucid.list
 apt-key adv --keyserver keyserver.ubuntu.com --recv-keys C300EE8C
-apt-get update 
+apt-get update
 apt-get install nginx
 </pre>
 

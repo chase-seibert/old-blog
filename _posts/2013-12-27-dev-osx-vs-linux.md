@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Development on a Mac versus Linux
-tags: osx, linux
+tags: osx linux
 ---
 
 I love the Mac computing experience. Their laptop hardware, like their phones, feel solid and elegant. OSX usability is excellent, though it is myopically geared towards the lowest common denominator of user. For most tasks, I appreciate that trade-off of affordability versus advanced power features. But not when I'm doing development. Even though I use a Mac as my home laptop, I prefer a Linux machine for work. I also keep a Windows desktop at home for gaming. To me, that's just using the right tool for the job.

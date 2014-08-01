@@ -2,7 +2,7 @@
 ---
 layout: post
 title: The Post/Redirect/Get (PRG) Pattern
-tags: django, view, prg
+tags: django view prg
 ---
 
 Anyone who has used a web browser has probably encountered the dreaded "form resubmission" dialog. This happens when the user tries to refresh or use the back button to navigate back to a HTTP POST.
@@ -46,5 +46,5 @@ def view_record(request, record_id):
 
 # Caveats
 
-* This only affects full page refreshes, Ajax calls are unaffected. 
+* This only affects full page refreshes, Ajax calls are unaffected.
 * In practice, this may sometimes require you to temporarily save state when otherwise you would not. For example, in multi-step forms. In those cases, you can often save the data safely in the [session scope](http://www.theserverside.com/news/1365146/Redirect-After-Post).

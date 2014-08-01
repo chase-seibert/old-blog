@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Migrate your Python app to Facebook OAuth 2.0
-tags: facebook, python, oauth
+tags: facebook python oauth
 ---
 
 <p>
@@ -57,7 +57,7 @@ FB.login(function(response) {
 </pre>
 
 <p>
-The more troublesome change was on the Python SDK side. Previously, when the javascript sdk authenticated a user, it would add a "_fbs_APP_ID" cookie to the response, which you would use get_user_from_cookie() from the python sdk to parse. With the OAuth 2.0 change, they moved to a new _fb<em>r</em>_APP_ID cookie (note the "r"), with a new format. As of Dec 15, the official <a href="https://github.com/facebook/python-sdk">python sdk</a> has not been updated to support this new format. 
+The more troublesome change was on the Python SDK side. Previously, when the javascript sdk authenticated a user, it would add a "_fbs_APP_ID" cookie to the response, which you would use get_user_from_cookie() from the python sdk to parse. With the OAuth 2.0 change, they moved to a new _fb<em>r</em>_APP_ID cookie (note the "r"), with a new format. As of Dec 15, the official <a href="https://github.com/facebook/python-sdk">python sdk</a> has not been updated to support this new format.
 </p>
 
 <p>

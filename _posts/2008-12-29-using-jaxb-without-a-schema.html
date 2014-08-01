@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Using JAXB without a schema
-tags: xmlspy, xml, jaxb
+tags: xmlspy xml jaxb
 ---
 
 <p>A <a href="http://developer.yahoo.com/hotjobs/">Yahoo HotJobs API</a> project has been my first exposure to <a href="http://en.wikipedia.org/wiki/Representational_State_Transfer">REST</a> APIs. Usually, I'm working with <a href="http://en.wikipedia.org/wiki/SOAP_(protocol)">SOAP web-services</a>. Bullhorn is actually thinking about trying to support REST with its own APIs, so this was a good opportunity to learn about the strengths and weaknesses of REST.</p>
@@ -35,7 +35,7 @@ tags: xmlspy, xml, jaxb
        &lt;yheader:LicenseKey&gt;$license$&lt;/yheader:LicenseKey&gt;
    &lt;/yheader:Credential&gt;
    &lt;atom:id&gt;$account$&lt;/atom:id&gt;
-&lt;/atom:feed&gt;  
+&lt;/atom:feed&gt;
 </pre>
 
 <p>... and a code segment that looked like:</p>
@@ -53,7 +53,7 @@ tags: xmlspy, xml, jaxb
 
         StringTemplate xml
                 = new StringTemplate(getFileContents(AuthRequest.class.getResourceAsStream(AUTH_XML_FILE)));
-        
+
         for (String key: replacements.keySet())
             xml.setAttribute(key, replacements.get(key));
 
@@ -121,7 +121,7 @@ public class YahooNamespacePrefixMapper extends NamespacePrefixMapper {
     public String getPreferredPrefix(String namespaceUri, String suggestion, boolean requirePrefix) {
 
         if (namespaceUri.equalsIgnoreCase(&quot;http://www.w3.org/2005/Atom&quot;)) return &quot;atom&quot;;
-        return &quot;yheader&quot;;        
+        return &quot;yheader&quot;;
     }
 }
 </pre>
@@ -144,7 +144,7 @@ public class YahooNamespacePrefixMapper extends NamespacePrefixMapper {
         } catch (JAXBException e) {
             throw new RuntimeException(e);
         }
-    }    
+    }
 </pre>
 
 <p>Success! Of course, generating a schema by hand is not ideal, either. But if there is no first-party schema, at least it's an option.</p>

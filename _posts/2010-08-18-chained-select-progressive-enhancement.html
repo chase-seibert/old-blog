@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Chained Select Progressive Enhancement
-tags: javascript, unobtrusive
+tags: javascript unobtrusive
 ---
 
 <p>
@@ -39,12 +39,12 @@ As I mentioned, I decided on an arbitrary prefix for the input values. In this c
    &lt;ul class="subcategory"&gt;
     &lt;li&gt;&lt;input type="radio" name="category" value="2:1"&gt;Architectural&lt;/li&gt;
     &lt;li&gt;&lt;input type="radio" name="category" value="2:2"&gt;Computer Aided Design&lt;/li&gt;
-    &lt;li&gt;&lt;input type="radio" name="category" value="2:3"&gt;Construction&lt;/li&gt;   
+    &lt;li&gt;&lt;input type="radio" name="category" value="2:3"&gt;Construction&lt;/li&gt;
     &lt;li&gt;&lt;input type="radio" name="category" value="2:4"&gt;Civil Engineering&lt;/li&gt;
     &lt;li&gt;&lt;input type="radio" name="category" value="2:5"&gt;Chemical Engineering&lt;/li&gt;
     &lt;li&gt;&lt;input type="radio" name="category" value="2:6"&gt;Computer Aided Design (CAD)&lt;/li&gt;
     &lt;li&gt;&lt;input type="radio" name="category" value="2:7"&gt;Construction&lt;/li&gt;
-    &lt;li&gt;&lt;input type="radio" name="category" value="2:8"&gt;Environmental Engineering&lt;/li&gt;   
+    &lt;li&gt;&lt;input type="radio" name="category" value="2:8"&gt;Environmental Engineering&lt;/li&gt;
     &lt;li&gt;&lt;input type="radio" name="category" value="2:9"&gt;Civil Engineering&lt;/li&gt;
     &lt;li&gt;&lt;input type="radio" name="category" value="2:10"&gt;Project/Program Management&lt;/li&gt;
    &lt;/ul&gt;
@@ -54,12 +54,12 @@ As I mentioned, I decided on an arbitrary prefix for the input values. In this c
    &lt;ul class="subcategory"&gt;
     &lt;li&gt;&lt;input type="radio" name="category" value="3:1"&gt;Business Systems Analysis&lt;/li&gt;
     &lt;li&gt;&lt;input type="radio" name="category" value="3:2"&gt;ERP Applications&lt;/li&gt;
-    &lt;li&gt;&lt;input type="radio" name="category" value="3:3"&gt;Network Operations&lt;/li&gt;   
+    &lt;li&gt;&lt;input type="radio" name="category" value="3:3"&gt;Network Operations&lt;/li&gt;
     &lt;li&gt;&lt;input type="radio" name="category" value="3:4"&gt;Project/Program Management&lt;/li&gt;
     &lt;li&gt;&lt;input type="radio" name="category" value="3:5"&gt;Security&lt;/li&gt;
     &lt;li&gt;&lt;input type="radio" name="category" value="3:7"&gt;Software Development&lt;/li&gt;
     &lt;li&gt;&lt;input type="radio" name="category" value="3:8"&gt;Quality Assurance&lt;/li&gt;
-    &lt;li&gt;&lt;input type="radio" name="category" value="3:9"&gt;Technical Writing/Documentation&lt;/li&gt;   
+    &lt;li&gt;&lt;input type="radio" name="category" value="3:9"&gt;Technical Writing/Documentation&lt;/li&gt;
     &lt;li&gt;&lt;input type="radio" name="category" value="3:10"&gt;Product Management&lt;/li&gt;
     &lt;li&gt;&lt;input type="radio" name="category" value="3:11"&gt;Web Design&lt;/li&gt;
    &lt;/ul&gt;
@@ -99,7 +99,7 @@ The progressive enhancement uses jQuery, and basically just does the following.
  <li>Hides the category labels and creates a select control with their values.</li>
  <li>Hides the subcategory lists.</li>
  <li>Attaches a behaviour to the new select control to show the relevant subcategory list when the select value changes.</li>
-</ol> 
+</ol>
 </p>
 
 <pre name="code" class="html">
@@ -112,7 +112,7 @@ The progressive enhancement uses jQuery, and basically just does the following.
      $(this).parents(".chained-select-style").find("li").removeClass("selected");
     $(this).parent().addClass("selected");
    }
-   else $(this).parent().removeClass("selected");   
+   else $(this).parent().removeClass("selected");
   }
 
   var items = $(".chained-select-style input");
@@ -128,12 +128,12 @@ The progressive enhancement uses jQuery, and basically just does the following.
     });
     $(this).before(top);
    });
-   elements.find(".category label").add(elements.find(".subcategory")).hide();   
+   elements.find(".category label").add(elements.find(".subcategory")).hide();
    function chained_select_change() {
     var label_text = $(this).val();
     $.each(elements.find(".category label"), function () {
      if ($(this).text() == label_text) {
-      $(this).next().show(); 
+      $(this).next().show();
      } else {
       $(this).next().hide();
      }

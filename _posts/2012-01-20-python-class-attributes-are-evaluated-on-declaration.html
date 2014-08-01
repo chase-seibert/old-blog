@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Python class attributes are evaluated on declaration
-tags: django, python
+tags: django python
 ---
 
 <p>
@@ -35,8 +35,8 @@ class MyChoiceField(ChoiceField):
     def __init__(self, choices=(), required=True, widget=None, label=None,
              initial=None, help_text=None, *args, **kwargs):
     super(ChoiceField, self).__init__(required, widget, label, initial,
-                                      help_text, *args, **kwargs)     
-    self.choices = [(m.id, m.name) for m in ReallyLargeTableModel.objects.all()] 
+                                      help_text, *args, **kwargs)
+    self.choices = [(m.id, m.name) for m in ReallyLargeTableModel.objects.all()]
 </pre>
 
 <p>
@@ -44,7 +44,7 @@ For me, this was a pretty standard pattern. I had a custom field that was pullin
 </p>
 
 <p>
-In this case, it's not hard to work around. Simply removing the list comprehension will allow Django to hold off on running the query until it actually requests the choices property (ie, when the field is displayed to the user). Alternatively, you could pass the data in from the MyForm constructor, which I gather is more idiomatic anyway. 
+In this case, it's not hard to work around. Simply removing the list comprehension will allow Django to hold off on running the query until it actually requests the choices property (ie, when the field is displayed to the user). Alternatively, you could pass the data in from the MyForm constructor, which I gather is more idiomatic anyway.
 </p>
 
 <p>

@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Flatten entire HBase column families with Pig and Python UDFs
-tags: hbase, pig
+tags: hbase pig
 ---
 
 Most [Pig](http://pig.apache.org/) tutorials you will find assume that you are working with data where you know all the column names ahead of time, and that the column names themselves are just labels, versus being composites of labels and data. For example, when working with [HBase](http://hbase.apache.org/), it's actually not uncommon for both of those assumptions to be false. Being a columnar database, it's very common to be working to rows that have [thousands of columns](https://issues.apache.org/jira/browse/HBASE-867). Under that circumstance, it's also common for the column names themselves to encode to dimensions, such as [date and counter type](https://www.facebook.com/video/video.php?v=707216889765).
