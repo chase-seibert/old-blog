@@ -1,6 +1,4 @@
 .DS_Store
 *.pyc
-_site
 .ropeproject
 .idea
-Gemfile.lock
