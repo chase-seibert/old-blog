@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Joining a software startup right out of school
-tags: startups
+tags: startups reading-list
 ---
 
 ## About me

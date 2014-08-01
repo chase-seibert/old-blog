@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Limiting Project Scope and Optimizing for Shipability
-tags: process
+tags: process reading-list
 ---
 
 >Observe that for the programmer, as for the chef, the urgency of the patron may govern the scheduled completion of the task, but it cannot govern the actual completion. An omelette, promised in two minutes, may appear to be progressing nicely. But when it has not set in two minutes, the customer has two choices--wait or eat it raw. Software customers have had the same choices. - The Mythical Man-Month

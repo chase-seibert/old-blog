@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Scrum in a Nutshell
-tags: agile scrum
+tags: agile scrum reading-list
 ---
 
 Scrum is a fundamentally adaptable process. One of the core pieces is the retrospective, where the team can collaboratively change the process itself. Team members learn from their mistakes and from each other about how to get better at delivering software. But before the iterative improvement can begin, there is a necessary bootstrapping. When introducing Scrum to a team for the first time, you can try to explain all of the nuances and edge cases up front. Or, like teaching people a new card game, sometimes it's better to just jump in and play a few hands.

@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Saving for Retirement as a Software Engineer
-tags: 401k
+tags: 401k reading-list
 ---
 
 > Take 100 young Americans starting out at age 25. By age 65, one will be rich and four will be financially independent. The remaining 95 will reach the traditional retirement age unable to self-sustain the lifestyle to which they have become accustomed. - [The Bogleheads' Guide to Investing](http://www.amazon.com/Bogleheads-Guide-Investing-Taylor-Larimore/dp/0470067365)

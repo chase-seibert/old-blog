@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Rich client side web apps gone too far!
-tags: web
+tags: web reading-list
 ---
 
 ## I have seen some Javascript in my time...
@@ -122,7 +122,7 @@ provide the same experience with about 5% of the client side code. Plus, you're
 slowing down your development team throughput significantly. All that extra
 complexity is not free. All of a sudden you have to hire people who specialize
 in front-end and people who specialize in back-end. It used to be that virtually
-all web devs could do both well. 
+all web devs could do both well.
 
 The key to delivering awesome client server HTML page render apps is graceful
 degradation, also called [progressive enhancement](http://en.wikipedia.org/wiki/Progressive_enhancement).
