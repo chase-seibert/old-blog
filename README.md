@@ -11,19 +11,6 @@ cd ~/projects/blog
 git checkout gh-pages
 ```
 
-You probably also want to remove my posts, and my git history.
-
-```
-rm -f _posts/*
-rm -rf .git
-git init
-git checkout gh-pages
-git add .
-git commit -m "Initial commit"
-git remote add origin git@github.com:username/blog.git
-git push -u --force origin master
-```
-
 # Install Dependencies
 
 ## Linux
