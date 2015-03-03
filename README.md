@@ -1,5 +1,7 @@
 This blog is hosted on [GitHub Pages](http://pages.github.com/) using [Jekyll](http://jekyllrb.com/). If you want to fork this blog and make your own, here is how you get started.
 
+This is a two-branch system. The `master` branch is where the source code of you blog as well as the post content lives. The `gh-pages` branch is generated from the source branch and contains the actual static files for your site + posts. This is what GitHub will end up hosting for you.
+
 # Clone it
 
 First, you need to fork this repository to your own account. Github looks for a branch called `gh-pages`, so create your blog content there.
@@ -8,7 +10,6 @@ First, you need to fork this repository to your own account. Github looks for a 
 # fork the repository using the github UI
 git clone git@github.com:username/blog.git ~/projects/blog
 cd ~/projects/blog
-git checkout gh-pages
 ```
 
 You probably also want to remove my posts, and my git history.
@@ -17,11 +18,9 @@ You probably also want to remove my posts, and my git history.
 rm -f _posts/*
 rm -rf .git
 git init
-git checkout gh-pages
 git add .
 git commit -m "Initial commit"
 git remote add origin git@github.com:username/blog.git
-git push -u --force origin master
 ```
 
 # Install Dependencies
@@ -49,13 +48,15 @@ bundle exec jekyll serve
 
 # Run it!
 
+This command wraps `bundle exec jekyll serve --watch`, and also launches a web browser. You may need to refresh a couple of times to see the content.
+
 ```bash
-bundle exec jekyll serve --watch
+./run.sh
 ```
 
 You should now be able to open [http://localhost:4000/blog/index.html](http://localhost:4000/blog/index.html)
 
-# Publish
+# Create a test Post and Publish
 
 Just create new files in _posts in the format `2013-01-01-post-title.md`. Here is a template to get you started:
 
@@ -69,12 +70,12 @@ tags: python, linux
 I [cloned this blog](https://github.com/chase-seibert/blog)
 ```
 
-While you're editing, you can view your [changes live](http://localhost:4000/blog/index.html). When you're done, just push as normal.
+While you're editing, you can view your [changes live](http://localhost:4000/blog/index.html). When you're done, run `./publish-website.sh` to publish it.
 
 ```
 git add .
 git commit -m "my first blog entry"
-git push origin gh-pages
+./publish-website.sh
 ```
 
 Your blog should show up on `http://username.github.io/blog`.
