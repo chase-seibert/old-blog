@@ -64,7 +64,7 @@ Just create new files in _posts in the format `2013-01-01-post-title.md`. Here i
 ---
 layout: post
 title: This is my new post
-tags: python, linux
+tags: python linux
 ---
 
 I [cloned this blog](https://github.com/chase-seibert/blog)
@@ -81,3 +81,14 @@ git commit -m "my first blog entry"
 Your blog should show up on `http://username.github.io/blog`.
 
 * [Markdown syntax guide](http://en.wikipedia.org/wiki/Markdown#Syntax_examples)
+
+
+# Updating Styling
+
+- The blog title is in `index.html`
+- In `_layouts/default.html`, you can change:
+    - The Facebook Opengraph meta data
+    - The sidebar content w/ my name, sub-title, social media links, resume, etc
+- In `_layout/post.html`, you can change:
+    - Twitter handle
+    - Disqus comment metadata
