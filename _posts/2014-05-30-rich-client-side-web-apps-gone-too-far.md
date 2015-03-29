@@ -86,13 +86,13 @@ But at the same time, mobile was just starting to come on. All these pages we we
 writing that rendered quickly on broadband absolutely sucked on mobile. No matter
 how fast your server was, latency was killing you on these shit early wireless
 networks. But we had a few years of AJAX under our belts, so we knew we could
-deliver the illusion of responsiveness by simple not reloading the page.
+deliver the illusion of responsiveness by simply not reloading the page.
 
 I remember trying to write an app for IE7 that was 100% rendered on the client
 side from a pure JSON server backend. That shit was ridiculously slow back in the
 day on a broadband connected PC simply because IE7 could not render a decently
 complicated HTML chunk into a previously rendered DOM without going out to lunch
-for several hundred milliseconds doing god knows what - while at the time time
+for several hundred milliseconds doing god knows what - while at the same time
 completely locking the UI of the browser.
 
 But it was actually *better* on mobile. The latency was such a killer that even
