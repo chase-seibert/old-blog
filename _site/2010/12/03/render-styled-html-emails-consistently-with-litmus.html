@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Render styled HTML emails consistently with Litmus</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/shCore.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2010/12/03/render-styled-html-emails-consistently-with-litmus.html" />
+
+        <meta property="og:title" content="Render styled HTML emails consistently with Litmus"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2010/12/03/render-styled-html-emails-consistently-with-litmus.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Render styled HTML emails consistently with Litmus
+                            
+                                <span class="post-date subtitle">03 Dec 2010</span>
+                            
+                        </h1>
+                    
+                    <p>
+Getting your HTML email to look the same on all mail clients is <a href="http://www.vomitron.com/blog/2010/05/07/html-email-is-hard/">hard</a>. Most clients only support a <a href="http://www.campaignmonitor.com/css/">small subset</a> of HTML. Outlook 2010 actually uses Word to display HTML, and we know <a href="http://www.email-standards.org/blog/entry/microsoft-to-ignore-web-standards/">how much that sucks</a>. But it's more endemic than that; there are simply no standards to code to.
+</p>
+
+<p>
+When marketing wants an email to look exactly the same on all clients, tell them they need to use plaintext. When they say they need HTML, tell them that it's impossible. When they insist, tell them that you can get it to look 90% the same across clients, but it will take 40 hours. The first hour will be spent composing the email. For the next 39 hours you will be sending it to gmail, testing, tweaking, sending it to yahoo, testing, tweaking, sending it to Outlook... etc.
+</p>
+
+<p>
+Enter <a href="http://litmus.com/">Litmus</a>. For $49 a month you can send <i>them</i> a copy of the email, and they will render screenshots of what it looks like on the <a href="http://litmus.com/email-previews">25 email clients</a> that actually matter.
+</p>
+
+<img src="http://lh4.ggpht.com/_EE2zVzGv1Ds/TPk2tdMV_II/AAAAAAAALZI/R3mELRSidf8/s800/litmus-dashboard.png">
+
+<p>
+You can zoom in on exactly what it looks like on a specific client, with or without images enabled, in plaintext or html mode. Litmus can show you the final rendered HTML code, as well as the entire MIME message. You can mark test cases as "failed", and then evaluate them again on subsequent revisions.
+</p>
+
+<img src="http://lh4.ggpht.com/_EE2zVzGv1Ds/TPk2tpPc15I/AAAAAAAALZM/IaWGkfJnQ_8/s800/litmus-iphone.png">
+
+<p>
+Having done this a couple of times recently, I came up with some rules of thumb.
+</p>
+
+<ul>
+<li>Assume images won't load. Use alt/title attributes.</li>
+<li>Many clients will not render style tags. Pretend it's 1995 and use <a href="http://www.quackit.com/css/inline_style_sheets.cfm">inline styles</a>.</li>
+<li>Relative, absolute and float positioning will not work. Use tables.</li>
+<li>Yahoo: add "margin-bottom: 1em;" to your <a href="http://www.email-standards.org/blog/entry/yahoo-drops-paragraph-spacing/">paragraph tags</a>.</li>
+<li>Outlook: some links will break when they wrap in MIME. If you can, keep them under 80 characters, and put them on the start of a line.</li>
+<li>Include a <a href="http://www.lshift.net/blog/2006/07/18/html-email-is-hard-to-get-right">plaintext section</a>. Some <a href="http://www.zeldman.com/2007/06/08/e-mail-is-not-a-platform-for-design/">users prefer it</a>, and some mobiles devices only show plaintext.</li>
+</ul>
+
+
+<hr>
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'chaseseibertblog';
+    var disqus_identifier = '/blog/2010/12/03/render-styled-html-emails-consistently-with-litmus';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/email">email</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/litmus">litmus</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2015/03/27/software-engineering-fireside-chat.html">Introducing the Software Engineering Fireside Chat Podcast</a></li>
+                                
+                                    <li><a href="/blog/2015/02/10/one-on-ones.html">Topics for One on Ones</a></li>
+                                
+                                    <li><a href="/blog/2014/12/22/class-design.html">Thoughts on Object Oriented Class Design</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script src="http://code.jquery.com/jquery-latest.js"></script>
+        <script src="/blog/js/bootstrap.js"></script>
+        <script src="/blog/js/shCore.js"></script>
+        <script src="/blog/js/shBrushBash.js"></script>
+        <script src="/blog/js/shBrushCpp.js"></script>
+        <script src="/blog/js/shBrushCSharp.js"></script>
+        <script src="/blog/js/shBrushCss.js"></script>
+        <script src="/blog/js/shBrushJava.js"></script>
+        <script src="/blog/js/shBrushJScript.js"></script>
+        <script src="/blog/js/shBrushPhp.js"></script>
+        <script src="/blog/js/shBrushPython.js"></script>
+        <script src="/blog/js/shBrushSql.js"></script>
+        <script src="/blog/js/shBrushRuby.js"></script>
+        <script src="/blog/js/shBrushXml.js"></script>
+
+        <script type="text/javascript">
+            dp.SyntaxHighlighter.BloggerMode();
+            dp.SyntaxHighlighter.HighlightAll("code");
+        </script>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

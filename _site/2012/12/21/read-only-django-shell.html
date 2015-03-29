@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Read only Django shell</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/shCore.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2012/12/21/read-only-django-shell.html" />
+
+        <meta property="og:title" content="Read only Django shell"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2012/12/21/read-only-django-shell.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Read only Django shell
+                            
+                                <span class="post-date subtitle">21 Dec 2012</span>
+                            
+                        </h1>
+                    
+                    <p>Say you have a bunch of developers that occasionally need Django shell access to production, but you want this to be an exceptional event. Here is a drop-in replacement for <code>./manage.py shell</code> that defaults to read-only mode, but lets the developer switch to writable mode on the fly, while notifying the team.</p>
+
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">optparse</span> <span class="kn">import</span> <span class="n">make_option</span>
+<span class="kn">from</span> <span class="nn">django.core.management.commands.shell</span> <span class="kn">import</span> <span class="n">Command</span> <span class="k">as</span> <span class="n">DjangoShellCommand</span>
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">router</span>
+<span class="kn">from</span> <span class="nn">django.core.management.base</span> <span class="kn">import</span> <span class="n">NoArgsCommand</span>
+<span class="kn">from</span> <span class="nn">myapp.utils</span> <span class="kn">import</span> <span class="n">hipchat</span>
+
+
+<span class="n">_original_db_for_write</span> <span class="o">=</span> <span class="bp">None</span>
+
+
+<span class="k">def</span> <span class="nf">confirm_writable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; user can over-ride the shell to be writable at any time, but it sends a message &#39;&#39;&#39;</span>
+
+    <span class="c"># for migrations, you might be in a non-interactive shell</span>
+    <span class="c"># so don&#39;t prompt, but still send out the notification</span>
+    <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">isatty</span><span class="p">():</span>
+        <span class="n">cont</span> <span class="o">=</span> <span class="nb">raw_input</span><span class="p">(</span><span class="s">&#39;Are you sure you want to connect to the production database in writable mode? [y/N] &#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">cont</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;y&#39;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s">&#39;Database in read-only mode.&#39;</span><span class="p">)</span>
+
+    <span class="n">router</span><span class="o">.</span><span class="n">db_for_write</span> <span class="o">=</span> <span class="n">_original_db_for_write</span>
+    <span class="n">send_alert</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">send_alert</span><span class="p">():</span>
+    <span class="n">hipchat</span><span class="o">.</span><span class="n">send_message</span><span class="p">(</span><span class="s">&quot;I&#39;m opening up a writable prod shell!&quot;</span><span class="p">,</span>
+        <span class="n">from_name</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;USER&#39;</span><span class="p">),</span>
+        <span class="n">color</span><span class="o">=</span><span class="s">&#39;red&#39;</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">Command</span><span class="p">(</span><span class="n">DjangoShellCommand</span><span class="p">):</span>
+
+    <span class="n">option_list</span> <span class="o">=</span> <span class="n">DjangoShellCommand</span><span class="o">.</span><span class="n">option_list</span> <span class="o">+</span> <span class="p">(</span>
+        <span class="n">make_option</span><span class="p">(</span><span class="s">&#39;--write&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s">&#39;writable&#39;</span><span class="p">,</span>
+            <span class="n">help</span><span class="o">=</span><span class="s">&#39;Connect to the database in writable mode.&#39;</span><span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">handle_noargs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">):</span>
+
+        <span class="c"># only allow read-only shells in prod by default</span>
+        <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;writable&#39;</span><span class="p">):</span>
+            <span class="n">send_alert</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">global</span> <span class="n">_original_db_for_write</span>
+            <span class="n">_original_db_for_write</span> <span class="o">=</span> <span class="n">router</span><span class="o">.</span><span class="n">db_for_write</span>
+            <span class="n">router</span><span class="o">.</span><span class="n">db_for_write</span> <span class="o">=</span> <span class="n">confirm_writable</span>
+
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Command</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">handle_noargs</span><span class="p">(</span><span class="o">**</span><span class="n">options</span><span class="p">)</span></code></pre></div>
+
+<p>The strategy here is to use Django&#39;s <a href="https://docs.djangoproject.com/en/dev/topics/db/multi-db/#using-routers">database router</a> mechanism to throw an exception when trying to write to the database.</p>
+
+<h1>Install</h1>
+
+<p>Drop this into your project as <code>myapp/management/commands/shell.py</code> and it will over-ride the default shell command.</p>
+
+<h1>Hipchat</h1>
+
+<p>In my case, I&#39;m notifying the team via <a href="https://www.hipchat.com/">Hipchat</a>. Of course, you can replace this function with a version that sends out an email, etc. If you&#39;re curious, here is the hipchat code:</p>
+
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">urllib</span>
+<span class="kn">import</span> <span class="nn">urllib2</span>
+
+
+<span class="k">def</span> <span class="nf">_make_hipchat_request</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">auth_token</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">auth_token</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+        <span class="n">auth_token</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">HIPCHAT_TOKEN</span>
+    <span class="n">HIPCHAT_BASE_URL</span> <span class="o">=</span> <span class="s">&quot;https://api.hipchat.com/v1&quot;</span>
+    <span class="n">final_url</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s%s%s</span><span class="s">auth_token=</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">HIPCHAT_BASE_URL</span><span class="p">,</span>
+        <span class="n">url</span><span class="p">,</span>
+        <span class="s">&#39;&amp;&#39;</span> <span class="k">if</span> <span class="s">&#39;?&#39;</span> <span class="ow">in</span> <span class="n">url</span> <span class="k">else</span> <span class="s">&#39;?&#39;</span><span class="p">,</span>
+        <span class="n">auth_token</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">final_url</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">send_message</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">room_id</span><span class="o">=</span><span class="s">&#39;Engineering&#39;</span><span class="p">,</span> <span class="n">from_name</span><span class="o">=</span><span class="s">&#39;Django&#39;</span><span class="p">,</span> <span class="n">auth_token</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s">&#39;yellow&#39;</span><span class="p">):</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="s">&#39;/rooms/message?message=</span><span class="si">%s</span><span class="s">&amp;room_id=</span><span class="si">%s</span><span class="s">&amp;from=</span><span class="si">%s</span><span class="s">&amp;message_format=text&amp;color=</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">urllib</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="n">message</span><span class="p">),</span>
+        <span class="n">urllib</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="n">room_id</span><span class="p">),</span>
+        <span class="n">urllib</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="n">from_name</span><span class="p">),</span>
+        <span class="n">urllib</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="n">color</span><span class="p">))</span>
+    <span class="n">_make_hipchat_request</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">auth_token</span><span class="p">)</span></code></pre></div>
+
+
+<hr>
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'chaseseibertblog';
+    var disqus_identifier = '/blog/2012/12/21/read-only-django-shell';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/django">django</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/shell">shell</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2015/03/27/software-engineering-fireside-chat.html">Introducing the Software Engineering Fireside Chat Podcast</a></li>
+                                
+                                    <li><a href="/blog/2015/02/10/one-on-ones.html">Topics for One on Ones</a></li>
+                                
+                                    <li><a href="/blog/2014/12/22/class-design.html">Thoughts on Object Oriented Class Design</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script src="http://code.jquery.com/jquery-latest.js"></script>
+        <script src="/blog/js/bootstrap.js"></script>
+        <script src="/blog/js/shCore.js"></script>
+        <script src="/blog/js/shBrushBash.js"></script>
+        <script src="/blog/js/shBrushCpp.js"></script>
+        <script src="/blog/js/shBrushCSharp.js"></script>
+        <script src="/blog/js/shBrushCss.js"></script>
+        <script src="/blog/js/shBrushJava.js"></script>
+        <script src="/blog/js/shBrushJScript.js"></script>
+        <script src="/blog/js/shBrushPhp.js"></script>
+        <script src="/blog/js/shBrushPython.js"></script>
+        <script src="/blog/js/shBrushSql.js"></script>
+        <script src="/blog/js/shBrushRuby.js"></script>
+        <script src="/blog/js/shBrushXml.js"></script>
+
+        <script type="text/javascript">
+            dp.SyntaxHighlighter.BloggerMode();
+            dp.SyntaxHighlighter.HighlightAll("code");
+        </script>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Using grep from inside vim</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/shCore.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2013/09/21/vim-grep-under-cursor.html" />
+
+        <meta property="og:title" content="Using grep from inside vim"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2013/09/21/vim-grep-under-cursor.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Using grep from inside vim
+                            
+                                <span class="post-date subtitle">21 Sep 2013</span>
+                            
+                        </h1>
+                    
+                    <blockquote>
+<p>This is my rifle. There are many like it, but this one is mine.  - <a href="http://en.wikipedia.org/wiki/Rifleman&#x27;s_Creed">Rifleman&#39;s Creed</a></p>
+</blockquote>
+
+<p>There are a thousand ways to grep over files. Most developers I have observed keep a separate command line open just for searching. A few use an IDE that has file search built-in. Personally, I use a couple of vim macros.</p>
+
+<p>In vim, you can execute a cross-file search with something like: <code>:vimgrep /dostuff()/j ../**/*.c</code>. I don&#39;t know about you, but the first time I saw that syntax my brain simply refused.</p>
+
+<p>Instead, I have the following in my .vimrc file:</p>
+
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="s">&quot; opens search results in a window w/ links and highlight the matches</span>
+<span class="n">command</span><span class="err">!</span> <span class="o">-</span><span class="n">nargs</span><span class="o">=+</span> <span class="n">Grep</span> <span class="n">execute</span> <span class="s">&#39;silent grep! -I -r -n --exclude *.{json,pyc} . -e &lt;args&gt;&#39;</span> <span class="o">|</span> <span class="n">copen</span> <span class="o">|</span> <span class="n">execute</span> <span class="s">&#39;silent /&lt;args&gt;&#39;</span>
+<span class="s">&quot; shift-control-* Greps for the word under the cursor</span>
+<span class="p">:</span><span class="n">nmap</span> <span class="o">&lt;</span><span class="n">leader</span><span class="o">&gt;</span><span class="n">g</span> <span class="p">:</span><span class="n">Grep</span> <span class="o">&lt;</span><span class="n">c</span><span class="o">-</span><span class="n">r</span><span class="o">&gt;=</span><span class="n">expand</span><span class="p">(</span><span class="s">&quot;&lt;cword&gt;&quot;</span><span class="p">)</span><span class="o">&lt;</span><span class="n">cr</span><span class="o">&gt;&lt;</span><span class="n">cr</span><span class="o">&gt;</span></code></pre></div>
+
+<p>The first command is just a simple alias for the above mentioned native grep. Like all custom commands, it must start with a capital letter (to differentiate it from native commands). You simply type <code>:Grep foobar</code>, and it will search in your current directory through all file extensions (except json and pyc; you can add more to the blacklist).</p>
+
+<p>It also displays the results in a nice little buffer window, which you can navigate through with normal HJKL keys, and open matches in the main editor window.</p>
+
+<p><img src="/blog/images/vimgrep.png" alt="vim Grep"></p>
+
+<p>The second line is a key mapping that will grep for the word currently under the cursor. You can just navigate to a word and hit <code>Leader-g</code> to issue the Grep command.</p>
+
+
+<hr>
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'chaseseibertblog';
+    var disqus_identifier = '/blog/2013/09/21/vim-grep-under-cursor';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/vim">vim</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2015/03/27/software-engineering-fireside-chat.html">Introducing the Software Engineering Fireside Chat Podcast</a></li>
+                                
+                                    <li><a href="/blog/2015/02/10/one-on-ones.html">Topics for One on Ones</a></li>
+                                
+                                    <li><a href="/blog/2014/12/22/class-design.html">Thoughts on Object Oriented Class Design</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script src="http://code.jquery.com/jquery-latest.js"></script>
+        <script src="/blog/js/bootstrap.js"></script>
+        <script src="/blog/js/shCore.js"></script>
+        <script src="/blog/js/shBrushBash.js"></script>
+        <script src="/blog/js/shBrushCpp.js"></script>
+        <script src="/blog/js/shBrushCSharp.js"></script>
+        <script src="/blog/js/shBrushCss.js"></script>
+        <script src="/blog/js/shBrushJava.js"></script>
+        <script src="/blog/js/shBrushJScript.js"></script>
+        <script src="/blog/js/shBrushPhp.js"></script>
+        <script src="/blog/js/shBrushPython.js"></script>
+        <script src="/blog/js/shBrushSql.js"></script>
+        <script src="/blog/js/shBrushRuby.js"></script>
+        <script src="/blog/js/shBrushXml.js"></script>
+
+        <script type="text/javascript">
+            dp.SyntaxHighlighter.BloggerMode();
+            dp.SyntaxHighlighter.HighlightAll("code");
+        </script>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

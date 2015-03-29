@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>click on a link (follow) via jQuery/JavaScript</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/shCore.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2010/04/09/click-on-a-link-follow-via-jqueryjavascript.html" />
+
+        <meta property="og:title" content="click on a link (follow) via jQuery/JavaScript"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2010/04/09/click-on-a-link-follow-via-jqueryjavascript.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            click on a link (follow) via jQuery/JavaScript
+                            
+                                <span class="post-date subtitle">09 Apr 2010</span>
+                            
+                        </h1>
+                    
+                    <p>
+You might reasonably assume that it would be possible to fire a click event on an "A" element (link) via JavaScript, at which point the browser would fire any click event handlers currently attached, or otherwise just follow the link. But you would be wrong, at least in the case of Firefox.
+</p>
+
+<blockquote>
+The click method is intended to be used with INPUT elements of type button, checkbox, radio, reset or submit. Gecko does not implement the click method on other elements that might be expected to respond to mouse–clicks such as links (A elements), nor will it necessarily fire the click event of other elements.
+  - <a href="https://developer.mozilla.org/en/DOM/element.click">Mozila Documentation</a>
+</blockquote>
+
+<p>
+Why is that? It seems that Firefox is <a href="http://www.w3.org/TR/DOM-Level-2-HTML/html.html#ID-2651361">following the standard</a> quite strictly, whereas IE has no problems automating link clicks. There may also be a sandbox security argument here, but personally I don't buy that as long as we are allowing <a href="http://trevordavis.net/blog/tutorial/ajax-forms-with-jquery/">JavaScript to fire FORM POSTS</a>.
+</p>
+
+<p>
+Regardless, a cross browser solution is needed. At first blush, just setting window.location directly seems to work.
+</p>
+
+<pre name="code" class="javascript">
+   window.location = $("a#my-link").attr("href");
+</pre>
+
+<p>
+This naive solution has serious drawbacks; IE will not post a <a href="http://en.wikipedia.org/wiki/HTTP_referrer">HTTP Referrer</a> header, and the back button may skip pages navigated to this way. However, it may be an acceptable solution depending on your application.
+</p>
+
+<p>
+If you have control over the HTML itself, a better solution is to just use FORMs instead. It's trivial to submit a form via jQuery. It's even possible to make the button look somewhat like a HTML link.
+</p>
+
+<pre name="code" class="html">
+
+&lt;!-- was &lt;a href="/my-link-url"&gt;Click me&lt;/a&gt; --&gt;
+&lt;form id="my-form" action="/my-link-url" action="get"&gt;
+   &lt;input class="button-link" type="submit" value="Click me" /&gt;
+&lt;/form&gt;
+
+&lt;script&gt;
+   // simulate a user clicking the "link"
+   $(".button-link").click();
+
+   // you could also just submit the form directly, depending on what's easier
+   $("form#my-form").submit();
+&lt;/script&gt;
+
+&lt;style&gt;
+   .button-link {
+      background-color:white;
+      border:0;
+      color:blue;
+      text-decoration:underline;
+      font-size:1em;
+      font-family:inherit;
+      cursor:pointer;
+   }
+&lt;/style&gt;
+
+</pre>
+
+
+<hr>
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'chaseseibertblog';
+    var disqus_identifier = '/blog/2010/04/09/click-on-a-link-follow-via-jqueryjavascript';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/javascript">javascript</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/jquery">jquery</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2015/03/27/software-engineering-fireside-chat.html">Introducing the Software Engineering Fireside Chat Podcast</a></li>
+                                
+                                    <li><a href="/blog/2015/02/10/one-on-ones.html">Topics for One on Ones</a></li>
+                                
+                                    <li><a href="/blog/2014/12/22/class-design.html">Thoughts on Object Oriented Class Design</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script src="http://code.jquery.com/jquery-latest.js"></script>
+        <script src="/blog/js/bootstrap.js"></script>
+        <script src="/blog/js/shCore.js"></script>
+        <script src="/blog/js/shBrushBash.js"></script>
+        <script src="/blog/js/shBrushCpp.js"></script>
+        <script src="/blog/js/shBrushCSharp.js"></script>
+        <script src="/blog/js/shBrushCss.js"></script>
+        <script src="/blog/js/shBrushJava.js"></script>
+        <script src="/blog/js/shBrushJScript.js"></script>
+        <script src="/blog/js/shBrushPhp.js"></script>
+        <script src="/blog/js/shBrushPython.js"></script>
+        <script src="/blog/js/shBrushSql.js"></script>
+        <script src="/blog/js/shBrushRuby.js"></script>
+        <script src="/blog/js/shBrushXml.js"></script>
+
+        <script type="text/javascript">
+            dp.SyntaxHighlighter.BloggerMode();
+            dp.SyntaxHighlighter.HighlightAll("code");
+        </script>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

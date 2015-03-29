@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Sanitize HTML with Beautiful Soup</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/shCore.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2011/01/28/sanitize-html-with-beautiful-soup.html" />
+
+        <meta property="og:title" content="Sanitize HTML with Beautiful Soup"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2011/01/28/sanitize-html-with-beautiful-soup.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Sanitize HTML with Beautiful Soup
+                            
+                                <span class="post-date subtitle">28 Jan 2011</span>
+                            
+                        </h1>
+                    
+                    <p>
+If you have a website that displays user-generated HTML (emails, rich text entry, etc), you likely want to scrub that HTML before you display it. At the very least, you want to provide a reasonable protection against <a href="http://bitkickers.blogspot.com/2009/02/antisamy.html">XSS</a>. But maybe you also want to prevent the HTML from breaking your page layout. Either way, Beautiful Soup is a good tool for the job.
+</p>
+
+<p>
+Here is some Python code that uses Beautiful Soup to clean HTML of any tags and attributes not explicitly white listed. The CSS property scrubbing is blacklist based, which sucks and should be redone with a real CSS parsing library. If you want a really diesel solution to this issue, I suggest you look at <a href="http://www.owasp.org/index.php/Category:OWASP_AntiSamy_Project">AntiSamy</a> for Java or .NET.
+</p>
+
+<p>
+As a bonus, there is also a method for converting html to plaintext, while making a best effort to preserve the structural whitespace.
+</p>
+
+<pre name="code" class="python">
+from BeautifulSoup import BeautifulSoup, Comment
+import re, htmlentitydefs
+from HTMLParser import HTMLParseError
+from datetime import datetime
+import subprocess
+import os
+import urllib2
+
+def safe_html(html):
+
+    if not html:
+        return None
+
+    # remove these tags, complete with contents.
+    blacklist = ["script", "style" ]
+
+    whitelist = [
+        "div", "span", "p", "br", "pre",
+        "table", "tbody", "thead", "tr", "td", "a",
+        "blockquote",
+        "ul", "li", "ol",
+        "b", "em", "i", "strong", "u", "font"
+        ]
+
+    try:
+        # BeautifulSoup is catching out-of-order and unclosed tags, so markup
+        # can't leak out of comments and break the rest of the page.
+        soup = BeautifulSoup(html)
+    except HTMLParseError, e:
+        # special handling?
+        raise e
+
+    # now strip HTML we don't like.
+    for tag in soup.findAll():
+        if tag.name.lower() in blacklist:
+            # blacklisted tags are removed in their entirety
+            tag.extract()
+        elif tag.name.lower() in whitelist:
+            # tag is allowed. Make sure all the attributes are allowed.
+            tag.attrs = [(a[0], safe_css(a[0], a[1])) for a in tag.attrs if _attr_name_whitelisted(a[0])]
+        else:
+            # not a whitelisted tag. I'd like to remove it from the tree
+            # and replace it with its children. But that's hard. It's much
+            # easier to just replace it with an empty span tag.
+            tag.name = "span"
+            tag.attrs = []
+
+    # scripts can be executed from comments in some cases
+    comments = soup.findAll(text=lambda text:isinstance(text, Comment))
+    for comment in comments:
+        comment.extract()
+
+    safe_html = unicode(soup)
+
+    if safe_html == ", -":
+        return None
+
+    return safe_html
+
+def _attr_name_whitelisted(attr_name):
+    return attr_name.lower() in ["href", "style", "color", "size", "bgcolor", "border"]
+
+def safe_css(attr, css):
+    if attr == "style":
+        return re.sub("(width|height):[^;]+;", "", css)
+    return css
+
+def plaintext(input):
+    """Converts HTML to plaintext, preserving whitespace."""
+
+    # from http://effbot.org/zone/re-sub.htm#unescape-html
+    def _unescape(text):
+        def fixup(m):
+            text = m.group(0)
+            if text[:2] == "&amp;#":
+                # character reference
+                try:
+                    if text[:3] == "&amp;#x":
+                        return unichr(int(text[3:-1], 16))
+                    else:
+                        return unichr(int(text[2:-1]))
+                except ValueError:
+                    pass
+            else:
+                # named entity
+                try:
+                    text = unichr(htmlentitydefs.name2codepoint[text[1:-1]])
+                except KeyError:
+                    pass
+            return text # leave as is
+        return re.sub("&amp;#?\w+;", fixup, text)
+
+    input = safe_html(input) # basic sanitation first
+    text = "".join(BeautifulSoup("&lt;body&gt;%s&lt;/body&gt;" % input).body(text=True))
+    text = text.replace("xml version='1.0' encoding='%SOUP-ENCODING%'", "") # strip BS meta-data
+    return _unescape(text)
+</pre>
+
+<p>
+<i>Note: This method is neither fast, nor particularly bullet proof. You definitely want to cache the results so you're not performing this transformation while the user is waiting. Some documents will throw a HTMLParseError if Beautiful Soup cannot parse them. You can choose whether you want to do the secure thing and not show it at all, or if you want to risk it and show them the original HTML.</i>
+</p>
+
+
+<hr>
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'chaseseibertblog';
+    var disqus_identifier = '/blog/2011/01/28/sanitize-html-with-beautiful-soup';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/xss">xss</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/plaintext">plaintext</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/beautifulsoup">beautifulsoup</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2015/03/27/software-engineering-fireside-chat.html">Introducing the Software Engineering Fireside Chat Podcast</a></li>
+                                
+                                    <li><a href="/blog/2015/02/10/one-on-ones.html">Topics for One on Ones</a></li>
+                                
+                                    <li><a href="/blog/2014/12/22/class-design.html">Thoughts on Object Oriented Class Design</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script src="http://code.jquery.com/jquery-latest.js"></script>
+        <script src="/blog/js/bootstrap.js"></script>
+        <script src="/blog/js/shCore.js"></script>
+        <script src="/blog/js/shBrushBash.js"></script>
+        <script src="/blog/js/shBrushCpp.js"></script>
+        <script src="/blog/js/shBrushCSharp.js"></script>
+        <script src="/blog/js/shBrushCss.js"></script>
+        <script src="/blog/js/shBrushJava.js"></script>
+        <script src="/blog/js/shBrushJScript.js"></script>
+        <script src="/blog/js/shBrushPhp.js"></script>
+        <script src="/blog/js/shBrushPython.js"></script>
+        <script src="/blog/js/shBrushSql.js"></script>
+        <script src="/blog/js/shBrushRuby.js"></script>
+        <script src="/blog/js/shBrushXml.js"></script>
+
+        <script type="text/javascript">
+            dp.SyntaxHighlighter.BloggerMode();
+            dp.SyntaxHighlighter.HighlightAll("code");
+        </script>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

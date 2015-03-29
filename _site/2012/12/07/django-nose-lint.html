@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Django Nose Lint Quickstart - Enforce fast unit tests</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/shCore.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2012/12/07/django-nose-lint.html" />
+
+        <meta property="og:title" content="Django Nose Lint Quickstart - Enforce fast unit tests"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2012/12/07/django-nose-lint.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Django Nose Lint Quickstart - Enforce fast unit tests
+                            
+                                <span class="post-date subtitle">07 Dec 2012</span>
+                            
+                        </h1>
+                    
+                    <p>In the battle for blazing fast unit tests, you need all the tools you can get at your disposal. Enter <a href="https://github.com/chase-seibert/django-nose-lint">django-nose-lint</a>, a new <a href="https://nose.readthedocs.org/en/latest/">Nose</a> plugin that lets you enforce certain runtime constraints on your test suite. You can just flat out fail tests that take over a configurable amount of time. You can also get more granular and fail tests that try to do certain slow stuff. For example, using the <a href="https://docs.djangoproject.com/en/dev/topics/testing/#module-django.test.client">Django test client</a>.</p>
+
+<p>Here are the things it can currently check for:</p>
+
+<ul>
+<li>ESOK = Used a TCP socket</li>
+<li>ECLI = Used the Django Test Client</li>
+<li>ETEM = Tried to render a Django template</li>
+<li>ESLO = Test took over 1 second (takes --maxms argument)</li>
+<li>EALL = All of the above</li>
+</ul>
+
+<h2>Quickstart for exsting Django projects already using django-nose</h2>
+
+<p>If you&#39;re already running <code>django-nose</code> on your Django app, all you need to do is install <code>django-nose-lint</code>, and run your tests with the <code>--lint</code> flag.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">pip install django-nose-lint
+./manage.py <span class="nb">test</span> --lint<span class="o">=</span>EALL</code></pre></div>
+
+<h2>Starting from scratch on a new Django project</h2>
+
+<p>This is mostly an re-hash of the <a href="https://github.com/jbalogh/django-nose#readme">django-nose setup docs</a>. I assume you have <a href="http://pypi.python.org/pypi/virtualenv">virtualenv</a> installed, and want to use it to isolate this skunkworks from your existing python stuff.</p>
+
+<p>First, setup a new Django project inside <code>virtualenv</code>.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">mkdir django-nose-lint-test
+<span class="nb">cd </span>django-nose-lint-test/
+virtualenv --no-site-packages --distribute virtualenv
+<span class="nb">source </span>virtualenv/bin/activate
+pip install django nose django-nose django-nose-lint
+django-admin.py startproject mysite
+<span class="nb">cd </span>mysite/</code></pre></div>
+
+<p>Then, edit your Django <code>settings.py</code> file to do basic setup, and attach <code>django-nose</code>.</p>
+
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">DATABASES</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">&#39;default&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s">&#39;ENGINE&#39;</span><span class="p">:</span> <span class="s">&#39;django.db.backends.sqlite3&#39;</span><span class="p">,</span>
+        <span class="s">&#39;NAME&#39;</span><span class="p">:</span> <span class="s">&#39;&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="n">INSTALLED_APPS</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="o">...</span>
+    <span class="s">&#39;django_nose&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">TEST_RUNNER</span> <span class="o">=</span> <span class="s">&#39;django_nose.NoseTestSuiteRunner&#39;</span></code></pre></div>
+
+<p>Create a basic test that we want to fail. Create this as <code>mysite/tests.py</code>. It should be along-side <code>urls.py</code> in the directory structure.</p>
+
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">unittest</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+
+<span class="k">class</span> <span class="nc">MyTest</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">test_one</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">1.1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span></code></pre></div>
+
+<p>Run your test suite.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">&gt;python manage.py <span class="nb">test</span> --lint<span class="o">=</span>EALL
+Creating <span class="nb">test </span>database <span class="k">for</span> <span class="nb">alias</span> <span class="s1">&#39;default&#39;</span>...
+.E
+<span class="o">======================================================================</span>
+ERROR: test_one <span class="o">(</span>tests.MyTest<span class="o">)</span>
+----------------------------------------------------------------------
+Traceback <span class="o">(</span>most recent call last<span class="o">)</span>:
+  File <span class="s2">&quot;/Users/cseibert/projects/django-nose-lint-test/virtualenv/lib/python2.7/site-packages/nose/case.py&quot;</span>, line 133, in run
+    self.runTest<span class="o">(</span>result<span class="o">)</span>
+  File <span class="s2">&quot;/Users/cseibert/projects/django-nose-lint-test/virtualenv/lib/python2.7/site-packages/nose/case.py&quot;</span>, line 151, in runTest
+    <span class="nb">test</span><span class="o">(</span>result<span class="o">)</span>
+  File <span class="s2">&quot;/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/unittest/case.py&quot;</span>, line 376, in __call__
+    <span class="k">return</span> self.run<span class="o">(</span>*args, **kwds<span class="o">)</span>
+  File <span class="s2">&quot;/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/unittest/case.py&quot;</span>, line 355, in run
+    result.stopTest<span class="o">(</span>self<span class="o">)</span>
+  File <span class="s2">&quot;/Users/cseibert/projects/django-nose-lint-test/virtualenv/lib/python2.7/site-packages/nose/proxy.py&quot;</span>, line 180, in stopTest
+    self.plugins.stopTest<span class="o">(</span>self.test<span class="o">)</span>
+  File <span class="s2">&quot;/Users/cseibert/projects/django-nose-lint-test/virtualenv/lib/python2.7/site-packages/nose/plugins/manager.py&quot;</span>, line 99, in __call__
+    <span class="k">return</span> self.call<span class="o">(</span>*arg, **kw<span class="o">)</span>
+  File <span class="s2">&quot;/Users/cseibert/projects/django-nose-lint-test/virtualenv/lib/python2.7/site-packages/nose/plugins/manager.py&quot;</span>, line 167, in simple
+    <span class="nv">result</span> <span class="o">=</span> meth<span class="o">(</span>*arg, **kw<span class="o">)</span>
+  File <span class="s2">&quot;/Users/cseibert/projects/django-nose-lint-test/virtualenv/lib/python2.7/site-packages/noselint/__init__.py&quot;</span>, line 76, in stopTest
+    raise DeprecationWarning<span class="o">(</span><span class="s1">&#39;DjangoNoseLint Error: ESLO - test took %s ms&#39;</span> % delta_ms<span class="o">)</span>
+DeprecationWarning: DjangoNoseLint Error: ESLO - <span class="nb">test </span>took <span class="m">1101</span> ms
+
+----------------------------------------------------------------------
+Ran <span class="m">1</span> <span class="nb">test </span>in 1.104s
+
+FAILED <span class="o">(</span><span class="nv">errors</span><span class="o">=</span>1<span class="o">)</span></code></pre></div>
+
+<p>If you run without the <code>--lint</code> flag, the same test should pass.</p>
+
+<h2>Call for ideas</h2>
+
+<p>I&#39;m looking for some more ideas of things to fail in unit tests. Please <a href="https://github.com/chase-seibert/django-nose-lint/issues">submit a bug</a> to the tracker if you have any ideas.</p>
+
+
+<hr>
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'chaseseibertblog';
+    var disqus_identifier = '/blog/2012/12/07/django-nose-lint';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/django">django</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/testing">testing</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2015/03/27/software-engineering-fireside-chat.html">Introducing the Software Engineering Fireside Chat Podcast</a></li>
+                                
+                                    <li><a href="/blog/2015/02/10/one-on-ones.html">Topics for One on Ones</a></li>
+                                
+                                    <li><a href="/blog/2014/12/22/class-design.html">Thoughts on Object Oriented Class Design</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script src="http://code.jquery.com/jquery-latest.js"></script>
+        <script src="/blog/js/bootstrap.js"></script>
+        <script src="/blog/js/shCore.js"></script>
+        <script src="/blog/js/shBrushBash.js"></script>
+        <script src="/blog/js/shBrushCpp.js"></script>
+        <script src="/blog/js/shBrushCSharp.js"></script>
+        <script src="/blog/js/shBrushCss.js"></script>
+        <script src="/blog/js/shBrushJava.js"></script>
+        <script src="/blog/js/shBrushJScript.js"></script>
+        <script src="/blog/js/shBrushPhp.js"></script>
+        <script src="/blog/js/shBrushPython.js"></script>
+        <script src="/blog/js/shBrushSql.js"></script>
+        <script src="/blog/js/shBrushRuby.js"></script>
+        <script src="/blog/js/shBrushXml.js"></script>
+
+        <script type="text/javascript">
+            dp.SyntaxHighlighter.BloggerMode();
+            dp.SyntaxHighlighter.HighlightAll("code");
+        </script>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

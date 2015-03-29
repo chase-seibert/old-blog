@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Creating International CSV files with Python</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/shCore.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2014/07/30/international-csv-files-python.html" />
+
+        <meta property="og:title" content="Creating International CSV files with Python"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2014/07/30/international-csv-files-python.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Creating International CSV files with Python
+                            
+                                <span class="post-date subtitle">30 Jul 2014</span>
+                            
+                        </h1>
+                    
+                    <p>You might assume that reading and writing files using the CSV format, being a simple and human-readable implementation,
+would be relatively pain free. You would be wrong. It turns out that even though there
+<a href="http://tools.ietf.org/html/rfc4180">is a standard</a>, many applications out there do not conform, or require their own
+additions and modifications. Most notable among the outliers is Microsoft Excel, which forces you to do some crazy things
+if you want to produce CSV files that can be read by any edition of Windows/Office, including international versions.</p>
+
+<p>Yes, you heard me right. Whether you&#39;re running the US or European version of Windows can effect whether you can
+seemlessly open a CSV file with commas as the delimiter. Apparently some countries prefer their comma delimited text
+to be delimited with semicolons. More on that later.</p>
+
+<blockquote>
+<p>The name &quot;CSV&quot; indicates the use of the comma to separate data fields. Nevertheless, the term &quot;CSV&quot; is widely used
+to refer a large family of formats, which differ in many ways. For example, many so-called &quot;CSV&quot; files in fact use
+the tab character instead of comma (such files can be more precisely referred to as &quot;TSV&quot; for tab separated values);
+some implementations allow or require single or double quotation marks around some or all fields; and some reserve
+the very first record as a header containing a list of field names. The character set being used is undefined:
+some applications require a Unicode BOM to enforce Unicode interpretation - <a href="http://en.wikipedia.org/wiki/Comma-separated_values#Lack_of_a_standard">Wikipedia</a></p>
+</blockquote>
+
+<h2>Diacriticly Delicious</h2>
+
+<p>The first hurdle when producing international CSV files with Python is the <code>csv</code> module&#39;s
+<a href="https://docs.python.org/2/library/csv.html">lack of native unicode support</a>:</p>
+
+<blockquote>
+<p>The csv module doesn’t directly support reading and writing Unicode, but it is 8-bit-clean save for some problems
+with ASCII NUL characters. So you can write functions or classes that handle the encoding and decoding for you as
+long as you avoid encodings like UTF-16 that use NULs. UTF-8 is recommended.</p>
+</blockquote>
+
+<p>Instead, they suggest that you use a a custom <code>UnicodeWriter</code> class.</p>
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="k">class</span> <span class="nc">UnicodeWriter</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A CSV writer which will write rows to CSV file &quot;f&quot;,</span>
+<span class="sd">    which is encoded in the given encoding.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">dialect</span><span class="o">=</span><span class="n">csv</span><span class="o">.</span><span class="n">excel</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s">&quot;utf-8&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="c"># Redirect output to a queue</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">queue</span> <span class="o">=</span> <span class="n">cStringIO</span><span class="o">.</span><span class="n">StringIO</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">writer</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">writer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">,</span> <span class="n">dialect</span><span class="o">=</span><span class="n">dialect</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stream</span> <span class="o">=</span> <span class="n">f</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">encoder</span> <span class="o">=</span> <span class="n">codecs</span><span class="o">.</span><span class="n">getincrementalencoder</span><span class="p">(</span><span class="n">encoding</span><span class="p">)()</span>
+
+    <span class="k">def</span> <span class="nf">writerow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">([</span><span class="n">s</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">row</span><span class="p">])</span>
+        <span class="c"># Fetch UTF-8 output from the queue ...</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s">&quot;utf-8&quot;</span><span class="p">)</span>
+        <span class="c"># ... and reencode it into the target encoding</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoder</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="c"># write to the target stream</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="c"># empty queue</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">truncate</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">writerows</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rows</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">writerow</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+</code></pre></div>
+<p>However, even with this handy class, you will find that Excel 2007, 2010 and 2013 will
+<a href="http://stackoverflow.com/questions/155097/microsoft-excel-mangles-diacritics-in-csv-files#answer-155176">fail to detect the UTF-8 encoding</a>.
+I should note that Google Docs and LibreOffice have no problems detecting the encoding. If you&#39;re using earlier versions
+of Excel, it&#39;s even worse. Excel 97, 2000 and 2003 will simply fail to open the file at all unless you use the import
+wizard and manually specify the encoding.</p>
+
+<h2>Dropping Bombs</h2>
+
+<p>For the versions of Excel from the modern era, you need to explicitly denote the encoding using a BOM, or
+<a href="http://en.wikipedia.org/wiki/Byte_order_mark">Byte Order Mark</a>.</p>
+
+<blockquote>
+<p>The byte order mark (BOM) is a Unicode character used to signal the endianness (byte order) of a text file or stream.
+It is encoded at U+FEFF byte order mark (BOM). BOM use is optional, and, if used, should appear at the start of the
+text stream. Beyond its specific use as a byte-order indicator, the BOM character may also indicate which of the
+several Unicode representations the text is encoded in.</p>
+</blockquote>
+
+<p>Fun. I find that meditating on my own endianness is a very relaxing morning ritual. In any case, it&#39;s fairly simple to
+write the UTF-8 BOM to the very start of the file:</p>
+
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">codecs</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">dialect</span><span class="o">=</span><span class="n">csv</span><span class="o">.</span><span class="n">excel</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s">&quot;utf-8&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="o">...</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stream</span> <span class="o">=</span> <span class="n">f</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">codecs</span><span class="o">.</span><span class="n">BOM_UTF8</span><span class="p">)</span>
+        <span class="o">...</span></code></pre></div>
+
+<p><em>Note: You need to write the BOM directly to the file buffer, and not via the UnicodeWriter.writer object, otherwise
+the BOM itself will be encoded as UTF-8, when it needs to be raw bytes.</em></p>
+
+<h2>Separating the Men from the Boys</h2>
+
+<p>It turns our that there is another insidious issue with international versions of Windows. There is actually a setting
+in Windows <a href="http://hotware.wordpress.com/2009/12/16/trouble-with-opening-csv-files-with-excel-the-comma-and-semicolon-issue-in-excel-due-to-regional-settings-for-europe/">Regional and Language</a>
+control panel called &quot;List Separator&quot;. In the US version of Windows, the default is a comma (<code>,</code>). In other locales,
+specifically the European version, the default is often a semi-colon (<code>;</code>).</p>
+
+<p><img src="/blog/images/regional.png" alt="regional settings"></p>
+
+<p>There are several hack solutions to this. The first is to tell all your European users to change their setting. The second
+is to save the file as a .txt file, and tell the users to choose &quot;Open with Excel&quot;, which will then run the import wizard
+and detect the delimiter. The third is to tell them to always use launch the import wizard manually, and not to simply
+double click on the file to open it.</p>
+
+<p>The fourth, <a href="http://superuser.com/questions/180964/how-to-open-semicolon-delimited-csv-files-in-us-version-of-excel#answer-420025">slightly less gross hack</a>
+to is put <code>sep=,</code> as the first line in your csv file, which will signal to Excel that you want to explicitly use commas as
+the delimiter.</p>
+
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">os</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">dialect</span><span class="o">=</span><span class="n">csv</span><span class="o">.</span><span class="n">excel</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s">&quot;utf-8&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="o">...</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;sep=,&#39;</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">linesep</span><span class="p">)</span>
+        <span class="o">...</span></code></pre></div>
+
+<p><em>Note: this line will show up in most spreadsheet applications as the first line of your data. So users may have to
+manually delete the first two every time they start working with a file.</em></p>
+
+<h2>More Fun</h2>
+
+<p>After some more research, it turns out that Mac Excel simply <a href="http://answers.microsoft.com/en-us/mac/forum/macoffice2011-macexcel/mac-excel-converts-utf-8-characters-to-underlines/7c4cdaa7-bfa3-41a2-8482-554ae235227b?msgId=c8295574-a053-48a6-b419-51523ce2a247">does not support UTF-8</a>
+at all. So forget it ever working there.</p>
+
+<p>Also, writing BOTH the BOM and the <code>sep=,</code> will cause Windows Excel to <a href="http://stackoverflow.com/questions/20395699/sep-statement-breaks-utf8-bom-in-csv-file-which-is-generated-by-xsl#answer-23513342">forget about the BOM</a>
+you just specified. So, you basically need to choose whether you want unicode characters to show up correctly, or
+whether you want to have the columns separated automatically.</p>
+
+
+<hr>
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'chaseseibertblog';
+    var disqus_identifier = '/blog/2014/07/30/international-csv-files-python';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/csv">csv</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2015/03/27/software-engineering-fireside-chat.html">Introducing the Software Engineering Fireside Chat Podcast</a></li>
+                                
+                                    <li><a href="/blog/2015/02/10/one-on-ones.html">Topics for One on Ones</a></li>
+                                
+                                    <li><a href="/blog/2014/12/22/class-design.html">Thoughts on Object Oriented Class Design</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script src="http://code.jquery.com/jquery-latest.js"></script>
+        <script src="/blog/js/bootstrap.js"></script>
+        <script src="/blog/js/shCore.js"></script>
+        <script src="/blog/js/shBrushBash.js"></script>
+        <script src="/blog/js/shBrushCpp.js"></script>
+        <script src="/blog/js/shBrushCSharp.js"></script>
+        <script src="/blog/js/shBrushCss.js"></script>
+        <script src="/blog/js/shBrushJava.js"></script>
+        <script src="/blog/js/shBrushJScript.js"></script>
+        <script src="/blog/js/shBrushPhp.js"></script>
+        <script src="/blog/js/shBrushPython.js"></script>
+        <script src="/blog/js/shBrushSql.js"></script>
+        <script src="/blog/js/shBrushRuby.js"></script>
+        <script src="/blog/js/shBrushXml.js"></script>
+
+        <script type="text/javascript">
+            dp.SyntaxHighlighter.BloggerMode();
+            dp.SyntaxHighlighter.HighlightAll("code");
+        </script>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

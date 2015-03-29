@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Measure navigation timing with javascript</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/shCore.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2011/04/22/measure-navigation-timing-with-javascript.html" />
+
+        <meta property="og:title" content="Measure navigation timing with javascript"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2011/04/22/measure-navigation-timing-with-javascript.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Measure navigation timing with javascript
+                            
+                                <span class="post-date subtitle">22 Apr 2011</span>
+                            
+                        </h1>
+                    
+                    <p>
+Historically, site administrators would measure their site performance by timing individual page renders. If your site is serving pages in less than 500ms, it must be pretty fast, right? The full picture is significantly more complicated.
+</p>
+
+<p>
+With the advent of decent browser-based timing information, developers and admins realized just how much of the picture they were previously missing. Now, with sites like <a href="http://www.yottaa.com/">yotta</a>, you can get this information without even sullying your own browser.
+</p>
+
+<img src="https://lh6.googleusercontent.com/_EE2zVzGv1Ds/TbHWqftXBpI/AAAAAAAALcM/nuwPQHZoqiw/s800/yotta-timeline.png">
+
+<p>
+Notice that the "signup" HTML itself came back in just 158 milliseconds. This is the number you would see in typical apache log analyzer tools. But according to the browser based timing, the user did not see anything on the page for over 900ms. Even then, they could not fully interact with the page for over 2 seconds.
+</p>
+
+<p>
+Instead of getting this information from expensive third party monitoring services, what if you could harvest it from your actual visitors? Enter the <a href="https://dvcs.w3.org/hg/webperf/raw-file/tip/specs/NavigationTiming/Overview.html">W3C Navigation Timing spec</a>. It turns out browser vendors are way ahead of us.
+</p>
+
+<blockquote>User latency is an important quality benchmark for Web Applications. While JavaScript-based mechanisms can provide comprehensive instrumentation for user latency measurements within an application, in many cases, they are unable to provide a complete end-to-end latency picture.</blockquote>
+
+<img src="https://lh6.googleusercontent.com/_EE2zVzGv1Ds/TbHWqZ-z-tI/AAAAAAAALcI/fBtzcPzbIk4/s800/timing-overview.png">
+
+<p>
+In turns out that you can access this information <b>right now</b>, at least in Chrome latest and IE 9.0. It's exposed as a simple javascript object.
+</p>
+
+<img src="https://lh4.googleusercontent.com/_EE2zVzGv1Ds/TbHZyO5O-GI/AAAAAAAALcU/YCiKsIff7UE/s800/performance-chrome.png">
+
+<p>
+So how do you log this information on the server side? There are many ways, but recently we solved this problem on one of our sites by sticking the values into a cookie. Then you can examine this cookie server side on a subsequent page request. From there, we decided to log to a file and create pretty graphs with <a href="http://www.splunk.com/">Splunk</a>.
+</p>
+
+<pre name="code" class="javascript">
+function store_client_performance_data() {
+
+    var t = performance.timing;
+
+    // Before the load event fires, the loadEventEnd value will be zero
+    if (t.loadEventEnd &gt; 0) {
+
+        var earliestTime = t.navigationStart;
+
+        // Redirects from a different origin cause navigationStart to
+        // be zeroed out.  See NavigationTiming spec:
+        //
+        // https://dvcs.w3.org/hg/webperf/raw-file/tip/specs/NavigationTiming/Overview.html
+        //
+        if (earliestTime == 0) {
+            earliestTime = t.fetchStart;
+        }
+
+        fetchStartTime = t.fetchStart - earliestTime;
+        responseEndTime = t.responseEnd - earliestTime;
+        loadEventEndTime = t.loadEventEnd - earliestTime;
+
+        jQuery.cookie("clientSidePerformance",
+                      fetchStartTime + "|" +
+                      responseEndTime + "|" +
+                      loadEventEndTime,
+                      {"path": "/" });
+
+    } else {
+        setTimeout("store_client_performance_data()", 1000);
+    }
+}
+
+if (Object.prototype.hasOwnProperty.call(window, "performance")) {
+    setTimeout("store_client_performance_data()", 1000);
+}
+</pre>
+
+<p>
+The only tricky part here is that you can't be sure when the page will stop loading. Instead, we run this function every second until loadEventEnd is non-zero.
+</p>
+
+
+<hr>
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'chaseseibertblog';
+    var disqus_identifier = '/blog/2011/04/22/measure-navigation-timing-with-javascript';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/performance">performance</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/javascript">javascript</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2015/03/27/software-engineering-fireside-chat.html">Introducing the Software Engineering Fireside Chat Podcast</a></li>
+                                
+                                    <li><a href="/blog/2015/02/10/one-on-ones.html">Topics for One on Ones</a></li>
+                                
+                                    <li><a href="/blog/2014/12/22/class-design.html">Thoughts on Object Oriented Class Design</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script src="http://code.jquery.com/jquery-latest.js"></script>
+        <script src="/blog/js/bootstrap.js"></script>
+        <script src="/blog/js/shCore.js"></script>
+        <script src="/blog/js/shBrushBash.js"></script>
+        <script src="/blog/js/shBrushCpp.js"></script>
+        <script src="/blog/js/shBrushCSharp.js"></script>
+        <script src="/blog/js/shBrushCss.js"></script>
+        <script src="/blog/js/shBrushJava.js"></script>
+        <script src="/blog/js/shBrushJScript.js"></script>
+        <script src="/blog/js/shBrushPhp.js"></script>
+        <script src="/blog/js/shBrushPython.js"></script>
+        <script src="/blog/js/shBrushSql.js"></script>
+        <script src="/blog/js/shBrushRuby.js"></script>
+        <script src="/blog/js/shBrushXml.js"></script>
+
+        <script type="text/javascript">
+            dp.SyntaxHighlighter.BloggerMode();
+            dp.SyntaxHighlighter.HighlightAll("code");
+        </script>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

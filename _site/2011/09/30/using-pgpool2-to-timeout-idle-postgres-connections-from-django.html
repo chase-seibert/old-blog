@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Using pgpool2 to timeout idle Postgres connections from Django</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/shCore.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2011/09/30/using-pgpool2-to-timeout-idle-postgres-connections-from-django.html" />
+
+        <meta property="og:title" content="Using pgpool2 to timeout idle Postgres connections from Django"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2011/09/30/using-pgpool2-to-timeout-idle-postgres-connections-from-django.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Using pgpool2 to timeout idle Postgres connections from Django
+                            
+                                <span class="post-date subtitle">30 Sep 2011</span>
+                            
+                        </h1>
+                    
+                    <p>
+Django has a <a href="http://thebuild.com/blog/2010/10/25/django-and-postgresql-idle-in-transaction-connections/">well known issue</a> with "&lt;IDLE&gt; in transaction" queries piling up. I have found that simply "&lt;IDLE&gt;" queries also have a tendency to hang out. This can cause problems for a high traffic site, as you can run out of open connections slots on the database side.
+</p>
+
+<p>
+To see if you're affected, you can run a database query to see the status of open connections.
+</p>
+
+<pre name="code" class="sql">
+&gt;select count(*), current_query from pg_stat_activity group by current_query;
+ count |                                current_query                                 
+-------+------------------------------------------------------------------------------
+    31 | &lt;IDLE&gt; in transaction
+    54 | &lt;IDLE&gt;
+     1 | select count(*), current_query from pg_stat_activity group by current_query;
+(3 rows)
+
+&gt;SHOW max_connections;
+125
+</pre>
+
+<p>
+In this case, you can see that 86 out of a possible 125 connections are open, and there is only one "real" query running. After a while, you might start seeing the <b>OperationalError: FATAL:  sorry, too many clients already</b> error from Postgres, by way of Django.
+</p>
+
+<p>
+Why are these connections hanging out? Maybe you're <a href="http://stackoverflow.com/questions/1303654/threaded-django-task-doesnt-automatically-handle-transactions-or-db-connections">opening a transaction and not closing it</a>. In my case, I have no idea. But I don't really care either, I just want them closed after say 90 seconds. Surprisingly, there is no configuration option in Django or Postgres for this. Instead, you have to rely on a Postgres add-on like <a href="http://pgpool.projects.postgresql.org/">pgpool2</a>.
+</p>
+
+<p>
+Here are my notes for installing pgpool2 on Ubuntu, fixing a bug in the Ubuntu 11.04 init script and configuring a 90 second connection timeout. In this example, I'm installing pgpool2 on the Postgres database server itself, and having pgpool2 take over post 5432, moving Postgres itself to 5431 (to make it a seamless transition as far as Django config is concerned).
+</p>
+
+<pre name="code" class="bash">
+apt-get install pgpool2 
+
+vim /etc/init.d/pgpool2 
+PIDFILE=/var/run/pgpool/pgpool.pid 
+
+vim /etc/pgpool.conf 
+port = 5432 
+connection_life_time = 90 
+client_idle_limit = 90 
+backend_hostname0 = &#39;localhost&#39; 
+backend_port0 = 5431 
+backend_weight0 = 1 
+
+vim /etc/postgresql/8.4/main/postgresql.conf 
+port = 5431 
+
+/etc/init.d/postgresql-8.4 stop 
+/etc/init.d/postgresql-8.4 start 
+service pgpool2 restart
+</pre>
+
+
+<hr>
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'chaseseibertblog';
+    var disqus_identifier = '/blog/2011/09/30/using-pgpool2-to-timeout-idle-postgres-connections-from-django';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2015/03/27/software-engineering-fireside-chat.html">Introducing the Software Engineering Fireside Chat Podcast</a></li>
+                                
+                                    <li><a href="/blog/2015/02/10/one-on-ones.html">Topics for One on Ones</a></li>
+                                
+                                    <li><a href="/blog/2014/12/22/class-design.html">Thoughts on Object Oriented Class Design</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script src="http://code.jquery.com/jquery-latest.js"></script>
+        <script src="/blog/js/bootstrap.js"></script>
+        <script src="/blog/js/shCore.js"></script>
+        <script src="/blog/js/shBrushBash.js"></script>
+        <script src="/blog/js/shBrushCpp.js"></script>
+        <script src="/blog/js/shBrushCSharp.js"></script>
+        <script src="/blog/js/shBrushCss.js"></script>
+        <script src="/blog/js/shBrushJava.js"></script>
+        <script src="/blog/js/shBrushJScript.js"></script>
+        <script src="/blog/js/shBrushPhp.js"></script>
+        <script src="/blog/js/shBrushPython.js"></script>
+        <script src="/blog/js/shBrushSql.js"></script>
+        <script src="/blog/js/shBrushRuby.js"></script>
+        <script src="/blog/js/shBrushXml.js"></script>
+
+        <script type="text/javascript">
+            dp.SyntaxHighlighter.BloggerMode();
+            dp.SyntaxHighlighter.HighlightAll("code");
+        </script>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

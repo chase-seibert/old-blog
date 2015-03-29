@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Dynamic Attributes in Python</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/shCore.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2013/04/12/getattr-setattr.html" />
+
+        <meta property="og:title" content="Dynamic Attributes in Python"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2013/04/12/getattr-setattr.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Dynamic Attributes in Python
+                            
+                                <span class="post-date subtitle">12 Apr 2013</span>
+                            
+                        </h1>
+                    
+                    <p>One of the strengths of a dynamic language is that it allows you to more easily work introspection and light weight meta-programming into your every day code. In Python, one of the primary ways of taking advantage of the dynamic nature of the language is through attribute access.</p>
+
+<p><strong>Note</strong>: this is part one in a series of posts about basic Python functionality.</p>
+
+<p>In most cases, to get an attribute of an object, you just want to use <code>obj.field</code>. But if you don&#39;t know the name of the field until runtime, you can use <code>getattr(obj, &#39;field&#39;)</code>.</p>
+
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="k">def</span> <span class="nf">print_field</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">field</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">print</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="k">print</span> <span class="s">&#39;No </span><span class="si">%s</span><span class="s"> field&#39;</span> <span class="o">%</span> <span class="n">field</span></code></pre></div>
+
+<p>This is a fairly common pattern, so you can avoid the extra try/catch and use the third <code>default</code> parameter:</p>
+
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="k">def</span> <span class="nf">print_field</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">field</span><span class="p">):</span>
+    <span class="k">print</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="s">&#39;No </span><span class="si">%s</span><span class="s"> field&#39;</span> <span class="o">%</span> <span class="n">field</span><span class="p">)</span></code></pre></div>
+
+<p>Both attribute access methods are <a href="http://stackoverflow.com/questions/2909423/is-it-bad-practice-to-use-pythons-getattr-extensively#answer-2909734">virtually identical</a> in terms of performance. The regular method produces slightly cleaner code, so normally you would use that. Besides, when do you <strong>NOT</strong> know the names of the fields you want to access ahead of time?</p>
+
+<p>If you&#39;re dealing with data, you don&#39;t always know. For example, say you&#39;re mapping URLs to view methods. If the user hits <code>/user/123/settings</code>, you could route that to a view function as follows:</p>
+
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="k">class</span> <span class="nc">ViewClass</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">route</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">url</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="s">&#39;not_found_404&#39;</span><span class="p">)(</span><span class="n">request</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">settings</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">HttpResponse</span><span class="p">(</span><span class="s">&#39;Here is your settings page!&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">not_found_404</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">HttpResponse</span><span class="p">(</span><span class="s">&#39;404 Page Not Found&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="mi">404</span><span class="p">)</span></code></pre></div>
+
+<p>Of course, you could always do this with a pre-defined set of URLs, but the point is that you have a built-in way to avoid that code duplication. In general, this is known as keeping your code <a href="http://en.wikipedia.org/wiki/Don&#x27;t_repeat_yourself">DRY</a>. For example, notice the duplication of tokens in code like the following:</p>
+
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">obj</span><span class="o">.</span><span class="n">first_name</span><span class="o">.</span><span class="n">first_child</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="s">&#39;Chase&#39;</span>
+<span class="n">obj</span><span class="o">.</span><span class="n">last_name</span><span class="o">.</span><span class="n">first_child</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="s">&#39;Seibert&#39;</span>
+<span class="n">obj</span><span class="o">.</span><span class="n">phone</span><span class="o">.</span><span class="n">first_child</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="s">&#39;(555) 123-4567&#39;</span></code></pre></div>
+
+<p>Instead, you could do something like the following:</p>
+
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="k">for</span> <span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="p">((</span><span class="s">&#39;first_name&#39;</span><span class="p">,</span> <span class="s">&#39;Chase&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;last_name&#39;</span><span class="p">,</span> <span class="s">&#39;Seibert&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;phone&#39;</span><span class="p">,</span> <span class="s">&#39;(555) 123-4567&#39;</span><span class="p">)):</span>
+    <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span><span class="o">.</span><span class="n">first_child</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span></code></pre></div>
+
+<p>While this is certainly more code, for a larger number of lines, there will be a code savings. It&#39;s also easy to refactor all the obj.field lines at once, if for example you need to change it to <code>obj.field.set(value)</code>.</p>
+
+<p>You can also make use of dynamic attributes on the class side by over-riding <code>__getattr__</code>.</p>
+
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="k">class</span> <span class="nc">Counter</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; will only get called for undefined attributes &#39;&#39;&#39;</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span>
+
+<span class="n">counter</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">()</span>
+<span class="n">counter</span><span class="o">.</span><span class="n">foo</span> <span class="o">=</span> <span class="n">counter</span><span class="o">.</span><span class="n">foo</span> <span class="o">+</span> <span class="mi">100</span>
+<span class="k">print</span> <span class="n">counter</span><span class="o">.</span><span class="n">foo</span>  <span class="c"># prints &#39;100&#39;</span></code></pre></div>
+
+<p>There is an alternate <a href="http://www.rafekettler.com/magicmethods.html">magic method</a> called <code>__getattribute__</code> that fires even for attributes that are already declared. But be careful, it&#39;s easy to get into an infinite recursion loop here.</p>
+
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="k">class</span> <span class="nc">Logger</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__getattribute__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">print</span> <span class="s">&#39;Accessed attribute </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">name</span>
+        <span class="k">return</span> <span class="nb">object</span><span class="o">.</span><span class="n">__getattribute__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">foobar</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c"># prints &#39;Accessed attribute foobar&#39;</span></code></pre></div>
+
+<p>This is a trivial example, better implemented with <a href="http://wiki.python.org/moin/PythonDecorators">decorators</a>. But that is a subject for another post!</p>
+
+<p>Finally, there is a sister to <code>getattr</code> called <code>setattr</code>. As you would expect, this will set attributes by name. Here is a quick example:</p>
+
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="k">class</span> <span class="nc">MyModel</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_kwargs</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">cls</span><span class="p">()</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">obj</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">MyModel</span><span class="o">.</span><span class="n">from_kwargs</span><span class="p">(</span><span class="n">foo</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">bar</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="k">print</span> <span class="n">model</span><span class="o">.</span><span class="n">foo</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">bar</span>  <span class="c"># prints &#39;1, 2&#39;</span></code></pre></div>
+
+
+<hr>
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'chaseseibertblog';
+    var disqus_identifier = '/blog/2013/04/12/getattr-setattr';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/python">python</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/tutorial">tutorial</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2015/03/27/software-engineering-fireside-chat.html">Introducing the Software Engineering Fireside Chat Podcast</a></li>
+                                
+                                    <li><a href="/blog/2015/02/10/one-on-ones.html">Topics for One on Ones</a></li>
+                                
+                                    <li><a href="/blog/2014/12/22/class-design.html">Thoughts on Object Oriented Class Design</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script src="http://code.jquery.com/jquery-latest.js"></script>
+        <script src="/blog/js/bootstrap.js"></script>
+        <script src="/blog/js/shCore.js"></script>
+        <script src="/blog/js/shBrushBash.js"></script>
+        <script src="/blog/js/shBrushCpp.js"></script>
+        <script src="/blog/js/shBrushCSharp.js"></script>
+        <script src="/blog/js/shBrushCss.js"></script>
+        <script src="/blog/js/shBrushJava.js"></script>
+        <script src="/blog/js/shBrushJScript.js"></script>
+        <script src="/blog/js/shBrushPhp.js"></script>
+        <script src="/blog/js/shBrushPython.js"></script>
+        <script src="/blog/js/shBrushSql.js"></script>
+        <script src="/blog/js/shBrushRuby.js"></script>
+        <script src="/blog/js/shBrushXml.js"></script>
+
+        <script type="text/javascript">
+            dp.SyntaxHighlighter.BloggerMode();
+            dp.SyntaxHighlighter.HighlightAll("code");
+        </script>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

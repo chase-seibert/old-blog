@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Profile and reduce memory use in Django with .iterator()</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/shCore.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2011/10/12/profile-and-reduce-memory-use-in-django-with-iterator.html" />
+
+        <meta property="og:title" content="Profile and reduce memory use in Django with .iterator()"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2011/10/12/profile-and-reduce-memory-use-in-django-with-iterator.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Profile and reduce memory use in Django with .iterator()
+                            
+                                <span class="post-date subtitle">12 Oct 2011</span>
+                            
+                        </h1>
+                    
+                    <p>
+For the most part, objects allocated by Django are short-lived, and are eligible for garbage collection when the request ends. In our case, we also have some long running jobs using <a href="http://celeryproject.org/">celery</a>. One in particular, a job to create a several hundred megabyte XML file, was consistently using all the RAM on the machine.
+</p>
+
+<p>
+This wasn't too surprising because we were initially using Django templating to create the file, which keeps the entire response in memory while it's still being composed. But even after we <a href="/blog/2011/06/24/creating-large-xml-files-in-python-with-saxutils.html">moved to a SAX parser</a>, which is specifically designed for running with little memory by streaming the file, we were still running out of memory occasionally.
+</p>
+
+<p>
+We decided it was time to stop guessing, and profile the memory usage. Never having done this before, I did some research and came up with <a href="http://www.lshift.net/blog/2008/11/14/tracing-python-memory-leaks">this excellent guide</a> to using pdb for memory profiling.
+</p>
+
+<p>
+To get started, I needed something I could run from the command line, outside of the celery task framework. Using the <a href="https://docs.djangoproject.com/en/dev/howto/custom-management-commands/">Django Command framework</a>, I was easily able to compose a job that could run via manage.py.
+</p>
+
+<pre name="code" class="python">
+# in file myapp/management/commands/xmlmemtest.py
+from django.core.management.base import BaseCommand
+from myapp.helpers.scheduler import write_job_board_feed
+import uuid
+
+class Command(BaseCommand):
+    def handle(self, *args, **options):
+        write_job_board_feed(&quot;simplyhired&quot;, &quot;&quot;, &quot;justjobs&quot;, nocache=uuid.uuid4())
+
+# can be run via: ./manage.py xmlmemtest
+</pre>
+
+<p>
+With that, I was set to launch this process using pdb, the <a href="http://docs.python.org/library/pdb.html">Python debugger</a>.
+</p>
+
+<pre name="code" class="bash">
+chase@chase:~$ pdb ./manage.py xmlmemtest
+-&gt; from django.core.management import execute_manager
+(Pdb) r
+
+#... wait for a while until memory is getting high (will be much slower than usual) ...
+
+# pause execution
+&lt;Ctrl+C&gt;
+
+# evoke the garbage collector manually to make sure you&#39;re only seeing referenced objects
+(Pdb) import gc
+(Pdb) gc.collect()
+58
+(Pdb) gc.collect()
+0
+
+# show the top items in memory
+(Pdb) import objgraph
+(Pdb) objgraph.show_most_common_types(limit=5)
+Job                        184791
+builtin_function_or_method 57542
+tuple                      55478
+list                       14900
+dict                       8631
+</pre>
+
+<p>
+I was excepting to see some SAX parser objects at the top of the list. Instead, most of the memory was tied up in Job objects, which are a Django model in my application. Looking at the function, jobs were first referenced in the following code block.
+</p>
+
+<pre name="code" class="python">
+    for job in jobs:
+        feed.write_entry(2, job)
+</pre>
+
+<p>
+Playing around a bit, I tried the following, which immediately solved the memory issue.
+</p>
+
+<pre name="code" class="python">
+    for _job in jobs:
+        job = Job.objects.get(id=_job.id)
+        feed.write_entry(2, job)
+</pre>
+
+<p>
+Basically, doing a separate query for each job, and making sure it <b>goes out of scope</b> after we're done using it. In retrospect, this was pretty obvious. So obvious, that Django even provides a handy idiom called <a href="https://docs.djangoproject.com/en/dev/ref/models/querysets/#iterator">.iterator()</a> to do just this.
+</p>
+
+<blockquote>Evaluates the QuerySet (by performing the query) and returns an iterator (see PEP 234) over the results. A QuerySet typically caches its results internally so that repeated evaluations do not result in additional queries. In contrast, iterator() will read results directly, without doing any caching at the QuerySet level (internally, the default iterator calls iterator() and caches the return value). For a QuerySet which returns a large number of objects that you only need to access once, this can results in better performance and a significant reduction in memory.</blockquote>
+
+
+<hr>
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'chaseseibertblog';
+    var disqus_identifier = '/blog/2011/10/12/profile-and-reduce-memory-use-in-django-with-iterator';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/profile">profile</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/django">django</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2015/03/27/software-engineering-fireside-chat.html">Introducing the Software Engineering Fireside Chat Podcast</a></li>
+                                
+                                    <li><a href="/blog/2015/02/10/one-on-ones.html">Topics for One on Ones</a></li>
+                                
+                                    <li><a href="/blog/2014/12/22/class-design.html">Thoughts on Object Oriented Class Design</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script src="http://code.jquery.com/jquery-latest.js"></script>
+        <script src="/blog/js/bootstrap.js"></script>
+        <script src="/blog/js/shCore.js"></script>
+        <script src="/blog/js/shBrushBash.js"></script>
+        <script src="/blog/js/shBrushCpp.js"></script>
+        <script src="/blog/js/shBrushCSharp.js"></script>
+        <script src="/blog/js/shBrushCss.js"></script>
+        <script src="/blog/js/shBrushJava.js"></script>
+        <script src="/blog/js/shBrushJScript.js"></script>
+        <script src="/blog/js/shBrushPhp.js"></script>
+        <script src="/blog/js/shBrushPython.js"></script>
+        <script src="/blog/js/shBrushSql.js"></script>
+        <script src="/blog/js/shBrushRuby.js"></script>
+        <script src="/blog/js/shBrushXml.js"></script>
+
+        <script type="text/javascript">
+            dp.SyntaxHighlighter.BloggerMode();
+            dp.SyntaxHighlighter.HighlightAll("code");
+        </script>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

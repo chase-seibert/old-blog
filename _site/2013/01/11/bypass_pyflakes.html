@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Ignore pyflakes warnings with bypass_pyflakes</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/shCore.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2013/01/11/bypass_pyflakes.html" />
+
+        <meta property="og:title" content="Ignore pyflakes warnings with bypass_pyflakes"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2013/01/11/bypass_pyflakes.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Ignore pyflakes warnings with bypass_pyflakes
+                            
+                                <span class="post-date subtitle">11 Jan 2013</span>
+                            
+                        </h1>
+                    
+                    <p><a href="https://github.com/kevinw/pyflakes">Pyflakes</a> is a popular linter for python, even if it <a href="https://github.com/kevinw/pyflakes/commits/master">isn&#39;t being maintained</a> anymore. One <a href="http://stackoverflow.com/questions/5033727/how-do-i-get-pyflakes-to-ignore-a-statement">long</a> <a href="https://github.com/kevinw/pyflakes/pull/22">standing</a> request is to allow ignoring of specific warnings with comments, like many other linters allow.</p>
+
+<p>For example, it&#39;s common in python config files to use <code>import *</code>. But you definitely <a href="http://pythonconquerstheuniverse.wordpress.com/2011/03/28/why-import-star-is-a-bad-idea/">don&#39;t want</a> to allow that in most places.</p>
+
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">form</span> <span class="n">settings</span><span class="o">.</span><span class="n">base</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="n">MY_OVERIDE</span> <span class="o">=</span> <span class="s">&#39;foobar&#39;</span>  <span class="c"># over-ride this setting from base</span></code></pre></div>
+
+<p>This results in the warning <code>settings/local.py:1: &#39;from settings.base import *&#39; used; unable to detect undefined names</code>.</p>
+
+<p>It would be nice to be able to do the following.</p>
+
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">form</span> <span class="n">settings</span><span class="o">.</span><span class="n">base</span> <span class="kn">import</span> <span class="o">*</span>  <span class="c"># bypass_pyflakes</span>
+<span class="n">MY_OVERIDE</span> <span class="o">=</span> <span class="s">&#39;foobar&#39;</span>  <span class="c"># over-ride this setting from base</span></code></pre></div>
+
+<p>Here is a python script that monkey patches pyflakes to add this functionality.</p>
+
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="c">#!/usr/bin/env python</span>
+
+<span class="kn">from</span> <span class="nn">pyflakes.scripts</span> <span class="kn">import</span> <span class="n">pyflakes</span>
+<span class="kn">from</span> <span class="nn">pyflakes.checker</span> <span class="kn">import</span> <span class="n">Checker</span>
+
+
+<span class="k">def</span> <span class="nf">report_with_bypass</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">messageClass</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">text_lineno</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">code</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">code</span><span class="o">.</span><span class="n">readlines</span><span class="p">()[</span><span class="n">text_lineno</span><span class="p">]</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;bypass_pyflakes&#39;</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">messageClass</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+
+<span class="c"># monkey patch checker to support bypass</span>
+<span class="n">Checker</span><span class="o">.</span><span class="n">report</span> <span class="o">=</span> <span class="n">report_with_bypass</span>
+
+<span class="n">pyflakes</span><span class="o">.</span><span class="n">main</span><span class="p">()</span></code></pre></div>
+
+<p>If you save this as <code>pyflakes-bypass.py</code>, instead of running the <code>pyflakes &lt;path&gt;</code> command directly, you would now run <code>pyflakes-bypass.py &lt;path&gt;</code>.</p>
+
+
+<hr>
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'chaseseibertblog';
+    var disqus_identifier = '/blog/2013/01/11/bypass_pyflakes';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/python">python</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/pyflakes">pyflakes</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2015/03/27/software-engineering-fireside-chat.html">Introducing the Software Engineering Fireside Chat Podcast</a></li>
+                                
+                                    <li><a href="/blog/2015/02/10/one-on-ones.html">Topics for One on Ones</a></li>
+                                
+                                    <li><a href="/blog/2014/12/22/class-design.html">Thoughts on Object Oriented Class Design</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script src="http://code.jquery.com/jquery-latest.js"></script>
+        <script src="/blog/js/bootstrap.js"></script>
+        <script src="/blog/js/shCore.js"></script>
+        <script src="/blog/js/shBrushBash.js"></script>
+        <script src="/blog/js/shBrushCpp.js"></script>
+        <script src="/blog/js/shBrushCSharp.js"></script>
+        <script src="/blog/js/shBrushCss.js"></script>
+        <script src="/blog/js/shBrushJava.js"></script>
+        <script src="/blog/js/shBrushJScript.js"></script>
+        <script src="/blog/js/shBrushPhp.js"></script>
+        <script src="/blog/js/shBrushPython.js"></script>
+        <script src="/blog/js/shBrushSql.js"></script>
+        <script src="/blog/js/shBrushRuby.js"></script>
+        <script src="/blog/js/shBrushXml.js"></script>
+
+        <script type="text/javascript">
+            dp.SyntaxHighlighter.BloggerMode();
+            dp.SyntaxHighlighter.HighlightAll("code");
+        </script>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

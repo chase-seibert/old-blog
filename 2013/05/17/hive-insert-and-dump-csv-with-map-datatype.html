@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Write CSV data into Hive and Python</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/shCore.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2013/05/17/hive-insert-and-dump-csv-with-map-datatype.html" />
+
+        <meta property="og:title" content="Write CSV data into Hive and Python"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2013/05/17/hive-insert-and-dump-csv-with-map-datatype.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Write CSV data into Hive and Python
+                            
+                                <span class="post-date subtitle">17 May 2013</span>
+                            
+                        </h1>
+                    
+                    <p><a href="http://hive.apache.org/">Apache Hive</a> is a high level SQL-like interface to Hadoop. It lets you execute mostly unadulterated SQL, like this:</p>
+
+<div class="highlight"><pre><code class="language-sql" data-lang="sql"><span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">test_table</span><span class="p">(</span><span class="k">key</span> <span class="n">string</span><span class="p">,</span> <span class="n">stats</span> <span class="k">map</span><span class="o">&lt;</span><span class="n">string</span><span class="p">,</span> <span class="nb">int</span><span class="o">&gt;</span><span class="p">);</span></code></pre></div>
+
+<p>The <code>map</code> column type is the only thing that doesn&#39;t look like vanilla SQL here. Hive can actually use different backends for a given table. Map is used to interface with column oriented backends like HBase. Essentially, because we won&#39;t know ahead of time all the column names that could be in the HBase table, Hive will just return them all as a key/value dictionary. There are then helpers to access individual columns by key, or even pivot the map into one key per logical row.</p>
+
+<p>As part of the Hadoop family, Hive is focused on bulk loading and processing. So it&#39;s not a surprise that Hive does not support inserting raw values like the following SQL:</p>
+
+<div class="highlight"><pre><code class="language-sql" data-lang="sql"><span class="k">INSERT</span> <span class="k">INTO</span> <span class="n">suppliers</span> <span class="p">(</span><span class="n">supplier_id</span><span class="p">,</span> <span class="n">supplier_name</span><span class="p">)</span> <span class="k">VALUES</span> <span class="p">(</span><span class="mi">24553</span><span class="p">,</span> <span class="s1">&#39;IBM&#39;</span><span class="p">);</span></code></pre></div>
+
+<p>However, for unit testing Hive scripts, it would be nice to be able to insert a few records manually. Then you could run your map reduce HQL, and validate the output. Luckily, Hive can load CSV files, so it&#39;s relatively easy to insert a handful or records that way.</p>
+
+<div class="highlight"><pre><code class="language-sql" data-lang="sql"><span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">foobar</span><span class="p">(</span><span class="k">key</span> <span class="n">string</span><span class="p">,</span> <span class="n">stats</span> <span class="k">map</span><span class="o">&lt;</span><span class="n">string</span><span class="p">,</span> <span class="nb">bigint</span><span class="o">&gt;</span><span class="p">)</span>
+<span class="k">ROW</span> <span class="n">FORMAT</span> <span class="n">DELIMITED</span>
+<span class="n">FIELDS</span> <span class="n">TERMINATED</span> <span class="k">BY</span> <span class="s1">&#39;,&#39;</span>
+<span class="n">COLLECTION</span> <span class="n">ITEMS</span> <span class="n">TERMINATED</span> <span class="k">BY</span> <span class="s1">&#39;|&#39;</span>
+<span class="k">MAP</span> <span class="n">KEYS</span> <span class="n">TERMINATED</span> <span class="k">BY</span> <span class="s1">&#39;:&#39;</span> <span class="p">;</span>
+
+<span class="k">LOAD</span> <span class="k">DATA</span> <span class="k">LOCAL</span> <span class="n">INPATH</span> <span class="s1">&#39;/tmp/foobar.csv&#39;</span> <span class="k">INTO</span> <span class="k">TABLE</span> <span class="n">foobar</span><span class="p">;</span></code></pre></div>
+
+<p>This will load a CSV file with the following data, where <code>c4ca4-0000001-79879483-000000000124</code> is the key, and <code>comments</code> and <code>likes</code> are columns in a map.</p>
+
+<div class="highlight"><pre><code class="language-text" data-lang="text">c4ca4-0000001-79879483-000000000124,comments:0|likes:0
+c4ca4-0000001-79879483-000000000124,comments:0|likes:0</code></pre></div>
+
+<p>Because I&#39;ve been doing this quite a bit in my unit tests, I wrote a quick Python helper to dump a list of key/map tuples to a temporary CSV file, and then load it into Hive. This uses <a href="https://github.com/tebeka/hiver">hiver</a> to talk to Hive over thrift.</p>
+
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">hiver</span>
+<span class="kn">from</span> <span class="nn">django.core.files.temp</span> <span class="kn">import</span> <span class="n">NamedTemporaryFile</span>
+
+
+<span class="k">def</span> <span class="nf">_hql</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hql</span><span class="p">):</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">hiver</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">HIVE_HOST</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">HIVE_PORT</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">client</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">hql</span><span class="p">)</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="n">client</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">insert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_name</span><span class="p">,</span> <span class="n">rows</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; cannot insert single rows via hive, need to save to a temp file and bulk load that &#39;&#39;&#39;</span>
+    <span class="n">csv_file</span> <span class="o">=</span> <span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">delete</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
+        <span class="n">map_repr</span> <span class="o">=</span> <span class="s">&#39;|&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">:</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">row</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="n">csv_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s">&quot;,&quot;</span> <span class="o">+</span> <span class="n">map_repr</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">csv_file</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">_hql</span><span class="p">(</span><span class="s">&#39;DROP TABLE IF EXISTS </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">table_name</span><span class="p">)</span>
+        <span class="n">_hql</span><span class="p">(</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">            CREATE TABLE</span>
+<span class="s">                </span><span class="si">%s</span><span class="s"> (</span>
+<span class="s">                    key string,</span>
+<span class="s">                    map&lt;string, int&gt;</span>
+<span class="s">                )</span>
+<span class="s">            ROW FORMAT DELIMITED</span>
+<span class="s">            FIELDS TERMINATED BY &#39;,&#39;</span>
+<span class="s">            COLLECTION ITEMS TERMINATED BY &#39;|&#39;</span>
+<span class="s">            MAP KEYS TERMINATED BY &#39;:&#39;</span>
+<span class="s">        &quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">table_name</span><span class="p">))</span>
+        <span class="n">_hql</span><span class="p">(</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">            LOAD DATA LOCAL INPATH &#39;</span><span class="si">%s</span><span class="s">&#39; INTO TABLE </span><span class="si">%s</span><span class="s"></span>
+<span class="s">        &quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">csv_file</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">table_name</span><span class="p">)</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="n">csv_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></code></pre></div>
+
+<p>You can call it like this:</p>
+
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">insert</span><span class="p">(</span><span class="s">&#39;test_table&#39;</span><span class="p">,</span> <span class="p">[</span>
+        <span class="p">(</span><span class="s">&#39;c4ca4-0000001-79879483-000000000124&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;comments&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s">&#39;likes&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">}),</span>
+        <span class="p">(</span><span class="s">&#39;c4ca4-0000001-79879483-000000000124&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;comments&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s">&#39;likes&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">}),</span>
+        <span class="p">(</span><span class="s">&#39;c4ca4-0000001-79879496-000000000124&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;comments&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s">&#39;likes&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">}),</span>
+        <span class="p">(</span><span class="s">&#39;b4aed-0000002-79879783-000000000768&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;comments&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s">&#39;likes&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">}),</span>
+        <span class="p">(</span><span class="s">&#39;b4aed-0000002-79879783-000000000768&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;comments&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s">&#39;likes&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">}),</span>
+    <span class="p">])</span></code></pre></div>
+
+
+<hr>
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'chaseseibertblog';
+    var disqus_identifier = '/blog/2013/05/17/hive-insert-and-dump-csv-with-map-datatype';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/python">python</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/hive">hive</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2015/03/27/software-engineering-fireside-chat.html">Introducing the Software Engineering Fireside Chat Podcast</a></li>
+                                
+                                    <li><a href="/blog/2015/02/10/one-on-ones.html">Topics for One on Ones</a></li>
+                                
+                                    <li><a href="/blog/2014/12/22/class-design.html">Thoughts on Object Oriented Class Design</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script src="http://code.jquery.com/jquery-latest.js"></script>
+        <script src="/blog/js/bootstrap.js"></script>
+        <script src="/blog/js/shCore.js"></script>
+        <script src="/blog/js/shBrushBash.js"></script>
+        <script src="/blog/js/shBrushCpp.js"></script>
+        <script src="/blog/js/shBrushCSharp.js"></script>
+        <script src="/blog/js/shBrushCss.js"></script>
+        <script src="/blog/js/shBrushJava.js"></script>
+        <script src="/blog/js/shBrushJScript.js"></script>
+        <script src="/blog/js/shBrushPhp.js"></script>
+        <script src="/blog/js/shBrushPython.js"></script>
+        <script src="/blog/js/shBrushSql.js"></script>
+        <script src="/blog/js/shBrushRuby.js"></script>
+        <script src="/blog/js/shBrushXml.js"></script>
+
+        <script type="text/javascript">
+            dp.SyntaxHighlighter.BloggerMode();
+            dp.SyntaxHighlighter.HighlightAll("code");
+        </script>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

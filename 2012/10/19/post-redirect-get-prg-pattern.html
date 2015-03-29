@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>The Post/Redirect/Get (PRG) Pattern</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/shCore.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2012/10/19/post-redirect-get-prg-pattern.html" />
+
+        <meta property="og:title" content="The Post/Redirect/Get (PRG) Pattern"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2012/10/19/post-redirect-get-prg-pattern.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            The Post/Redirect/Get (PRG) Pattern
+                            
+                                <span class="post-date subtitle">19 Oct 2012</span>
+                            
+                        </h1>
+                    
+                    <p>Anyone who has used a web browser has probably encountered the dreaded &quot;form resubmission&quot; dialog. This happens when the user tries to refresh or use the back button to navigate back to a HTTP POST.</p>
+
+<p><img src="/blog/images/resubmit_ie.png" alt="Internet Explorer resubmit form dialog">
+<img src="/blog/images/resubmit_chrome.png" alt="Chrome resubmit form dialog">
+<img src="/blog/images/resubmit_firefox.jpeg" alt="Firefox resubmit form dialog"></p>
+
+<p>A typical case where you might see this is when checking out from a web store. Maybe you have one page that takes your shipping address, and a second page that takes your billing information. The first page submits your data with an HTTP POST, and then returns a 200 response with the payment details form HTML. If the user hits the back button in their browser, or tries to refresh the second page, they will see one of the above dialogs.</p>
+
+<p>To the typical user, such a dialog is absolutely terrifying. Even if they know what it means, there is no clearly correct course of action. If they hit &quot;Ok&quot;, they may be creating <a href="http://en.wikipedia.org/wiki/Post/Redirect/Get">duplicate</a> shipping address records. Or maybe it&#39;s just updating the one they already submitted. Or maybe it will just throw an error saying they can&#39;t submit this form again. There is no way to be sure; they don&#39;t know how it&#39;s implemented on the server.</p>
+
+<p>If they hit cancel, they will be greeted with an even more obscure blank browser page. Hitting back forward again will prompt them with yet another resubmit form dialog!</p>
+
+<h1>The PRG Pattern</h1>
+
+<p>To avoid this usability issue, you want to try to keep POST events out of the browser history. Conveniently, there there is a mechanism for this that all the browsers respect. <strong>If a HTTP POST returns a HTTP 302 redirect, only the location of the redirect will be stored in the browser history.</strong> Hitting the back button will skip over the POST, and the user can bounce freely between the first and second forms.</p>
+
+<h1>Bad code</h1>
+
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="k">def</span> <span class="nf">view_record</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">record_id</span><span class="p">):</span>
+    <span class="n">record</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">Record</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="n">record_id</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s">&quot;POST&quot;</span><span class="p">:</span>
+        <span class="n">record</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;name&quot;</span><span class="p">)</span>
+        <span class="n">record</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">render_to_response</span><span class="p">(</span><span class="s">&quot;page.html&quot;</span><span class="p">,</span> <span class="nb">locals</span><span class="p">())</span></code></pre></div>
+
+<h1>Good code</h1>
+
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="k">def</span> <span class="nf">view_record</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">record_id</span><span class="p">):</span>
+    <span class="n">record</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">Record</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="n">record_id</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s">&quot;POST&quot;</span><span class="p">:</span>
+        <span class="n">record</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;name&quot;</span><span class="p">)</span>
+        <span class="n">record</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">HttpResponseRedirect</span><span class="p">(</span><span class="n">reverse</span><span class="p">(</span><span class="s">&quot;view_record&quot;</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="n">record_id</span><span class="p">]))</span>
+    <span class="k">return</span> <span class="n">render_to_response</span><span class="p">(</span><span class="s">&quot;page.html&quot;</span><span class="p">,</span> <span class="nb">locals</span><span class="p">())</span></code></pre></div>
+
+<h1>Caveats</h1>
+
+<ul>
+<li>This only affects full page refreshes, Ajax calls are unaffected.</li>
+<li>In practice, this may sometimes require you to temporarily save state when otherwise you would not. For example, in multi-step forms. In those cases, you can often save the data safely in the <a href="http://www.theserverside.com/news/1365146/Redirect-After-Post">session scope</a>.</li>
+</ul>
+
+
+<hr>
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'chaseseibertblog';
+    var disqus_identifier = '/blog/2012/10/19/post-redirect-get-prg-pattern';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/django">django</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/view">view</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/prg">prg</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2015/03/27/software-engineering-fireside-chat.html">Introducing the Software Engineering Fireside Chat Podcast</a></li>
+                                
+                                    <li><a href="/blog/2015/02/10/one-on-ones.html">Topics for One on Ones</a></li>
+                                
+                                    <li><a href="/blog/2014/12/22/class-design.html">Thoughts on Object Oriented Class Design</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script src="http://code.jquery.com/jquery-latest.js"></script>
+        <script src="/blog/js/bootstrap.js"></script>
+        <script src="/blog/js/shCore.js"></script>
+        <script src="/blog/js/shBrushBash.js"></script>
+        <script src="/blog/js/shBrushCpp.js"></script>
+        <script src="/blog/js/shBrushCSharp.js"></script>
+        <script src="/blog/js/shBrushCss.js"></script>
+        <script src="/blog/js/shBrushJava.js"></script>
+        <script src="/blog/js/shBrushJScript.js"></script>
+        <script src="/blog/js/shBrushPhp.js"></script>
+        <script src="/blog/js/shBrushPython.js"></script>
+        <script src="/blog/js/shBrushSql.js"></script>
+        <script src="/blog/js/shBrushRuby.js"></script>
+        <script src="/blog/js/shBrushXml.js"></script>
+
+        <script type="text/javascript">
+            dp.SyntaxHighlighter.BloggerMode();
+            dp.SyntaxHighlighter.HighlightAll("code");
+        </script>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

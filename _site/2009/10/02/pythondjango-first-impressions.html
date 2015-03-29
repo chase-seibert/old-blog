@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Python/Django&#58; First Impressions</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/shCore.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2009/10/02/pythondjango-first-impressions.html" />
+
+        <meta property="og:title" content="Python/Django&#58; First Impressions"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2009/10/02/pythondjango-first-impressions.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Python/Django&#58; First Impressions
+                            
+                                <span class="post-date subtitle">02 Oct 2009</span>
+                            
+                        </h1>
+                    
+                    <p>
+I've started a brand-new codebase at work. With new code comes the possibility of a new language/platorm. What we really needed was speed; we don't know exactly what we want to build; we are going to have to iterate over many ideas quickly.
+</p>
+
+<p>
+We had a long list of requirements. We wanted a simple, clean language. We needed to integrate with <a href="http://lucene.apache.org/solr/">SOLR</a>, but SOLR integrated with anything easily. We wanted fine-grain control of HTML output, so WSIWYG UI framewords like <a href="http://java.sun.com/javaee/javaserverfaces/">JSF</a> and <a href="http://code.google.com/webtoolkit/">GWT</a> were out. We wanted a <a href="http://stackoverflow.com/tags">popular platform</a>, so there would be a good community to field questions.
+</p>
+
+<p>
+Most importantly, we didn't want to limit our options down the road. Being potentially able to deploy on J2EE was huge. Ideally we would be able to import Java JARs, as well.
+</p>
+
+<p>
+Both Ruby on Rails and Python/Django met our requirements. Django came out slightly ahead by having better documentation. Too much RoR info is still woefully out of date, or trapped in youtube videos.
+</p>
+
+<p>
+Here are some quick thoughts on my first week programming Python/Django for an actual work project:
+</p>
+
+<ul>
+  <li>Python itself is as nice a language as advertised.
+     <ul>
+        <li>Hardly a single character is wasted in the source. You can do a lot in ten lines of Python, even if you're not calling out to libraries.</li>
+        <li>lists, dictionaries, tuples, map() really help reduce your code.
+
+<pre name="code" class="python">
+def id_value_long(objs):
+   result = []
+   for obj in objs:
+       result.append((obj.id, str(obj))
+   return result
+
+# this is equivalent to id_value_long()
+def id_value(objs):
+   return map(lambda obj: (obj.id, str(obj)), objs)
+</pre>
+
+        </li>
+        <li>You can make your code object oriented, or not. Mix and match. <i>Note: private members are only by convention; the door is wide open to get at those.</i></li>
+        <li>You have modern language features like aspect oriented programming (via decorators) and lambdas, implemented with clean syntax. They don't feel like in-elegant tack-ons.</li>
+        <li>The standard library includes almost everything you could possibly want: reflection, regular expressions, dom parsing, web-services and unit testing.</li>
+
+     </ul>
+  </li>
+
+  <li>Django lets you do more with less code (sense a pattern here?)
+     <ul>
+        <li>Real templating is worlds better than ColdFusion/JSP/PHP includes.</li>
+        <li>You can hand-code your HTML for greater control, or use generic views for common cases.
+
+<pre name="code" class="python">
+
+class SearchForm(forms.Form):
+   job = forms.ChoiceField(label="Source Job")
+   query = forms.ChoiceField(label="Query Options")
+
+   def __init__(self, jobs, queries, *args, **kwargs):
+       super(SearchForm, self).__init__(*args, **kwargs)
+       # ChoiceField needs id/value pairs, not full model objects
+       self.fields["job"].choices = id_value(jobs)
+       self.fields["query"].choices = id_value(queries)
+
+...
+
+&lt;FORM action="&#123;% url results_link %&#125;" method="get"&gt;
+ &#123;&#123; form.as_p &#125;&#125;
+ &lt;INPUT type="submit" value="Search"/&gt;
+&lt;/FORM&gt;
+</pre>
+
+</li>
+     <li>Just like RoR, you can auto-generate views from models. But in Django, these are by default relegated to an "admin" sub-site, which makes sense.</li>
+     <li>Unlike RoR, Django doesn't manage scheme updates for you. Unless you want to blow away all your data every time, you need to write schema update scripts by hand. <a href="http://www.djangoproject.com/documentation/models/fixtures/">Fixtures</a> can mitigate this in development, but not in production. </li>
+     <li>Django doesn't do MVC, it does "MTV" (model, view, template). In my opinion, it's really MuTV, because the url mapper plays a controller-like role.</li>
+     </ul>
+
+  </li>
+</ul>
+
+
+<hr>
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'chaseseibertblog';
+    var disqus_identifier = '/blog/2009/10/02/pythondjango-first-impressions';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/django">django</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/python">python</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2015/03/27/software-engineering-fireside-chat.html">Introducing the Software Engineering Fireside Chat Podcast</a></li>
+                                
+                                    <li><a href="/blog/2015/02/10/one-on-ones.html">Topics for One on Ones</a></li>
+                                
+                                    <li><a href="/blog/2014/12/22/class-design.html">Thoughts on Object Oriented Class Design</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script src="http://code.jquery.com/jquery-latest.js"></script>
+        <script src="/blog/js/bootstrap.js"></script>
+        <script src="/blog/js/shCore.js"></script>
+        <script src="/blog/js/shBrushBash.js"></script>
+        <script src="/blog/js/shBrushCpp.js"></script>
+        <script src="/blog/js/shBrushCSharp.js"></script>
+        <script src="/blog/js/shBrushCss.js"></script>
+        <script src="/blog/js/shBrushJava.js"></script>
+        <script src="/blog/js/shBrushJScript.js"></script>
+        <script src="/blog/js/shBrushPhp.js"></script>
+        <script src="/blog/js/shBrushPython.js"></script>
+        <script src="/blog/js/shBrushSql.js"></script>
+        <script src="/blog/js/shBrushRuby.js"></script>
+        <script src="/blog/js/shBrushXml.js"></script>
+
+        <script type="text/javascript">
+            dp.SyntaxHighlighter.BloggerMode();
+            dp.SyntaxHighlighter.HighlightAll("code");
+        </script>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

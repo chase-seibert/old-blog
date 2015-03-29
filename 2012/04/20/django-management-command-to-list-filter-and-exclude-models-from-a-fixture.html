@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Django management command to list, filter and exclude models from a fixture</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/shCore.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2012/04/20/django-management-command-to-list-filter-and-exclude-models-from-a-fixture.html" />
+
+        <meta property="og:title" content="Django management command to list, filter and exclude models from a fixture"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2012/04/20/django-management-command-to-list-filter-and-exclude-models-from-a-fixture.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Django management command to list, filter and exclude models from a fixture
+                            
+                                <span class="post-date subtitle">20 Apr 2012</span>
+                            
+                        </h1>
+                    
+                    <p>
+Dumping Django data to a fixture and loading it back up again are accomplished with the built-in management commands <a href="https://docs.djangoproject.com/en/dev/ref/django-admin/?from=olddocs#dumpdata-appname-appname-appname-model">dumpdata</a> and <a href="https://docs.djangoproject.com/en/dev/ref/django-admin/?from=olddocs#loaddata-fixture-fixture">loaddata</a>. However, loading a fixture into an existing database is a little trickier than loading it into an empty database. Because the fixture json contains the original primary keys of the records, you can get integrity errors.
+</p>
+
+<p>
+Recently, I had a use case where I wanted to recover from this situation by excluding some models from the fixture. What I came up with is a new management command called copydata that takes an existing fixture file and can list, filter and exclude a subset of the models. 
+</p>
+
+<pre name="code" class="python">
+from django.core.management.base import BaseCommand
+from optparse import make_option
+import json
+
+
+class Command(BaseCommand):
+
+    operation = None
+    filters = []
+    excludes = []
+
+    args = '&lt;file [--list|--filter|--exclude]&gt;'
+    help = 'Copy/filter JSON fixture data to strip out certain models. ' \
+        'Useful if certain parts of a fixture are failing.'
+
+    option_list = BaseCommand.option_list + (
+            make_option('--list',
+                action='store_true',
+                dest='list',
+                default=False,
+                help='List the models in a fixture'),
+            make_option('--filter',
+                action='store',
+                dest='filter',
+                default=False,
+                help='Output the fixture with only these models, ' \
+                    'comma-separated list.'),
+            make_option('--exclude',
+                action='store',
+                dest='exclude',
+                default=False,
+                help='Output the fixture without these models, ' \
+                    'comma-separated list.'),
+            )
+
+    def handle(self, file_path=None, list=False, filter=None, exclude=None, **options):
+
+        if list:
+            self.operation = 'list'
+        if filter:
+            self.filters = filter.split(',')
+            self.operation = 'copy'
+        if exclude:
+            self.excludes = exclude.split(',')
+            self.operation = 'copy'
+
+        self.call('init')
+        for record in json.load(open(file_path)):
+            self.call('iter', record)
+        self.call('final')
+
+    def call(self, func_postfix, *args, **kwargs):
+        func_name = self.operation + '_' + func_postfix
+        if hasattr(self, func_name):
+            func = getattr(self, func_name)
+            func(*args, **kwargs)
+
+    def list_init(self):
+        self.model_set = set()
+
+    def list_iter(self, record):
+        self.model_set.add(record.get('model'))
+
+    def list_final(self):
+        for model in list(self.model_set):
+            print model
+
+    def copy_init(self):
+        self.json_out = []
+
+    def copy_iter(self, record):
+
+        if self.filters and record.get('model') not in self.filters:
+            return
+
+        if self.excludes and record.get('model') in self.excludes:
+            return
+
+        self.json_out.append(record)
+
+    def copy_final(self):
+        print json.dumps(self.json_out, indent=4)
+</pre>
+
+<p>
+After saving this file as copydata.py inside the <a href="https://docs.djangoproject.com/en/dev/howto/custom-management-commands/">management/commands</a> directory of your Django application, you can do the following.
+<p>
+
+<pre name="code" class="bash">
+&gt;./manage.py dumpdata myapp &gt; /tmp/fixture.json
+
+&gt;./manage.py copydata /tmp/fixture.json --list
+myapp.friend
+myapp.invite
+myapp.profile
+
+&gt;./manage.py copydata /tmp/fixture.json --filter myapp.friend &gt; /tmp/just_friends.json
+
+&gt;./manage.py copydata /tmp/fixture.json --exclude myapp.friend &gt; /tmp/just_invites_and_profiles.json
+</pre>
+
+<p>
+If you still have access to the database where the fixture was dumped from, it's more straight forward to just dump the data again and use the built-in appname.Model arguments on the command-line, though you will need to list ALL of them in the exclude case.
+</p>
+
+<hr>
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'chaseseibertblog';
+    var disqus_identifier = '/blog/2012/04/20/django-management-command-to-list-filter-and-exclude-models-from-a-fixture';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/django">django</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2015/03/27/software-engineering-fireside-chat.html">Introducing the Software Engineering Fireside Chat Podcast</a></li>
+                                
+                                    <li><a href="/blog/2015/02/10/one-on-ones.html">Topics for One on Ones</a></li>
+                                
+                                    <li><a href="/blog/2014/12/22/class-design.html">Thoughts on Object Oriented Class Design</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script src="http://code.jquery.com/jquery-latest.js"></script>
+        <script src="/blog/js/bootstrap.js"></script>
+        <script src="/blog/js/shCore.js"></script>
+        <script src="/blog/js/shBrushBash.js"></script>
+        <script src="/blog/js/shBrushCpp.js"></script>
+        <script src="/blog/js/shBrushCSharp.js"></script>
+        <script src="/blog/js/shBrushCss.js"></script>
+        <script src="/blog/js/shBrushJava.js"></script>
+        <script src="/blog/js/shBrushJScript.js"></script>
+        <script src="/blog/js/shBrushPhp.js"></script>
+        <script src="/blog/js/shBrushPython.js"></script>
+        <script src="/blog/js/shBrushSql.js"></script>
+        <script src="/blog/js/shBrushRuby.js"></script>
+        <script src="/blog/js/shBrushXml.js"></script>
+
+        <script type="text/javascript">
+            dp.SyntaxHighlighter.BloggerMode();
+            dp.SyntaxHighlighter.HighlightAll("code");
+        </script>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

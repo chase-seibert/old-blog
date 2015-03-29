@@ -1,0 +1,18 @@
+ttyrec
+latex cookbook
+django multi column join stuff
+p3p/newrelic/third party/fb and google/cooie set versus send
+celery autoreload amqp
+rdb usage
+vim/grep/color
+ssh port forward for db connections
+bypass_pyflakes
+ssh port forward + multi-hop
+django query cache
+mlocate
+
+projects:
+vim give a tab a static name
+open source migratron**
+pidgin html
+vim clickable links

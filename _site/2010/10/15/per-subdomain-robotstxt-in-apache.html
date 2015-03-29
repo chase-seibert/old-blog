@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>per subdomain robots.txt in Apache</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/shCore.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2010/10/15/per-subdomain-robotstxt-in-apache.html" />
+
+        <meta property="og:title" content="per subdomain robots.txt in Apache"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2010/10/15/per-subdomain-robotstxt-in-apache.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            per subdomain robots.txt in Apache
+                            
+                                <span class="post-date subtitle">15 Oct 2010</span>
+                            
+                        </h1>
+                    
+                    <p>
+When I develop a website, I tend to go <a href="http://en.wikipedia.org/wiki/Subdomain">subdomain</a> crazy. If the site is crazy.net, I probably configure www.crazy.net, admin.crazy.net, static.crazy.net, youare.crazy.net, etc. Some allow concurrent logins as different users such as yourself, an admin account and maybe as a particular live user. Others are to keep your <a href="http://developer.yahoo.com/performance/rules.html#cookie_free">static/media resources</a> cookie free, as well as allow parallel sockets for html/media content. 
+</p>
+
+<p>
+In my typical use case, all of these subdomains point to the same Apache instance. So you can go to a particular relative URL at any of the subdomains, and you will get the same page. But I certainly don't want Google to index all those subdomains; I want a single canonical domain for the site. I'm hardly an expert in Apache configuration, so it took me an hour to track down the solution to this problem. 
+</p>
+
+<p>
+Essentially, I wanted www.crazy.net to serve up a permissive <a href="http://en.wikipedia.org/wiki/Robots_exclusion_standard">robots.txt</a> file, as well as a <a href="http://en.wikipedia.org/wiki/Site_map">sitemap</a>.
+</p>
+
+<pre name="code" class="bash">
+# robots.txt @ http://www.crazy.net/robots.txt
+User-agent: *
+Sitemap: http://www.crazy.net/sitemap.txt
+</pre>
+
+<p>
+However, all subdomains should return a different, restrictive robots.txt for the same URL.
+</p>
+
+<pre name="code" class="bash">
+# norobots.txt @ http://admin.crazy.net/robots.txt, http://static.crazy.net/robots.txt, etc
+User-agent: *
+Disallow: /
+</pre>
+
+<p>
+Here is a sample of my /etc/apache2/sites-available/default config file that made this happen.
+</p>
+
+<pre name="code" class="bash">
+ServerAdmin admin@example.com
+
+ExpiresActive On
+ExpiresByType text/css "access plus 12 years"
+ExpiresByType application/javascript "access plus 12 years"
+ExpiresByType image/png "access plus 12 years"
+ExpiresByType image/gif "access plus 12 years"
+ExpiresByType image/jpeg "access plus 12 years"
+FileETag none
+
+...
+
+&lt;VirtualHost *:80&gt;
+ alias /robots.txt /home/apache/website/norobots.txt
+&lt;/VirtualHost&gt;
+
+&lt;VirtualHost *:80&gt;
+ ServerName www.crazy.net
+ alias /robots.txt /home/apache/website/robots.txt
+ alias /sitemap.txt /home/apache/website/sitemap.txt
+&lt;/VirtualHost&gt;
+</pre>
+
+<p>
+Prior to this, all my directives were in a single VirtualHost. The key revelation on my part was that they don't need to be. Rather, Apache configs support inheritance from a global scope. So my VirtualHosts end up just being what's different between www.crazy.net and any other ServerName.
+</p>
+
+<hr>
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'chaseseibertblog';
+    var disqus_identifier = '/blog/2010/10/15/per-subdomain-robotstxt-in-apache';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/apache">apache</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2015/03/27/software-engineering-fireside-chat.html">Introducing the Software Engineering Fireside Chat Podcast</a></li>
+                                
+                                    <li><a href="/blog/2015/02/10/one-on-ones.html">Topics for One on Ones</a></li>
+                                
+                                    <li><a href="/blog/2014/12/22/class-design.html">Thoughts on Object Oriented Class Design</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script src="http://code.jquery.com/jquery-latest.js"></script>
+        <script src="/blog/js/bootstrap.js"></script>
+        <script src="/blog/js/shCore.js"></script>
+        <script src="/blog/js/shBrushBash.js"></script>
+        <script src="/blog/js/shBrushCpp.js"></script>
+        <script src="/blog/js/shBrushCSharp.js"></script>
+        <script src="/blog/js/shBrushCss.js"></script>
+        <script src="/blog/js/shBrushJava.js"></script>
+        <script src="/blog/js/shBrushJScript.js"></script>
+        <script src="/blog/js/shBrushPhp.js"></script>
+        <script src="/blog/js/shBrushPython.js"></script>
+        <script src="/blog/js/shBrushSql.js"></script>
+        <script src="/blog/js/shBrushRuby.js"></script>
+        <script src="/blog/js/shBrushXml.js"></script>
+
+        <script type="text/javascript">
+            dp.SyntaxHighlighter.BloggerMode();
+            dp.SyntaxHighlighter.HighlightAll("code");
+        </script>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

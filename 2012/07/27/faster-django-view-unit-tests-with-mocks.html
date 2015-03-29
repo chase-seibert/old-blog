@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Faster Django view unit tests with mocks</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/shCore.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2012/07/27/faster-django-view-unit-tests-with-mocks.html" />
+
+        <meta property="og:title" content="Faster Django view unit tests with mocks"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2012/07/27/faster-django-view-unit-tests-with-mocks.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Faster Django view unit tests with mocks
+                            
+                                <span class="post-date subtitle">27 Jul 2012</span>
+                            
+                        </h1>
+                    
+                    <p>
+Unit tests need to be fast. Really fast. Some have suggested that <a href="http://blog.matthewriley.name/2011/04/assert-that-unit-tests-are-fast.html">speed is the defining characteristic</a> of a unit test. But writing fast unit tests for Django views is <a href="http://carljm.github.com/django-testing-slides/#32">hard</a>.
+</p>
+
+<p>
+The key to fast unit tests is isolation. You don't want to be hitting the database, making requests over the network, etc. You also want to minimize the amount of code that's running for each test. Ideally, you just want to run your code. But the default facility to testing views, the <a href="https://docs.djangoproject.com/en/dev/topics/testing/?from=olddocs#module-django.test.client">Django test client</a>, is not isolated at all.
+</p>
+
+<p>
+The test client is actually running a fully-featured Django server instance. Your requests go through the URL router, execute middleware, talk to the database and render HTML. It's slow, and it's more like an integration test. You certainly want to have something like that too, though I'm not convinced that the Django test client does a better job of it than Selenium.
+</p>
+
+<p>
+So how do you write fast unit test for views? The first step is to isolate as much as you can. If you're like me, you probably don't want to hack up all your views to account to dependency injection. Luckily, in a dynamic language like Python, it's almost too easy to just mock all a view's dependencies on the fly.
+</p>
+
+<pre name="code" class="python">
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseRedirect
+from django.core.urlresolvers import reverse
+from django.shortcuts import get_object_or_404
+from django.contrib.auth.models import User
+from django.shortcuts import render_to_response
+from django.contrib import messages
+from django.template.context import RequestContext
+
+
+@login_required
+def view_user(request, user_id):
+
+    user = get_object_or_404(User, id=user_id)
+
+    if request.user.is_authenticated() and request.user == user:
+        messages.error(request, 'View your OWN record!')
+        return HttpResponseRedirect(reverse('user_self'))
+
+    return render_to_response('users/view.html',
+        RequestContext(request, locals()))
+</pre>
+
+<p>
+Even for a simple view like this, how can we mock out the request, the database, the messages sub-system and the redirects?
+</p>
+
+<pre name="code" class="python">
+import unittest
+import factory
+from mock import patch
+
+from django.http import HttpRequest
+from django.contrib.auth.models import User
+from django.http import Http404
+
+from website.views.blog import view_user
+
+
+def setup(self):
+    ''' using django-nose to only run ONCE, not once per test
+    using globals for easy reference in the tests'''
+
+    global request, user_being_viewed
+    request = FakeRequestFactory()
+    user_being_viewed = UserFactory()
+
+    def render_to_response_echo(*args, **kwargs):
+        ''' mocked render_to_response that just returns what was passed in,
+        also puts the template name into the results dict '''
+        context = args[1]
+        locals = context.dicts[0]
+        locals.update(dict(template_name=args[0]))
+        return locals
+
+    patch('website.views.blog.render_to_response',
+        render_to_response_echo).start()
+
+
+class ViewUserTestCase(unittest.TestCase):
+
+    def test_404(self):
+        with self.assertRaises(Http404):
+            view_user(request, 1234)
+
+    def test_user_found(self):
+        self.assertEquals(user_being_viewed,
+            view_user(request, user_being_viewed.id).get('user'))
+
+    def test_authenticated_and_self(self):
+        view_user(request, request.user.id)
+        self.assertEquals('View your OWN record!',
+            request._messages.pop)
+
+    def test_authenticated_and_self_redirect(self):
+        self.assertEquals('/home',
+            view_user(request, request.user.id)['Location'])
+
+    def test_user_found_template(self):
+        self.assertEquals('users/view.html',
+            view_user(request, user_being_viewed.id).get('template_name'))
+
+
+class FakeMessages:
+    ''' mocks the Django message framework, makes it easier to get
+    the messages out '''
+
+    messages = []
+
+    def add(self, level, message, extra_tags):
+        self.messages.append(str(message))
+
+    @property
+    def pop(self):
+        return self.messages.pop()
+
+
+def FakeRequestFactory(*args, **kwargs):
+    ''' FakeRequestFactory, FakeMessages and FakeRequestContext are good for
+    mocking out django views; they are MUCH faster than the Django test client.
+    '''
+
+    user = UserFactory()
+    if kwargs.get('authenticated'):
+        user.is_authenticated = lambda: True
+
+    request = HttpRequest()
+    request.user = user
+    request._messages = FakeMessages()
+    request.session = kwargs.get('session', {})
+    if kwargs.get('POST'):
+        request.method = 'POST'
+        request.POST = kwargs.get('POST')
+    else:
+        request.method = 'GET'
+        request.POST = kwargs.get('GET', {})
+
+    return request
+
+
+class UserFactory(factory.Factory):
+    ''' using the excellent factory_boy library '''
+    FACTORY_FOR = User
+    username = factory.Sequence(lambda i: 'blogtest' + i)
+    first_name = 'John'
+    last_name = 'Doe'
+    email = factory.Sequence(lambda i: 'blogtest%s@example.com' % i)
+
+</pre>
+
+<p>
+Notice that I am touching the database here. In my opinion, mocking out the database layer is silly; we already have an abstraction for that, it's called the ORM. Instead, you can get all the speed you need by using an in memory sqlite3 database for your unit tests. Just stick the following in your settings.py.
+</p>
+
+<pre name="code" class="python">
+if 'test' in sys.argv:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': ':memory',
+        },
+    }
+</pre>
+
+<p>
+Also notice that I'm using <a href="https://github.com/jbalogh/django-nose">Django nose</a>. One of the best features of Nose is that it allows you to run the setup code as infrequently as you want. If you must, you can run it for every test. But it also let's you run it just once for a class or a package for speed. Any tweaks to need per-test can done with mocks and patches.
+</p>
+
+<p>
+Running these five tests is pretty quick. It shouldn't get much slower as you go along, especially if you continue to re-use what few database record you do create.
+</p>
+
+<pre name="code" class="bash">
+$ ./manage.py test tests.test_blog
+nosetests --verbosity 1 tests.test_blog --config=nose.cfg
+Creating test database for alias 'default'...
+.....
+----------------------------------------------------------------------
+Ran 5 tests in 0.356s
+
+OK
+</pre>
+
+
+<hr>
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'chaseseibertblog';
+    var disqus_identifier = '/blog/2012/07/27/faster-django-view-unit-tests-with-mocks';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/unit-tests">unit-tests</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/mock">mock</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/django">django</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2015/03/27/software-engineering-fireside-chat.html">Introducing the Software Engineering Fireside Chat Podcast</a></li>
+                                
+                                    <li><a href="/blog/2015/02/10/one-on-ones.html">Topics for One on Ones</a></li>
+                                
+                                    <li><a href="/blog/2014/12/22/class-design.html">Thoughts on Object Oriented Class Design</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script src="http://code.jquery.com/jquery-latest.js"></script>
+        <script src="/blog/js/bootstrap.js"></script>
+        <script src="/blog/js/shCore.js"></script>
+        <script src="/blog/js/shBrushBash.js"></script>
+        <script src="/blog/js/shBrushCpp.js"></script>
+        <script src="/blog/js/shBrushCSharp.js"></script>
+        <script src="/blog/js/shBrushCss.js"></script>
+        <script src="/blog/js/shBrushJava.js"></script>
+        <script src="/blog/js/shBrushJScript.js"></script>
+        <script src="/blog/js/shBrushPhp.js"></script>
+        <script src="/blog/js/shBrushPython.js"></script>
+        <script src="/blog/js/shBrushSql.js"></script>
+        <script src="/blog/js/shBrushRuby.js"></script>
+        <script src="/blog/js/shBrushXml.js"></script>
+
+        <script type="text/javascript">
+            dp.SyntaxHighlighter.BloggerMode();
+            dp.SyntaxHighlighter.HighlightAll("code");
+        </script>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

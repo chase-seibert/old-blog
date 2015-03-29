@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Backup your Amazon order history with Python</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/shCore.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2011/01/15/backup-your-amazon-order-history-with-python.html" />
+
+        <meta property="og:title" content="Backup your Amazon order history with Python"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2011/01/15/backup-your-amazon-order-history-with-python.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Backup your Amazon order history with Python
+                            
+                                <span class="post-date subtitle">15 Jan 2011</span>
+                            
+                        </h1>
+                    
+                    <p>
+Ever wanted to download your Amazon order history? Maybe you want to get it into a spreadsheet, or just keep it around in case Amazon decides to delete this information. Here is some Python code to screen scrape your account pages.
+</p>
+
+<pre name="code" class="python">
+import sys
+from optparse import OptionParser
+import datetime
+import mechanize
+from BeautifulSoup import BeautifulSoup
+import pprint
+
+"""
+Usage: python amazon.py --username=foo --password=bar --firstyear=2004
+"""
+
+def getOptions():
+   arguments = OptionParser()
+   arguments.add_options(["--username", "--password", "--firstyear"])
+   return arguments.parse_args()[0]
+
+def _text(node):
+      return "".join([unicode(s) for s in node.contents]).strip()
+
+def _parse_orders(html):
+      soup = BeautifulSoup(html)
+      orders = []
+      for order in soup.findAll("div", {"class": "order"}):
+            date = order.find("h2")
+            for item in order.findAll("li", {"class": "item "}):
+                  title = item.find("span", {"class": "item-title"})
+                  link = item.find("a")
+                  image = item.find("img")
+                  orders.append({
+                        "date": _text(date),
+                        "title": _text(title),
+                        "link": link["href"],
+                        "image": image["src"]
+                  })
+      return orders
+
+if __name__ == '__main__':
+
+      options = getOptions()
+
+      br = mechanize.Browser()
+      br.set_handle_robots(False)
+      br.addheaders = [("User-agent", "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.2.13) Gecko/20101206 Ubuntu/10.10 (maverick) Firefox/3.6.13")]
+
+      sign_in = br.open("http://www.amazon.com/gp/flex/sign-out.html")
+
+      br.select_form(name="sign-in")
+      br["email"] = options.username
+      br["password"] = options.password
+      logged_in = br.submit()
+
+      error_str = "The e-mail address and password you entered do not match any accounts on record."
+      if error_str in logged_in.read():
+            print error_str
+            sys.exit(1)
+
+      orders = []
+      for year in range(int(options.firstyear),  datetime.datetime.now().year):
+            orders_html = br.open("https://www.amazon.com/gp/css/history/orders/view.html?orderFilter=year-%s&amp;startAtIndex=1000" % year)
+            new_orders = _parse_orders(orders_html.read())
+            if new_orders:
+                  orders.append(new_orders)
+
+      if len(orders) == 0:
+            print "No orders found."
+            sys.exit(1)
+
+      pp = pprint.PrettyPrinter(indent=4)
+      pp.pprint(orders)
+
+</pre>
+
+<pre name="code" class="bash">
+# usage example, your username and password are your Amazon login. The firstyear is the year of your oldest order.
+python amazon.py --username=foo --password=bar --firstyear=2004
+</pre>
+
+<pre name="code" class="python">
+# example output (json)
+    [   {   'date': u'November 26, 2007',
+            'image': u'https://images-na.ssl-images-amazon.com/images/I/517SDCCC3KL._SX100_.jpg',
+            'link': u'http://www.amazon.com/gp/product/0847827852/ref=oss_product',
+            'title': u'Chip Kidd: Book One: Work: 1986-2006 (Chip Kidd)'},
+        {   'date': u'November 23, 2007',
+            'image': u'https://images-na.ssl-images-amazon.com/images/I/118MVgvXzoL._SX100_.jpg',
+            'link': u'http://www.amazon.com/gp/product/B000OUP9NE/ref=oss_product',
+            'title': u'Canon Black Ink Cartridge &amp;#45; PGI5'},
+        {   'date': u'November 23, 2007',
+            'image': u'https://images-na.ssl-images-amazon.com/images/I/41sW%2B3x4VJL._SY100_.jpg',
+            'link': u'http://www.amazon.com/gp/product/B000BUWNH2/ref=oss_product',
+            'title': u'Canon CLI-8 4-Color Multipack Ink Tanks'},
+        {   'date': u'November 22, 2007',
+            'image': u'https://images-na.ssl-images-amazon.com/images/I/51YT5W1SEeL._SY100_.jpg',
+            'link': u'http://www.amazon.com/gp/product/B0002F5E0E/ref=oss_product',
+            'title': u'Meinl Kenny Aronoff Steel Bell Series Cowbell,  8 Inches'},
+
+        ...
+</pre>
+
+<p>
+Please, drop me a comment if you have any bug fixes or interesting use cases for this code.
+</p>
+
+
+<hr>
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'chaseseibertblog';
+    var disqus_identifier = '/blog/2011/01/15/backup-your-amazon-order-history-with-python';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/python">python</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/mechanize">mechanize</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/beautifulsoup">beautifulsoup</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2015/03/27/software-engineering-fireside-chat.html">Introducing the Software Engineering Fireside Chat Podcast</a></li>
+                                
+                                    <li><a href="/blog/2015/02/10/one-on-ones.html">Topics for One on Ones</a></li>
+                                
+                                    <li><a href="/blog/2014/12/22/class-design.html">Thoughts on Object Oriented Class Design</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script src="http://code.jquery.com/jquery-latest.js"></script>
+        <script src="/blog/js/bootstrap.js"></script>
+        <script src="/blog/js/shCore.js"></script>
+        <script src="/blog/js/shBrushBash.js"></script>
+        <script src="/blog/js/shBrushCpp.js"></script>
+        <script src="/blog/js/shBrushCSharp.js"></script>
+        <script src="/blog/js/shBrushCss.js"></script>
+        <script src="/blog/js/shBrushJava.js"></script>
+        <script src="/blog/js/shBrushJScript.js"></script>
+        <script src="/blog/js/shBrushPhp.js"></script>
+        <script src="/blog/js/shBrushPython.js"></script>
+        <script src="/blog/js/shBrushSql.js"></script>
+        <script src="/blog/js/shBrushRuby.js"></script>
+        <script src="/blog/js/shBrushXml.js"></script>
+
+        <script type="text/javascript">
+            dp.SyntaxHighlighter.BloggerMode();
+            dp.SyntaxHighlighter.HighlightAll("code");
+        </script>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

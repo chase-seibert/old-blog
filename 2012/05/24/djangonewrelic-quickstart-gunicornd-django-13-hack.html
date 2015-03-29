@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Django/NewRelic Quickstart (gunicorn.d + Django 1.3 hack)</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/shCore.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2012/05/24/djangonewrelic-quickstart-gunicornd-django-13-hack.html" />
+
+        <meta property="og:title" content="Django/NewRelic Quickstart (gunicorn.d + Django 1.3 hack)"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2012/05/24/djangonewrelic-quickstart-gunicornd-django-13-hack.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Django/NewRelic Quickstart (gunicorn.d + Django 1.3 hack)
+                            
+                                <span class="post-date subtitle">24 May 2012</span>
+                            
+                        </h1>
+                    
+                    <p>
+New Relic is an excellent web application performance reporting tool. After a great experience using it on Heroku, I went to enable it for an existing self-hosted application. While Django 1.4 has an <a href="https://docs.djangoproject.com/en/dev/releases/1.4/#improved-wsgi-support">excellent WSGI</a> configuration build-in, Django 1.3 makes it a little trickier. To complicate matters even more, I was using debian's gunicorn package, which not not make changing the Django executable easy.
+</p>
+
+<p>
+New Relic has <a href="https://newrelic.com/docs/python/new-relic-for-python">excellent documentation</a> for downloading, installing and configuring their tools. Here are my crib notes:
+</p>
+
+<pre name="code" class="bash">
+pip install newrelic django-newrelic-extensions
+# sign up on newrelic.com, get $LICENSE_KEY under "Account Settings"
+mkdir /etc/newrelic
+newrelic-admin generate-config $LICENSE_KEY /etc/newrelic/newrelic.ini
+newrelic-admin validate-config /etc/newrelic/newrelic.ini
+</pre>
+
+<p>
+You should now be able to log in to new relic and see an application called "Python Agent Test". This means that the test worked; new relic can communicate with the hosted servers. You can run gunicorn manually from the command line with new relic as follows:
+</p>
+
+<pre name="code" class="bash">
+cd /opt/my-django-project
+export NEW_RELIC_CONFIG_FILE=/etc/newrelic/newrelic.ini
+newrelic-admin run-program python manage.py run_gunicorn
+</pre>
+
+<p>
+Notice that new relic replaces the python executable with its own command, "newrelic-admin run-program". I'm using Ubuntu, which uses the Debian gunicorn package, which stores its configuration in /etc/gunicorn.d/django. Here is my current config file:
+</p>
+
+<pre name="code" class="python">
+#/etc/gunicorn.d/django
+CONFIG = {
+    'mode': 'django',
+    'working_dir': '/opt/my-django-project',
+    'user': 'django',
+    'group': 'django',
+
+    # stupid hack to get new relic to load in Django 1.3
+    # once we move to 1.4 we should use straight WSGI
+    'python': '/opt/my-django-project/conf/newrelic.sh',
+    'environment': {
+        'NEW_RELIC_CONFIG_FILE': '/etc/newrelic/newrelic.ini',
+        },
+
+    'args': (
+        '--bind=0.0.0.0:80',
+        '--workers=4',
+        '--backlog=0',
+        '--worker-class=sync',  # gevent doesn't work smoothly with new relic yet
+        '--preload',
+    ),
+}
+</pre>
+
+<p>
+Notice the hack to inject the new relic runner script. I have over-ridden the python executable path to point to a third script, newrelic.sh.
+</p>
+
+<pre name="code" class="bash">
+#!/usr/bin/env bash
+/usr/local/bin/newrelic-admin run-program python $*
+</pre>
+
+<p>
+This script just takes whatever arguments are passed in ($*), and passes them as arguments to newrelic-admin. That's it, a service gunicorn restart should start data flowing into new relic.
+</p>
+
+
+<hr>
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'chaseseibertblog';
+    var disqus_identifier = '/blog/2012/05/24/djangonewrelic-quickstart-gunicornd-django-13-hack';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/django">django</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/gunicorn">gunicorn</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/newrelic">newrelic</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2015/03/27/software-engineering-fireside-chat.html">Introducing the Software Engineering Fireside Chat Podcast</a></li>
+                                
+                                    <li><a href="/blog/2015/02/10/one-on-ones.html">Topics for One on Ones</a></li>
+                                
+                                    <li><a href="/blog/2014/12/22/class-design.html">Thoughts on Object Oriented Class Design</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script src="http://code.jquery.com/jquery-latest.js"></script>
+        <script src="/blog/js/bootstrap.js"></script>
+        <script src="/blog/js/shCore.js"></script>
+        <script src="/blog/js/shBrushBash.js"></script>
+        <script src="/blog/js/shBrushCpp.js"></script>
+        <script src="/blog/js/shBrushCSharp.js"></script>
+        <script src="/blog/js/shBrushCss.js"></script>
+        <script src="/blog/js/shBrushJava.js"></script>
+        <script src="/blog/js/shBrushJScript.js"></script>
+        <script src="/blog/js/shBrushPhp.js"></script>
+        <script src="/blog/js/shBrushPython.js"></script>
+        <script src="/blog/js/shBrushSql.js"></script>
+        <script src="/blog/js/shBrushRuby.js"></script>
+        <script src="/blog/js/shBrushXml.js"></script>
+
+        <script type="text/javascript">
+            dp.SyntaxHighlighter.BloggerMode();
+            dp.SyntaxHighlighter.HighlightAll("code");
+        </script>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

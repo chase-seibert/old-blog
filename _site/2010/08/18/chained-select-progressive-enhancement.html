@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Chained Select Progressive Enhancement</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/shCore.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2010/08/18/chained-select-progressive-enhancement.html" />
+
+        <meta property="og:title" content="Chained Select Progressive Enhancement"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2010/08/18/chained-select-progressive-enhancement.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Chained Select Progressive Enhancement
+                            
+                                <span class="post-date subtitle">18 Aug 2010</span>
+                            
+                        </h1>
+                    
+                    <p>
+Perhaps you have encountered a <a href="http://www.dynamicdrive.com/dynamicindex1/chainedmenu/index.htm">chained select</a> control in your travels. The canonical example would be on Monster or CareerBuilder, picking your area of expertise. Maybe you first select "Technology", then the second menu contains only technology skills, and you select "Web Developer", etc. It most useful when there are a large number of sub-categories, and you don't want to show all the irrelevant options to the user.
+</p>
+
+<p>
+This control is not one of the standard web form controls, perhaps because it's really a composite of two or more select controls. Composites are <a href="http://www.quirksmode.org/dom/inputfile.html">harder to style</a>, and in this case don't even map cleanly to FORM variables. How do you define two forms fields in a parent/child one to many relationship, semantically? You have to resort to hacks like field name prefixes.
+</p>
+
+<p>
+Any chained select implementation is going to involve javascript. But every implementation I could find also <span style="font-weight:bold;">requires</span> javascript. In other words, if the user has javascript disabled, or there is a bug in your javascript, they will not be able to fill out the form.
+</p>
+
+<p>
+What follows is the beginnings of a chained select <a href="http://www.alistapart.com/articles/progressiveenhancementwithjavascript/">progressive enhancement</a>, aka a unobstrusive javascript version. It starts with a nested HTML list. That's the baseline version.
+</p>
+
+<img src="http://lh3.ggpht.com/_EE2zVzGv1Ds/TGwBcujw1nI/AAAAAAAALV8/J08G7BJCylA/s800/Screenshot-Mozilla%20Firefox.png" />
+
+<p>
+As I mentioned, I decided on an arbitrary prefix for the input values. In this case, the format is categoryID:subcategoryID. You could potentially just post the subcategoryID of course, if your back-end could pull the category automatically.
+</p>
+
+<pre name="code" class="html">
+ &lt;ul class="chained-select chained-select-style"&gt;
+  &lt;li class="category"&gt;
+   &lt;label&gt;Customer Service/Technical Support&lt;/label&gt;
+   &lt;ul class="subcategory"&gt;
+    &lt;li&gt;&lt;input type="radio" name="category" value="1:1"&gt;All Customer Service/Technical Support&lt;/li&gt;
+   &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li class="category"&gt;
+   &lt;label&gt;Engineering (Non-IT)&lt;/label&gt;
+   &lt;ul class="subcategory"&gt;
+    &lt;li&gt;&lt;input type="radio" name="category" value="2:1"&gt;Architectural&lt;/li&gt;
+    &lt;li&gt;&lt;input type="radio" name="category" value="2:2"&gt;Computer Aided Design&lt;/li&gt;
+    &lt;li&gt;&lt;input type="radio" name="category" value="2:3"&gt;Construction&lt;/li&gt;
+    &lt;li&gt;&lt;input type="radio" name="category" value="2:4"&gt;Civil Engineering&lt;/li&gt;
+    &lt;li&gt;&lt;input type="radio" name="category" value="2:5"&gt;Chemical Engineering&lt;/li&gt;
+    &lt;li&gt;&lt;input type="radio" name="category" value="2:6"&gt;Computer Aided Design (CAD)&lt;/li&gt;
+    &lt;li&gt;&lt;input type="radio" name="category" value="2:7"&gt;Construction&lt;/li&gt;
+    &lt;li&gt;&lt;input type="radio" name="category" value="2:8"&gt;Environmental Engineering&lt;/li&gt;
+    &lt;li&gt;&lt;input type="radio" name="category" value="2:9"&gt;Civil Engineering&lt;/li&gt;
+    &lt;li&gt;&lt;input type="radio" name="category" value="2:10"&gt;Project/Program Management&lt;/li&gt;
+   &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li class="category"&gt;
+   &lt;label&gt;Information Technology&lt;/label&gt;
+   &lt;ul class="subcategory"&gt;
+    &lt;li&gt;&lt;input type="radio" name="category" value="3:1"&gt;Business Systems Analysis&lt;/li&gt;
+    &lt;li&gt;&lt;input type="radio" name="category" value="3:2"&gt;ERP Applications&lt;/li&gt;
+    &lt;li&gt;&lt;input type="radio" name="category" value="3:3"&gt;Network Operations&lt;/li&gt;
+    &lt;li&gt;&lt;input type="radio" name="category" value="3:4"&gt;Project/Program Management&lt;/li&gt;
+    &lt;li&gt;&lt;input type="radio" name="category" value="3:5"&gt;Security&lt;/li&gt;
+    &lt;li&gt;&lt;input type="radio" name="category" value="3:7"&gt;Software Development&lt;/li&gt;
+    &lt;li&gt;&lt;input type="radio" name="category" value="3:8"&gt;Quality Assurance&lt;/li&gt;
+    &lt;li&gt;&lt;input type="radio" name="category" value="3:9"&gt;Technical Writing/Documentation&lt;/li&gt;
+    &lt;li&gt;&lt;input type="radio" name="category" value="3:10"&gt;Product Management&lt;/li&gt;
+    &lt;li&gt;&lt;input type="radio" name="category" value="3:11"&gt;Web Design&lt;/li&gt;
+   &lt;/ul&gt;
+  &lt;/li&gt;
+ &lt;/ul&gt;
+</pre>
+
+<p>
+Even the baseline should look decent, however. Here is my basic styling. It also includes some classes which will only be set later by the javascript.
+</p>
+
+<pre name="code" class="html">
+&lt;style&gt;
+   #demo { width: 900px; }
+
+   .chained-select-style li { list-style: none; float: left; }
+   .chained-select-style li ul li { display: inline; }
+
+   .chained-select-style li.category { font-weight: bold; }
+   .chained-select-style .subcategory {font-weight: normal; }
+   .chained-select-style li ul li { padding: 5px; margin: 5px; margin-right: 10px; border: 1px solid #B0B0B0; background-color: #F0F0F0; }
+   .chained-select-style li ul li.selected { background-color: #F0F0B0; }
+
+&lt;/style&gt;
+</pre>
+
+<p>
+Now, it looks more like this.
+</p>
+
+<img src="http://lh6.ggpht.com/_EE2zVzGv1Ds/TGwCqj8_o8I/AAAAAAAALWE/wB7_g9cnmmA/s800/Screenshot-Mozilla%20Firefox-1.png" />
+
+<p>
+The progressive enhancement uses jQuery, and basically just does the following.
+<ol>
+ <li>Toggles a "selected" class when an individual item is checked off.</li>
+ <li>Hides the category labels and creates a select control with their values.</li>
+ <li>Hides the subcategory lists.</li>
+ <li>Attaches a behaviour to the new select control to show the relevant subcategory list when the select value changes.</li>
+</ol>
+</p>
+
+<pre name="code" class="html">
+&lt;script&gt;
+ $(document).ready(function () {
+
+  function select_changed() {
+   if ($(this).is(":checked")) {
+    if ($(this).is("[type=radio]"))
+     $(this).parents(".chained-select-style").find("li").removeClass("selected");
+    $(this).parent().addClass("selected");
+   }
+   else $(this).parent().removeClass("selected");
+  }
+
+  var items = $(".chained-select-style input");
+  items.change(select_changed);
+  $.each(items.filter(":checked"), select_changed);
+
+  function chained_select(elements) {
+   $.each(elements, function () {
+    var top = $("&lt;select class='chained-select-top'&gt;");
+    $.each($(this).find(".category label"), function () {
+     // escape the contents
+     top.append($("&lt;option&gt;&lt;/option&gt;").text($(this).text()));
+    });
+    $(this).before(top);
+   });
+   elements.find(".category label").add(elements.find(".subcategory")).hide();
+   function chained_select_change() {
+    var label_text = $(this).val();
+    $.each(elements.find(".category label"), function () {
+     if ($(this).text() == label_text) {
+      $(this).next().show();
+     } else {
+      $(this).next().hide();
+     }
+    });
+   }
+   var items = $(".chained-select-top");
+   items.change(chained_select_change);
+   $.each(items, chained_select_change);
+  }
+  chained_select($(".chained-select"));
+ });
+&lt;/script&gt;
+</pre>
+
+<p>
+What you end up with is the following. You could certainly take this one step further and convert the subcategory list into the traditional second select control. I just like the way this looks better.
+</p>
+
+<img src="http://lh3.ggpht.com/_EE2zVzGv1Ds/TGwD8R85PzI/AAAAAAAALWM/bMVo_cjgf0M/s800/Screenshot-Mozilla%20Firefox-2.png" />
+
+
+<hr>
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'chaseseibertblog';
+    var disqus_identifier = '/blog/2010/08/18/chained-select-progressive-enhancement';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/javascript">javascript</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/unobtrusive">unobtrusive</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2015/03/27/software-engineering-fireside-chat.html">Introducing the Software Engineering Fireside Chat Podcast</a></li>
+                                
+                                    <li><a href="/blog/2015/02/10/one-on-ones.html">Topics for One on Ones</a></li>
+                                
+                                    <li><a href="/blog/2014/12/22/class-design.html">Thoughts on Object Oriented Class Design</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script src="http://code.jquery.com/jquery-latest.js"></script>
+        <script src="/blog/js/bootstrap.js"></script>
+        <script src="/blog/js/shCore.js"></script>
+        <script src="/blog/js/shBrushBash.js"></script>
+        <script src="/blog/js/shBrushCpp.js"></script>
+        <script src="/blog/js/shBrushCSharp.js"></script>
+        <script src="/blog/js/shBrushCss.js"></script>
+        <script src="/blog/js/shBrushJava.js"></script>
+        <script src="/blog/js/shBrushJScript.js"></script>
+        <script src="/blog/js/shBrushPhp.js"></script>
+        <script src="/blog/js/shBrushPython.js"></script>
+        <script src="/blog/js/shBrushSql.js"></script>
+        <script src="/blog/js/shBrushRuby.js"></script>
+        <script src="/blog/js/shBrushXml.js"></script>
+
+        <script type="text/javascript">
+            dp.SyntaxHighlighter.BloggerMode();
+            dp.SyntaxHighlighter.HighlightAll("code");
+        </script>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

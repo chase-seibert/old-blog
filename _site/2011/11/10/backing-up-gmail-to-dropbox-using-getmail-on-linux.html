@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Backing up gmail to Dropbox using getmail on Linux</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/shCore.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2011/11/10/backing-up-gmail-to-dropbox-using-getmail-on-linux.html" />
+
+        <meta property="og:title" content="Backing up gmail to Dropbox using getmail on Linux"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2011/11/10/backing-up-gmail-to-dropbox-using-getmail-on-linux.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Backing up gmail to Dropbox using getmail on Linux
+                            
+                                <span class="post-date subtitle">10 Nov 2011</span>
+                            
+                        </h1>
+                    
+                    <p>
+What if gmail went away tomorrow, or at least deleted all your mail? It may <a href="http://techcrunch.com/2006/12/28/gmail-disaster-reports-of-mass-email-deletions/">not be as far fetched</a> as you think. It's always prudent to have a backup.
+</p>
+
+<p>
+On Linux, you can use the excellent <a href="http://pyropus.ca/software/getmail/">getmail</a> program to backup any POP3 or IMAP account. For gmail in particular, the first step is to <a href="https://mail.google.com/support/bin/answer.py?answer=77695">enable IMAP access</a>.
+</p>
+
+<img src='http://www.tipsfor.us/wp-content/uploads/2008/12/gmail-enable-imap.png'>
+
+<p>
+Installing and configuring getmail is simple.
+</p>
+
+<pre name="code" class="bash">
+sudo apt-get install getmail
+
+# decide where you want you mail to live, and create an empty file there
+touch ~/Dropbox/backup/gmail.mbox
+
+mkdir ~/.getmail
+vim ~/.getmail/getmailrc
+
+# add the following
+[retriever]
+type = SimpleIMAPSSLRetriever
+server = imap.gmail.com
+username = YOURGMAILADDRESS
+password = YOUGMAILPASSWORD
+mailboxes = ("[Gmail]/All Mail",)
+
+[destination]
+type = Mboxrd
+path = ~/Dropbox/backup/gmail.mbox
+
+[options]
+read_all = False # just get the new messages on subsequent runs
+message_log_syslog = True
+</pre>
+
+<p>
+You can test whether your configuration working by running getmail manually from the command line. The initial download can take a while to begin if you have thousands of messages. The actual download will likewise take a long time for large mailboxes. While it's in progress, you will get a series of log messages on the console (and in syslog).
+</p>
+
+<pre name="code" class="bash">
+getmail
+
+... several minutes later ...
+
+SimpleIMAPSSLRetriever:chase.seibert@gmail.com@imap.gmail.com:993:
+  msg      1/105702 (325 bytes) delivered
+  msg      2/105702 (335 bytes) delivered
+  msg      3/105702 (363 bytes) delivered
+  msg      4/105702 (180479 bytes) delivered
+  msg      5/105702 (311 bytes) delivered
+  msg      6/105702 (1057 bytes) delivered
+  msg      7/105702 (818 bytes) delivered
+  msg      8/105702 (331 bytes) delivered
+  msg      9/105702 (321 bytes) delivered
+  msg     10/105702 (882 bytes) delivered
+  msg     11/105702 (1201 bytes) delivered
+  msg     12/105702 (1614 bytes) delivered
+  msg     13/105702 (359 bytes) delivered
+  msg     14/105702 (359 bytes) delivered
+  ...
+</pre>
+
+<p>
+I choose to configure getmail to use a single <a href="http://en.wikipedia.org/wiki/Mbox">mbox file</a>, but you can also use one file per message. In addition to this large file, getmail will keep a smaller index file in ~/.getmail.
+</p>
+
+<p>
+If you want, you can setup a cron job to update your backup nightly.
+</p>
+
+<pre name="code" class="bash">
+crontab -e
+
+# add the following line, which will run the backup at 1AM every day
+* 1 * * * /usr/bin/getmail >/dev/null 2>&1
+</pre>
+
+
+<hr>
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'chaseseibertblog';
+    var disqus_identifier = '/blog/2011/11/10/backing-up-gmail-to-dropbox-using-getmail-on-linux';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/backup">backup</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/gmail">gmail</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/dropbox">dropbox</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2015/03/27/software-engineering-fireside-chat.html">Introducing the Software Engineering Fireside Chat Podcast</a></li>
+                                
+                                    <li><a href="/blog/2015/02/10/one-on-ones.html">Topics for One on Ones</a></li>
+                                
+                                    <li><a href="/blog/2014/12/22/class-design.html">Thoughts on Object Oriented Class Design</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script src="http://code.jquery.com/jquery-latest.js"></script>
+        <script src="/blog/js/bootstrap.js"></script>
+        <script src="/blog/js/shCore.js"></script>
+        <script src="/blog/js/shBrushBash.js"></script>
+        <script src="/blog/js/shBrushCpp.js"></script>
+        <script src="/blog/js/shBrushCSharp.js"></script>
+        <script src="/blog/js/shBrushCss.js"></script>
+        <script src="/blog/js/shBrushJava.js"></script>
+        <script src="/blog/js/shBrushJScript.js"></script>
+        <script src="/blog/js/shBrushPhp.js"></script>
+        <script src="/blog/js/shBrushPython.js"></script>
+        <script src="/blog/js/shBrushSql.js"></script>
+        <script src="/blog/js/shBrushRuby.js"></script>
+        <script src="/blog/js/shBrushXml.js"></script>
+
+        <script type="text/javascript">
+            dp.SyntaxHighlighter.BloggerMode();
+            dp.SyntaxHighlighter.HighlightAll("code");
+        </script>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

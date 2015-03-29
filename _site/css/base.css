@@ -1,0 +1,169 @@
+body {
+    font-family: 'Arvo', serif;
+    font-size: 18px;
+    line-height: 30px;
+    color: #282828;
+    background-color: #f3f3f3;
+    padding-top: 1em;
+}
+
+li {
+    line-height: 26px;
+}
+
+a, a:visited, a:hover {
+    color: #065588;
+}
+
+.title {
+    font-size: 26px;
+    margin-bottom: 0px;
+}
+
+.subtitle {
+    margin-top: -1em;
+    margin-bottom: 1em;
+}
+
+.stackoverflow {
+    margin-left: .5em;
+}
+
+#related {
+    margin-top: 1.5em;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: Lato;
+    font-weight: bold;
+    font-style: italic;
+    color: #242424;
+    text-shadow: 1px 1px 1px white;
+}
+
+h4 {
+    font-size: 20px;
+}
+
+.content img {
+    display: block;
+    margin: 1em;
+}
+
+.post-date {
+    margin-bottom: 1em;
+    color: #646464;
+    font-size: 14px;
+    white-space: nowrap;
+    font-style: normal;
+    font-weight: normal;
+}
+
+h2 {
+    font-size: 24px;
+}
+
+.dp-highlighter {
+    font-family: Ubuntu Mono !important;
+    font-size: 13px;
+    background-color: inherit;
+}
+
+.dp-highlighter .bar {
+    padding-left: 1em !important;
+}
+
+.dp-highlighter ol {
+    margin-left: 1em !important;
+}
+
+.dp-highlighter ol li {
+    list-style: none;
+    border-left: inherit;
+    background-color: inherit;
+}
+
+.dp-highlighter ol li.alt {
+    color: inherit;
+}
+
+.dp-highlighter ol li:first-child {
+    padding-top: .5em !important;
+}
+
+
+.dp-highlighter ol li:last-child {
+    padding-bottom: .5em !important;
+}
+
+.dp-highlighter .tools {
+    border-left: inherit;
+}
+
+.dp-highlighter .tools a {
+    display: none;
+}
+
+.dp-highlighter .tools a:first-child {
+    display: inherit;
+}
+
+
+code,
+pre {
+  font-family: Ubuntu Mono, Monaco, Menlo, Consolas, "Courier New",  monospace;
+  font-size: 16px;
+}
+
+blockquote {
+    border-left: 5px solid #DDD;
+    padding: 1em;
+    background-color: #EFEFEF;
+}
+
+blockquote p {
+    color: #333;
+    font-size: 1em;
+}
+
+blockquote p:first-child:before,
+blockquote p:last-child:after {
+    font-size: 3em;
+    line-height:.1em;
+    vertical-align:-.4em;
+    color: #ccc;
+}
+
+blockquote p:first-child:before {
+    content: open-quote;
+    margin-right:.25em;
+}
+
+blockquote p:last-child:after {
+    content: close-quote;
+    margin-left:.25em;
+}
+
+#disqus_thread {
+    margin-top: 3em;
+}
+
+table {
+    border: 1px solid black;
+    margin: .5em;
+    margin-bottom: 1.5em;
+}
+
+table th {
+    text-align: left;
+}
+
+table th, table td{
+    padding: .5em;
+    border: 1px solid black;
+}
+
+ul.archive  {
+    list-style: none;
+    margin: 0;
+}

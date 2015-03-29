@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Per user timezones in Django</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/shCore.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2010/12/10/per-user-timezones-in-django.html" />
+
+        <meta property="og:title" content="Per user timezones in Django"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2010/12/10/per-user-timezones-in-django.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Per user timezones in Django
+                            
+                                <span class="post-date subtitle">10 Dec 2010</span>
+                            
+                        </h1>
+                    
+                    <p>
+A common requirement for sites that deal with dates (most of them), is to display date and time values in the individual user's timezones. Luckily, there are a few good ready-made solutions for Python/Django. They don't solve the problem completely seamlessly. You will still need to decide when to invoke the datetime translation, but most of the heavy lifting will be done for you.
+</p>
+
+<p>
+Before I go any further, it's worth noting that there is a work-around for some subset of sites. Instead of collecting and showing absolute dates and times, you may be able to get away with relative dates and times. For example, if you just need to display the time a record was created, you could say "13 minutes ago" instead of "Dec 10, 2010 at 8:55pm". In fact, here is a handy decorator to that effect:
+</p>
+
+<pre name="code" class="python">
+from datetime import datetime
+from django.template.defaultfilters import timesince
+
+@register.filter
+def ago(date_time):
+    diff = abs(date_time - datetime.today())
+    if diff.days &lt;= 0:
+        span = timesince(date_time)
+        span = span.split(",")[0] # just the most significant digit
+        if span == "0 minutes":
+            return "seconds ago"
+        return "%s ago" % span
+    return date(date_time)
+</pre>
+
+<p>
+Assuming you do need to support absolute times, you would start by downloading <a href="https://github.com/brosner/django-timezones">django-timezones</a>, which itself relies on <a href="http://pytz.sourceforge.net/">pytz</a>. You can get both via <a href="http://pypi.python.org/pypi/pip">pip</a>:
+</p>
+
+<pre name="code" class="bash">
+sudo pip install django-timezones
+sudo pip install pytz
+</pre>
+
+<p>
+However, there is a bug in the latest stable release of django-timezones which <a href="https://github.com/brosner/django-timezones/issues/closed#issue/1">prevents you</a> from using their model and form definitions. If you do, you will get a "Value XXX is not a valid choice" validation error trying to submit the form. You can either install the trunk release, where the bug is fixed, or use the following work-around models definition:
+</p>
+
+<pre name="code" class="python">
+from timezones.forms import PRETTY_TIMEZONE_CHOICES
+
+class UserProfile(models.Model):
+   ...
+   timezone = models.CharField(max_length=255, choices=PRETTY_TIMEZONE_CHOICES, blank=True, null=True, )
+   ...
+</pre>
+
+<p>
+With this definition, you can use a standard ModelForm, without overriding the field or widget of timezone. Once you have your form rendering in HTML, you can use the following jQuery snippet to default the timezone selection to the correct choice for that user, using <a href="http://www.w3schools.com/jsref/jsref_getTimezoneOffset.asp">getTimezoneOffset</a>. It will only fire if there is no timezone selected already.
+</p>
+
+<pre name="code" class="javascript">
+var selects = $("select#id_timezone");
+if (selects.length &gt; 0 &amp;&amp; selects.val() == "") {
+ var offset_minutes = new Date().getTimezoneOffset();
+ var offset = 100 * offset_minutes / 60;
+ var default_value = _first_timezone_match(selects, offset);
+ selects.val(default_value);
+}
+
+function _first_timezone_match(selects, offset) {
+ var match = "";
+ selects.find("option").each(function() {
+  // ex: "(GMT-0500) America/New_York"
+  if ($(this).text().indexOf(offset) &gt; 0) {
+   match = $(this).val();
+  }
+ });
+ return match;
+}
+</pre>
+
+<p>
+Finally, here are some helper methods to translate to and from the server timezone and the user's timezone.
+</p>
+
+<pre name="code" class="python">
+import datetime
+import settings
+import pytz
+
+# need to translate to a non-naive timezone, even if timezone == settings.TIME_ZONE, so we can compare two dates
+def to_user_timezone(date, profile):
+    timezone = profile.timezone if profile.timezone else settings.TIME_ZONE
+    return date.replace(tzinfo=pytz.timezone(settings.TIME_ZONE)).astimezone(pytz.timezone(timezone))
+
+def to_system_timezone(date, profile):
+    timezone = profile.timezone if profile.timezone else settings.TIME_ZONE
+    return date.replace(tzinfo=pytz.timezone(timezone)).astimezone(pytz.timezone(settings.TIME_ZONE))
+
+def now_timezone():
+    return datetime.datetime.now().replace(tzinfo=pytz.timezone(settings.TIME_ZONE)).astimezone(pytz.timezone(settings.TIME_ZONE))
+</pre>
+
+<p>
+<i>Note:</i> I'm careful to always return a datetime object w/ the timezone information. This is because otherwise, you could get a "can't compare offset-naive and offset-aware datetimes" error when you compare two datetime objects.
+</p>
+
+
+<hr>
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'chaseseibertblog';
+    var disqus_identifier = '/blog/2010/12/10/per-user-timezones-in-django';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/timezone">timezone</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/django">django</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2015/03/27/software-engineering-fireside-chat.html">Introducing the Software Engineering Fireside Chat Podcast</a></li>
+                                
+                                    <li><a href="/blog/2015/02/10/one-on-ones.html">Topics for One on Ones</a></li>
+                                
+                                    <li><a href="/blog/2014/12/22/class-design.html">Thoughts on Object Oriented Class Design</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script src="http://code.jquery.com/jquery-latest.js"></script>
+        <script src="/blog/js/bootstrap.js"></script>
+        <script src="/blog/js/shCore.js"></script>
+        <script src="/blog/js/shBrushBash.js"></script>
+        <script src="/blog/js/shBrushCpp.js"></script>
+        <script src="/blog/js/shBrushCSharp.js"></script>
+        <script src="/blog/js/shBrushCss.js"></script>
+        <script src="/blog/js/shBrushJava.js"></script>
+        <script src="/blog/js/shBrushJScript.js"></script>
+        <script src="/blog/js/shBrushPhp.js"></script>
+        <script src="/blog/js/shBrushPython.js"></script>
+        <script src="/blog/js/shBrushSql.js"></script>
+        <script src="/blog/js/shBrushRuby.js"></script>
+        <script src="/blog/js/shBrushXml.js"></script>
+
+        <script type="text/javascript">
+            dp.SyntaxHighlighter.BloggerMode();
+            dp.SyntaxHighlighter.HighlightAll("code");
+        </script>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

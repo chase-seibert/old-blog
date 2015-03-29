@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>My favorite coding interview question</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/shCore.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2014/10/10/my-favorite-interview-question.html" />
+
+        <meta property="og:title" content="My favorite coding interview question"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2014/10/10/my-favorite-interview-question.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            My favorite coding interview question
+                            
+                                <span class="post-date subtitle">10 Oct 2014</span>
+                            
+                        </h1>
+                    
+                    <p>Every software engineering interview I have ever participated in has involved a coding exercise. For one position, I
+would expect three two five separate coding tests. I&#39;ve <a href="/blog/2012/08/31/how-to-prepare-for-a-software-engineer-interview.html">written previously</a>
+about why every company asks these questions, and the best way to handle these as a candidate. But what makes a good coding question?</p>
+
+<p>There is very little data out there about effective interviewing. What data does exists seems to suggest interviews are
+only good for filtering out candidates that do not meet the minimum bar. According to one popular
+<a href="http://www.forbes.com/sites/quora/2013/06/28/is-there-a-link-between-job-interview-performance-and-job-performance/">Google internal study</a>,
+there is no correlation between interview results and on the job performance.</p>
+
+<p>With this in mind, the coding question I ask is simple. I have found that you can hardly ask a question that&#39;s too
+simple; a substantial number of candidates will have no problem hanging themselves with the smallest amount of rope
+that you can give them.</p>
+
+<h2>The Question</h2>
+
+<blockquote>
+<p>Write a function that takes two parameters, a string and an integer. The function will return another string that
+is similar to the input string, but with certain characters removed. It&#39;s going to remove characters from consecutive
+runs of the same character, where the length of the run is greater than the input parameter.</p>
+</blockquote>
+<div class="highlight"><pre><code class="language-text" data-lang="text">Ex: &quot;aaab&quot;, 2 =&gt; &quot;aab&quot;
+Ex: &quot;aabb&quot;, 1 =&gt; &quot;ab&quot;
+Ex: &quot;aabbaa&quot;, 1 =&gt; &quot;aba&quot;
+</code></pre></div>
+<p><em>Note: I&#39;m evaluating your answer on the simplicity of your code. The goal is for it to be readable; someone new
+should be able to walk into this room afterwards and instantly understand what your function is doing.</em></p>
+
+<h2>The Evaluation</h2>
+
+<p>I explicitly state the part about what I&#39;m looking for with the candidate. I tell them to use the language they are
+most comfortable with. Here is what I consider an ideal solution, in Python:</p>
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="k">def</span> <span class="nf">remove_extra_consecutive</span><span class="p">(</span><span class="n">input_str</span><span class="p">,</span> <span class="n">max_consecutive_chars</span><span class="p">):</span>
+    <span class="n">output</span><span class="p">,</span> <span class="n">prev_char</span><span class="p">,</span> <span class="n">current_char_seen</span> <span class="o">=</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">current_char</span> <span class="ow">in</span> <span class="n">input_str</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">current_char</span> <span class="o">==</span> <span class="n">prev_char</span><span class="p">:</span>
+            <span class="n">current_char_seen</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">current_char_seen</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">prev_char</span> <span class="o">=</span> <span class="n">current_char</span>
+        <span class="k">if</span> <span class="n">current_char_seen</span> <span class="o">&lt;</span> <span class="n">max_consecutive_chars</span><span class="p">:</span>
+            <span class="n">output</span> <span class="o">+=</span> <span class="n">current_char</span>
+    <span class="k">return</span> <span class="n">output</span>
+</code></pre></div>
+<p>While the candidate is writing code, I focus on the following.</p>
+
+<ul>
+<li>Thought process. How do they get to a solution? Did they talk about their strategy?</li>
+<li>It needs to work. If it doesn&#39;t, I will keep pushing them until it does.</li>
+<li>Are the function and the variables well named?</li>
+<li>Is the code as simple as possible, but not more simple?</li>
+<li>Is the candidate struggling to remember standard library functions? Help them out.</li>
+</ul>
+
+<h2>Other Solutions</h2>
+
+<p>The most common variant answer I see is conflating the clauses that count the character and append to the output. Typically this results in a bug where the last character in a run is omitted.</p>
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="k">def</span> <span class="nf">remove_extra_consecutive</span><span class="p">(</span><span class="n">input_str</span><span class="p">,</span> <span class="n">max_consecutive_chars</span><span class="p">):</span>
+    <span class="n">output</span><span class="p">,</span> <span class="n">prev_char</span><span class="p">,</span> <span class="n">current_char_seen</span> <span class="o">=</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="mi">1</span>
+    <span class="k">for</span> <span class="n">current_char</span> <span class="ow">in</span> <span class="n">input_str</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">current_char</span> <span class="o">==</span> <span class="n">prev_char</span> <span class="ow">and</span> <span class="n">current_char_seen</span> <span class="o">&lt;</span> <span class="n">max_consecutive_chars</span><span class="p">:</span>
+            <span class="n">current_char_seen</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">output</span> <span class="o">+=</span> <span class="n">current_char</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">current_char</span> <span class="o">!=</span> <span class="n">prev_char</span><span class="p">:</span>
+                <span class="n">current_char_seen</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="n">output</span> <span class="o">+=</span> <span class="n">current_char</span>
+        <span class="n">prev_char</span> <span class="o">=</span> <span class="n">current_char</span>
+    <span class="k">return</span> <span class="n">output</span>
+</code></pre></div>
+<p>Another variant is using indexes instead of a named variable for the previous character. This can often lead to an index out of bounds bug. It&#39;s also common to forget to add the last character.</p>
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="k">def</span> <span class="nf">remove_extra_consecutive</span><span class="p">(</span><span class="n">input_str</span><span class="p">,</span> <span class="n">max_consecutive_chars</span><span class="p">):</span>
+    <span class="n">output</span><span class="p">,</span> <span class="n">current_char_seen</span> <span class="o">=</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">input_str</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">input_str</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">input_str</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="n">current_char_seen</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">current_char_seen</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">current_char_seen</span> <span class="o">&lt;</span> <span class="n">max_consecutive_chars</span><span class="p">:</span>
+            <span class="n">output</span> <span class="o">+=</span> <span class="n">input_str</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">current_char_seen</span> <span class="o">&lt;=</span> <span class="n">max_consecutive_chars</span><span class="p">:</span>
+        <span class="n">output</span> <span class="o">+=</span> <span class="n">input_str</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">output</span>
+</code></pre></div>
+<p>Finally some candidates try to alter the input string itself, or sometimes loop indexes, which can lead of off by one errors.</p>
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="k">def</span> <span class="nf">remove_extra_consecutive</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">max_consecutive_chars</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">)):</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">while</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">str</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="nb">str</span><span class="p">[</span><span class="n">j</span><span class="p">]:</span>
+                <span class="k">break</span>
+            <span class="k">if</span> <span class="n">j</span> <span class="o">-</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="n">max_consecutive_chars</span><span class="p">:</span>
+                <span class="nb">str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">j</span><span class="p">]</span> <span class="o">+</span> <span class="nb">str</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span>
+            <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="nb">str</span>
+</code></pre></div>
+<h2>Summary</h2>
+
+<p>I like this problem because it has one simple and robust solution, and a number of more complicated and brittle solutions. If a candidate gets through it quickly and correctly, I follow up by asking them about which edge cases they would want to create unit tests for. If it&#39;s in a dynamic language, I ask about how to make the function operate on any iterable.</p>
+
+
+<hr>
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'chaseseibertblog';
+    var disqus_identifier = '/blog/2014/10/10/my-favorite-interview-question';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/interview">interview</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2015/03/27/software-engineering-fireside-chat.html">Introducing the Software Engineering Fireside Chat Podcast</a></li>
+                                
+                                    <li><a href="/blog/2015/02/10/one-on-ones.html">Topics for One on Ones</a></li>
+                                
+                                    <li><a href="/blog/2014/12/22/class-design.html">Thoughts on Object Oriented Class Design</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script src="http://code.jquery.com/jquery-latest.js"></script>
+        <script src="/blog/js/bootstrap.js"></script>
+        <script src="/blog/js/shCore.js"></script>
+        <script src="/blog/js/shBrushBash.js"></script>
+        <script src="/blog/js/shBrushCpp.js"></script>
+        <script src="/blog/js/shBrushCSharp.js"></script>
+        <script src="/blog/js/shBrushCss.js"></script>
+        <script src="/blog/js/shBrushJava.js"></script>
+        <script src="/blog/js/shBrushJScript.js"></script>
+        <script src="/blog/js/shBrushPhp.js"></script>
+        <script src="/blog/js/shBrushPython.js"></script>
+        <script src="/blog/js/shBrushSql.js"></script>
+        <script src="/blog/js/shBrushRuby.js"></script>
+        <script src="/blog/js/shBrushXml.js"></script>
+
+        <script type="text/javascript">
+            dp.SyntaxHighlighter.BloggerMode();
+            dp.SyntaxHighlighter.HighlightAll("code");
+        </script>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Quick and dirty Ajax on any FORM</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/shCore.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2009/10/23/quick-and-dirty-ajax-on-any-form.html" />
+
+        <meta property="og:title" content="Quick and dirty Ajax on any FORM"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2009/10/23/quick-and-dirty-ajax-on-any-form.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Quick and dirty Ajax on any FORM
+                            
+                                <span class="post-date subtitle">23 Oct 2009</span>
+                            
+                        </h1>
+                    
+                    <p>
+I have been trying to write as much unobtrusive javascript as possibly lately. Mainly this means getting everything working without any javascript in the picture to start, and then layering in dynamic elements without breaking anything for javascript-disabled users.
+</p>
+
+<p>
+This week, I had a pretty simply page with a single FORM element and a bunch of INPUT  elements, many of which were submit buttons with various name/value pairs. Why so many buttons? Well, it's a semantically valid way to capture a single-click user action.
+</p>
+
+<p>
+The user wants to go to the next page? That's a button. Want to remove a keyword from this list? That's a button. Want to expand a section? You guessing it, that's a button.
+</p>
+
+<p>
+Why not use a link for this? In a simple case that's fine. If you wanted to go a whole other page, that's a link. But usually when I'm writing a web-application (as opposed to a web-site) there is a whole lot of state to pass around. Sure, the "next page" operation is the new piece of state, but what about the current page/last page state? I could wrap those into each link on the server-side, but that gets messy quickly. You're also limiting yourself to the size of the state by using a GET for that request.
+</p>
+
+<p>
+Now, buttons are kind ugly. Luckily, there is a cross-browser way to display them as images using just CSS:
+</p>
+
+<pre name="code" class="html">
+INPUT.ImageButton {
+ border: 0px;
+ padding: 0 0 0 16px !important; /* Hide text - IE */
+ text-indent: -999em; /* Hide text - FF */
+ height: 10px;
+ width: 10px;
+ margin-bottom: 3px;
+ cursor: pointer;
+ display: inline;
+ font-size: 8px;
+}
+
+INPUT.ImageButton.Add {
+ background: transparent url(/media/img/admin/icon_addlink.gif) no-repeat center;
+}
+
+...
+
+&lt;input type="submit" class="ImageButton Add" name="next_page" value="true"/&gt;
+</pre>
+
+<p>
+What does this have to do with Ajax? Well, it makes Ajax a breeze. Here is a generic jQuery snippet for turning any page where the state is entirely FORM-based into an Ajax request.
+</p>
+
+<pre name="code" class="javascript">
+$(document).ready(function() {
+ bind();
+})
+
+function bind() {
+ var form = $("#results-form");
+ if (form) {
+
+  $("input[type=submit]").click(function(e) {
+
+   // disable the form buttons so the user can't submit twice
+   $("input[type=submit]").click(function(){ return false; });
+
+   var form = $("#results-form");
+   var button = this;
+   var url = "ajax=true&amp;" + button.name + "=" + button.value + "&amp;";
+
+   document.body.style.cursor = 'wait';
+
+   $.post(form[0].action, url + form.serialize(), function (data) {
+
+    document.body.style.cursor = 'auto';
+
+    $("#contentDiv").html(data);
+
+    // re-bind new html for next Ajax call
+    bind();
+   });
+
+   return false;
+  });
+ }
+}
+</pre>
+
+<p>
+All you need to do is change your back-end to look for the ajax parameter, and only render the contents of contentDiv in that case.
+</p>
+
+
+<hr>
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'chaseseibertblog';
+    var disqus_identifier = '/blog/2009/10/23/quick-and-dirty-ajax-on-any-form';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/javascript">javascript</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/jquery">jquery</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/ajax">ajax</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2015/03/27/software-engineering-fireside-chat.html">Introducing the Software Engineering Fireside Chat Podcast</a></li>
+                                
+                                    <li><a href="/blog/2015/02/10/one-on-ones.html">Topics for One on Ones</a></li>
+                                
+                                    <li><a href="/blog/2014/12/22/class-design.html">Thoughts on Object Oriented Class Design</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script src="http://code.jquery.com/jquery-latest.js"></script>
+        <script src="/blog/js/bootstrap.js"></script>
+        <script src="/blog/js/shCore.js"></script>
+        <script src="/blog/js/shBrushBash.js"></script>
+        <script src="/blog/js/shBrushCpp.js"></script>
+        <script src="/blog/js/shBrushCSharp.js"></script>
+        <script src="/blog/js/shBrushCss.js"></script>
+        <script src="/blog/js/shBrushJava.js"></script>
+        <script src="/blog/js/shBrushJScript.js"></script>
+        <script src="/blog/js/shBrushPhp.js"></script>
+        <script src="/blog/js/shBrushPython.js"></script>
+        <script src="/blog/js/shBrushSql.js"></script>
+        <script src="/blog/js/shBrushRuby.js"></script>
+        <script src="/blog/js/shBrushXml.js"></script>
+
+        <script type="text/javascript">
+            dp.SyntaxHighlighter.BloggerMode();
+            dp.SyntaxHighlighter.HighlightAll("code");
+        </script>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

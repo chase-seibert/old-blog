@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Distributing Vagrant base boxes securely</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/shCore.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2014/05/18/vagrant-authenticated-private-box-urls.html" />
+
+        <meta property="og:title" content="Distributing Vagrant base boxes securely"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2014/05/18/vagrant-authenticated-private-box-urls.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Distributing Vagrant base boxes securely
+                            
+                                <span class="post-date subtitle">18 May 2014</span>
+                            
+                        </h1>
+                    
+                    <p><a href="http://www.vagrantup.com">Vagrant</a> is typically used to provide local, uniform and <em>repeatable</em> development virtual machines. Repeatable is given little importance in the documentation, but since I&#39;ve been using vagrant, I&#39;ve been surprised at just how often I end up destroying and re-creating my boxes.</p>
+
+<h1>Why custom base boxes</h1>
+
+<p>Our typical provisioning takes about 30 minutes. Half of that is downloading and installing <code>apt</code> dependencies, and half is downloading, compiling (ugh) and installing <code>pip</code> dependencies for Python. What&#39;s worse, it&#39;s not particularly robust; compiling Python libraries will fail approximately 10% of the time. Just enough to be really annoying.</p>
+
+<p>Base boxes to the rescue. The included Ubuntu boxes <code>precise32</code> and <code>precise64</code> are about 300MB, and contain only the operating system and minimal other dependencies. But you can build your own base box files from a previously configured virtual machine.</p>
+
+<h1>Shrinking images</h1>
+
+<p>Running the standard <code>vagrant package --output /tmp/mydev.box</code> command creates a base box of 2.5GB in my case. How did we go from 300MB to 2.5GB? It&#39;s actually mostly bloat. You can save quite a bit of space by running <a href="https://gist.githubusercontent.com/adrienbrault/3775253/raw/da59136ef0414af151b917bd25a06882f0107947/purge.sh">this gist</a> inside your VM <em>before</em> you package it.</p>
+
+<p>In my case, this trimmed it down to 800MB.</p>
+
+<h1>Do you want your dev image public?</h1>
+
+<p>In our case, we didn&#39;t want to make this image publicly available. Although the box does not have actual code on it (it&#39;s loaded later via NFS), it <em>does</em> have development API keys/passwords. Why? A while back we removed these from the github repo and moved them into <code>/etc</code> config files. Besides, I&#39;m not sure we want to make anything about our service config public, either.</p>
+
+<p>This is a problem because Vagrant assumes your <code>box_url</code> is going to be using HTTP/HTTPS. It does support Basic Authentication, but that&#39;s hardly secure.</p>
+
+<h1>What about Vagrant cloud?</h1>
+
+<p>Vagrant is starting a service called <a href="https://vagrantcloud.com/">Vagrant Cloud</a> aimed precisely at this use case. However, it&#39;s in early beta, and doesn&#39;t support actually hosting files at this stage. You need to upload your box somewhere else and give them a URL, so you&#39;re back to square one.</p>
+
+<h1>Plugins</h1>
+
+<p>I could not find a vagrant plugin for my use case, either. There is an interesting <a href="https://github.com/natlownes/vagrant-fog-box-storage">vagrant-fog-box-storage</a> plugin that allows you to download a box image off S3. However, it doesn&#39;t work with Vagrant versions past 1.1. Plus, I&#39;m pretty sure I don&#39;t want to include AWS access tokens in my Vagrantfile.</p>
+
+<p>I&#39;m also <em>very</em> sure I don&#39;t want to write by own plugin in ruby.</p>
+
+<h1>Vagrant actually uses cURL</h1>
+
+<p>While searching around, I randomly ran into the vagrant <a href="https://github.com/mitchellh/vagrant/blob/master/lib/vagrant/util/downloader.rb">download code</a>, where I quickly realized they were using cURL to do the actual download. Great! A little known feature of cURL is that it supports many different protocols: <code>dict file ftp ftps gopher http https imap imaps ldap ldaps pop3 pop3s rtsp scp sftp smtp smtps telnet tftp</code>.</p>
+
+<p>This actually turns out to be a <a href="https://github.com/mitchellh/vagrant/pull/1041">concious decision</a> to support scp. All you have to do is use a scp URL like <code>scp://my-server:/tmp/dev.box</code>.</p>
+
+<h1>cURL doesn&#39;t have this option by default in OSX</h1>
+
+<p>One big problem. Our development machines are all Apples, and the <code>curl</code> command built-in to OSX Mavericks is not compiled with the scp option. So we turn to homebrew.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">brew install curl --with-ssh
+brew link curl --force</code></pre></div>
+
+<p><strong>Note: This will over-ride the built-in curl, which is fairly dangerous. If the arguments don&#39;t match something another app on your system is expecting, things could very well break. <a href="http://stackoverflow.com/questions/4691403/keg-only-homebrew-formulas">Learn more.</a></strong></p>
+
+<h1>Example vagrant file</h1>
+
+<p>Using a scp URL in your <code>Vagrantfile</code> is simple:</p>
+
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="c1"># -*- mode: ruby -*-</span>
+<span class="no">Vagrant</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="s2">&quot;2&quot;</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+  <span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">hostname</span> <span class="o">=</span> <span class="s2">&quot;dev-vagrant&quot;</span>
+  <span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">box</span> <span class="o">=</span> <span class="s2">&quot;dev&quot;</span>
+  <span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">box_url</span> <span class="o">=</span> <span class="s2">&quot;scp://my-server:/tmp/dev.box&quot;</span>
+<span class="k">end</span></code></pre></div>
+
+<h1>Future Work</h1>
+
+<p>Ideally, Vagrant itself would optionally call <code>scp</code> directly to side-step the OSX issue. It would also be ideal if they supported S3 directly, as well. In fact, just let us write our own shell command/script to download the file.</p>
+
+
+<hr>
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'chaseseibertblog';
+    var disqus_identifier = '/blog/2014/05/18/vagrant-authenticated-private-box-urls';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/vagrant">vagrant</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2015/03/27/software-engineering-fireside-chat.html">Introducing the Software Engineering Fireside Chat Podcast</a></li>
+                                
+                                    <li><a href="/blog/2015/02/10/one-on-ones.html">Topics for One on Ones</a></li>
+                                
+                                    <li><a href="/blog/2014/12/22/class-design.html">Thoughts on Object Oriented Class Design</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script src="http://code.jquery.com/jquery-latest.js"></script>
+        <script src="/blog/js/bootstrap.js"></script>
+        <script src="/blog/js/shCore.js"></script>
+        <script src="/blog/js/shBrushBash.js"></script>
+        <script src="/blog/js/shBrushCpp.js"></script>
+        <script src="/blog/js/shBrushCSharp.js"></script>
+        <script src="/blog/js/shBrushCss.js"></script>
+        <script src="/blog/js/shBrushJava.js"></script>
+        <script src="/blog/js/shBrushJScript.js"></script>
+        <script src="/blog/js/shBrushPhp.js"></script>
+        <script src="/blog/js/shBrushPython.js"></script>
+        <script src="/blog/js/shBrushSql.js"></script>
+        <script src="/blog/js/shBrushRuby.js"></script>
+        <script src="/blog/js/shBrushXml.js"></script>
+
+        <script type="text/javascript">
+            dp.SyntaxHighlighter.BloggerMode();
+            dp.SyntaxHighlighter.HighlightAll("code");
+        </script>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>NetBIOS Naming Service + lmhosts</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/shCore.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2009/05/13/netbios-naming-service-lmhosts.html" />
+
+        <meta property="og:title" content="NetBIOS Naming Service + lmhosts"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2009/05/13/netbios-naming-service-lmhosts.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            NetBIOS Naming Service + lmhosts
+                            
+                                <span class="post-date subtitle">13 May 2009</span>
+                            
+                        </h1>
+                    
+                    <p>
+Recently, I have been working on a project using <a href="http://www.alfresco.com/products/aifs/">Alfresco JLAN</a> to simulate a Windows <a href="http://en.wikipedia.org/wiki/Server_Message_Block">CIFS</a> (aka Samba) share in Java. Not being able to (easily) replace the entire Windows file sharing stack, it instead advertises its virtual host name via a Win32 API call to the NetBIOS Naming Service.
+</p>
+
+<p>
+From the <a href="http://en.wikipedia.org/wiki/NetBIOS_over_TCP/IP#Name_service">NetBIOS Wikipedia entry</a>:
+</p>
+
+<blockquote>In NetBIOS, each participant must register on the network using a unique name of at most 16 characters. In legacy networks, when a new application wanted to register a name, it had to broadcast a message saying "Is anyone currently using that name?" and wait for an answer. If no answer came back, it was safe to assume that the name was not in use. However, the wait timeout was a few seconds, making the name registration a very lengthy process, as the only way of knowing that a name was not registered was to not receive any answer.</blockquote>
+
+<p>
+When attempting to roll it out to production, we ran into an interesting issue. Unlike our QA system, production has multiple <a href="http://en.wikipedia.org/wiki/Subnetwork">IP subnets</a>. When the NetBIOS broadcast goes out, it only gets broadcast to the local subnet. As a result, only systems on that subnet can address it by name. We actually broke out <a href="http://www.wireshark.org/">Wireshark</a> on both the server and the client side to verify that yes, indeed, the broadcasts were not seen on the remote subnet(s):
+</p>
+
+<a href="http://picasaweb.google.com/lh/photo/kMMnxHFFTMZuEZd2J3NOmA?feat=directlink"><img src='http://lh3.ggpht.com/_EE2zVzGv1Ds/SgsYqkG5NOI/AAAAAAAAIC0/xGLqkNcNgZo/s800/wireshark_netbios.gif'></a>
+
+<p>
+This actually makes perfect sense, but not being involved in the day-to-day networking in the office, it took me a while to see why. One of the purposes of the subnets is to reduce broadcast traffic; allowing an overly chatty network can lead to congestion. And while there are <a href="http://routergod.com/trinity/">router-level solutions</a> to let certain broadcasts cross subnets, those are something of a maintenance nightmare. 
+</p>
+
+<p>
+A simple solution turned out to be the Windows <a href="http://en.wikipedia.org/wiki/LMHOSTS">lmhosts</a> file. It works like the regular hosts file, but ties NetBIOS (versus DNS) names to IP addresses. By manually configuring the mapping in this file on the client(s), we can side-step the whole broadcast/subnet issue. Just remember to rename the file from lmhosts.sam to just lhmosts.
+</p>
+
+<hr>
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'chaseseibertblog';
+    var disqus_identifier = '/blog/2009/05/13/netbios-naming-service-lmhosts';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2015/03/27/software-engineering-fireside-chat.html">Introducing the Software Engineering Fireside Chat Podcast</a></li>
+                                
+                                    <li><a href="/blog/2015/02/10/one-on-ones.html">Topics for One on Ones</a></li>
+                                
+                                    <li><a href="/blog/2014/12/22/class-design.html">Thoughts on Object Oriented Class Design</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script src="http://code.jquery.com/jquery-latest.js"></script>
+        <script src="/blog/js/bootstrap.js"></script>
+        <script src="/blog/js/shCore.js"></script>
+        <script src="/blog/js/shBrushBash.js"></script>
+        <script src="/blog/js/shBrushCpp.js"></script>
+        <script src="/blog/js/shBrushCSharp.js"></script>
+        <script src="/blog/js/shBrushCss.js"></script>
+        <script src="/blog/js/shBrushJava.js"></script>
+        <script src="/blog/js/shBrushJScript.js"></script>
+        <script src="/blog/js/shBrushPhp.js"></script>
+        <script src="/blog/js/shBrushPython.js"></script>
+        <script src="/blog/js/shBrushSql.js"></script>
+        <script src="/blog/js/shBrushRuby.js"></script>
+        <script src="/blog/js/shBrushXml.js"></script>
+
+        <script type="text/javascript">
+            dp.SyntaxHighlighter.BloggerMode();
+            dp.SyntaxHighlighter.HighlightAll("code");
+        </script>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

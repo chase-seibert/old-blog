@@ -1,0 +1,74 @@
+<hr>
+
+<p>layout: post
+title: Logging Django shell and dbshell sessions</p>
+
+<h2>tags: django logging</h2>
+
+<p>The Django <a href="https://docs.djangoproject.com/en/dev/ref/django-admin/#shell">shell management command</a> is a supremely useful tool for developers to explore and potentially modify data in their applications, both during development and in production. For jobs where that does not perform well enough, or you need lower level access to the data, the <a href="https://docs.djangoproject.com/en/dev/ref/django-admin/#dbshell">dbshell command</a> gives you even more power.</p>
+
+<h1>With great power, comes great responsibility</h1>
+
+<p>Every developer has been in a situation where they use their supremely powerful tools to make a supremely large mistake against production data. In those cases, although it may not save you, it can be critical to have a log of what you did, exactly. If you realize your mistake while you are in front of the console, they you have all the information you need. But what if you only realize minutes, hours or days later?</p>
+
+<p>Or perhaps you just need plausible deniability. In either case, it&#39;s not too hard to hookup logging to Django&#39;s shell commands. In this post, I&#39;ll show you how to enable per-user logging into separate files, with date and time stamps.</p>
+
+<h1>Shell Logging with iPython</h1>
+
+<p><a href="http://ipython.org/download.html">iPython</a> is a great replacement for the already pretty awesome interactive interpreter built into python. You should be running it anyway, but if you&#39;re looking for another reason, it has built-in logging capability. To get Django to use iPython for its <code>shell</code> command, you just need to have iPython installed with <code>pip install ipython</code>. Django will detect and use it.</p>
+
+<p>To enable logging from Django&#39;s <code>shell</code> command, put the following in you project root directory in a file called <code>ipython_config.py</code>.</p>
+
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">os</span>
+
+<span class="c"># lines of code to run at IPython startup.</span>
+<span class="n">c</span> <span class="o">=</span> <span class="n">get_config</span><span class="p">()</span>
+<span class="n">c</span><span class="o">.</span><span class="n">InteractiveShellApp</span><span class="o">.</span><span class="n">exec_lines</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s">&quot;</span><span class="si">%%</span><span class="s">logstart -t -o /var/log/django/shell-</span><span class="si">%s</span><span class="s">.log&quot;</span> <span class="o">%</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;USER&quot;</span><span class="p">,</span> <span class="s">&quot;none&quot;</span><span class="p">)]</span></code></pre></div>
+
+<p>To get <code>shell</code> to recognize your config file, you need to write your own subclass. Place this in a file under your project directory called <code>management/commands/shell.py</code>, and Django will automatically pick it up. Make sure to create <code>__init__.py</code> files in the <code>management</code> and <code>commands</code> directories.</p>
+
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">django.core.management.commands.shell</span> <span class="kn">import</span> <span class="n">Command</span> <span class="k">as</span> <span class="n">DjangoShellCommand</span>
+<span class="kn">from</span> <span class="nn">IPython.frontend.terminal.ipapp</span> <span class="kn">import</span> <span class="n">TerminalIPythonApp</span>
+
+<span class="k">class</span> <span class="nc">Command</span><span class="p">(</span><span class="n">DjangoShellCommand</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">ipython</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; need to over-ride this to invoke the TerminalIPythonAdd, versus embed().</span>
+<span class="sd">        The later does not take configuration options we require to enable logging.</span>
+<span class="sd">        See: https://code.djangoproject.com/ticket/17078</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">TerminalIPythonApp</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="n">argv</span><span class="o">=</span><span class="p">[])</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">start</span><span class="p">()</span></code></pre></div>
+
+<p>You will also need to create the <code>/var/log/django</code> directory with write permissions.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">mkdir /var/log/django
+chown root:root /var/log/django
+chmod <span class="m">775</span> /var/log/django</code></pre></div>
+
+<h1>Database Shell Logging with MySQL</h1>
+
+<p>Assuming you&#39;re using MySQL as your database, you can enable logging by placing the following code in your <code>settings.py</code> file, bellow your <code>DATABASES</code> declaration.</p>
+
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">socket</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="n">options</span> <span class="o">=</span> <span class="n">DATABASES</span><span class="p">[</span><span class="s">&#39;default&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;OPTIONS&#39;</span><span class="p">,</span> <span class="p">{})</span>
+<span class="n">hostname</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">gethostname</span><span class="p">()</span>
+<span class="k">if</span> <span class="s">&#39;dbshell&#39;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span> <span class="ow">and</span> <span class="n">DATABASES</span><span class="p">[</span><span class="s">&#39;default&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;ENGINE&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;mysql&#39;</span><span class="p">):</span>
+    <span class="c"># have mysql executable log for us, using a per user config file</span>
+    <span class="n">mycnf</span> <span class="o">=</span> <span class="s">&#39;/tmp/</span><span class="si">%s</span><span class="s">.cnf&#39;</span> <span class="o">%</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;USER&#39;</span><span class="p">)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">mycnf</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="nb">file</span><span class="p">:</span>
+        <span class="n">contents</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;</span>
+<span class="s">[mysql]</span>
+<span class="s">prompt=&quot;[\D </span><span class="si">%(username)s</span><span class="s">@</span><span class="si">%(host)s</span><span class="s">]&gt; &quot;</span>
+<span class="s">tee=/var/log/django/dbshell-</span><span class="si">%(username)s</span><span class="s">.log</span>
+<span class="s">&#39;&#39;&#39;</span> <span class="o">%</span> <span class="nb">dict</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;USER&#39;</span><span class="p">),</span> <span class="n">host</span><span class="o">=</span><span class="n">hostname</span><span class="p">)</span>
+        <span class="nb">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">contents</span><span class="p">)</span>
+    <span class="n">options</span><span class="p">[</span><span class="s">&#39;read_default_file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mycnf</span>
+<span class="n">DATABASES</span><span class="p">[</span><span class="s">&#39;default&#39;</span><span class="p">][</span><span class="s">&#39;OPTIONS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">options</span></code></pre></div>
+
+<p>This method also uses a logging facility built-in to an external tool, in this case the <code>mysql</code> command line interactive shell.</p>

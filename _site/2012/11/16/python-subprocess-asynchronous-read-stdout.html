@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Python Subprocess Asynchronous Read Stdout</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/shCore.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2012/11/16/python-subprocess-asynchronous-read-stdout.html" />
+
+        <meta property="og:title" content="Python Subprocess Asynchronous Read Stdout"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2012/11/16/python-subprocess-asynchronous-read-stdout.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Python Subprocess Asynchronous Read Stdout
+                            
+                                <span class="post-date subtitle">16 Nov 2012</span>
+                            
+                        </h1>
+                    
+                    <p>Python has a great standard library when it comes to invoking <a href="http://docs.python.org/2/library/subprocess.html">external processes</a>. But one weakness it does have is that it&#39;s not easy to communicate with a subprocess while it&#39;s running, i.e. streaming its stdout. If you look at the documentation for <code>popen</code>, you will repeatedly see caveats like the following from the Python docs for <a href="http://docs.python.org/2/library/subprocess.html#subprocess.Popen.communicate">Popen.communicate</a>:</p>
+
+<blockquote>
+<p>Interact with process: Send data to stdin. Read data from stdout and stderr, until end-of-file is reached. <strong>Wait for process to terminate.</strong> The optional input argument should be a string to be sent to the child process, or None, if no data should be sent to the child.</p>
+</blockquote>
+
+<p>It&#39;s actually a well known problem. There is even an open enhancement proposal <a href="http://www.python.org/dev/peps/pep-3145/">PEP 3145</a> to address it. But that is currently on track for Python 3.2. Python 2.x will never get that update.</p>
+
+<p>Hunting around, I found a pretty decent partial solution on <a href="http://stackoverflow.com/questions/375427/non-blocking-read-on-a-subprocess-pipe-in-python">Stackoverflow</a>, but it took me quite a bit to tweaking to get it to work in my case.</p>
+
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">fcntl</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">Thread</span>
+
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+
+    <span class="n">mysql_process</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span>
+        <span class="p">[</span><span class="s">&#39;mysql&#39;</span><span class="p">,</span> <span class="s">&#39;--user=</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s">&#39;--password=</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="s">&#39;--batch&#39;</span><span class="p">,</span> <span class="s">&#39;--skip-tee&#39;</span><span class="p">,</span> <span class="s">&#39;--skip-pager&#39;</span><span class="p">,</span> <span class="s">&#39;--unbuffered&#39;</span><span class="p">]</span>
+        <span class="n">stdin</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stdin</span><span class="p">,</span>
+        <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
+        <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
+
+    <span class="n">thread</span> <span class="o">=</span> <span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">log_worker</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="n">mysql_process</span><span class="o">.</span><span class="n">stdout</span><span class="p">])</span>
+    <span class="n">thread</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+    <span class="n">mysql_process</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+    <span class="n">thread</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">log_worker</span><span class="p">(</span><span class="n">stdout</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; needs to be in a thread so we can read the stdout w/o blocking &#39;&#39;&#39;</span>
+    <span class="n">username</span><span class="p">,</span> <span class="n">hostname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;USER&#39;</span><span class="p">),</span> <span class="n">socket</span><span class="o">.</span><span class="n">gethostname</span><span class="p">()</span>
+    <span class="n">log_file</span> <span class="o">=</span> <span class="s">&#39;/var/log/mysql-</span><span class="si">%s</span><span class="s">.log&#39;</span> <span class="o">%</span> <span class="n">username</span>
+    <span class="n">log</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">log_file</span><span class="p">,</span> <span class="s">&#39;a&#39;</span><span class="p">)</span>
+    <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">non_block_read</span><span class="p">(</span><span class="n">stdout</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">output</span><span class="p">:</span>
+            <span class="sd">&#39;&#39;&#39; [Tue Oct 30 22:13:13 2012 cseibert@host1]&gt; &#39;&#39;&#39;</span>
+            <span class="n">prompt</span> <span class="o">=</span> <span class="s">&#39;[</span><span class="si">%(timestamp)s</span><span class="s"> </span><span class="si">%(username)s</span><span class="s">@</span><span class="si">%(host)s</span><span class="s">]&gt; </span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="nb">dict</span><span class="p">(</span>
+                    <span class="n">timestamp</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s">&#39;%a %b </span><span class="si">%d</span><span class="s"> %H:%M:%S %Y&#39;</span><span class="p">),</span>
+                    <span class="n">username</span><span class="o">=</span><span class="n">username</span><span class="p">,</span>
+                    <span class="n">host</span><span class="o">=</span><span class="n">hostname</span><span class="p">)</span>
+            <span class="k">print</span> <span class="n">prompt</span> <span class="o">+</span> <span class="n">output</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">prompt</span> <span class="o">+</span> <span class="n">output</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">non_block_read</span><span class="p">(</span><span class="n">output</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; even in a thread, a normal read with block until the buffer is full &#39;&#39;&#39;</span>
+    <span class="n">fd</span> <span class="o">=</span> <span class="n">output</span><span class="o">.</span><span class="n">fileno</span><span class="p">()</span>
+    <span class="n">fl</span> <span class="o">=</span> <span class="n">fcntl</span><span class="o">.</span><span class="n">fcntl</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">fcntl</span><span class="o">.</span><span class="n">F_GETFL</span><span class="p">)</span>
+    <span class="n">fcntl</span><span class="o">.</span><span class="n">fcntl</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">fcntl</span><span class="o">.</span><span class="n">F_SETFL</span><span class="p">,</span> <span class="n">fl</span> <span class="o">|</span> <span class="n">os</span><span class="o">.</span><span class="n">O_NONBLOCK</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">output</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s">&#39;&#39;</span></code></pre></div>
+
+<p>As you can see, this code is invoking the <code>mysql</code> command-line client in batch mode. I&#39;m piping a file into my python script, and then turning around and piping that into mysql. I start the mysql subprocess, but at the same time I&#39;m spinning off a worker thread to read its output. Additionally, I&#39;m re-opening stdout in non-blocking mode, so I don&#39;t have to wait for a buffer to fill up before I can read a chunk.</p>
+
+<p>Then I&#39;m reading the mysql output and writing it both to the console, and to a log file. For this application, it&#39;s critical that the mysql output be shown on the screen as it&#39;s running. What if there&#39;s an exception; the user will want to terminate before it runs any further.</p>
+
+<p>Doesn&#39;t mysql provide logging by default? Yes, but only for interactive (i.e., non-batch) sessions. From the mysql command-line tool docs:</p>
+
+<blockquote>
+<p>By using the --tee option when you invoke mysql, you can log statements and their output. All the data displayed on the screen is appended into a given file. This can be very useful for debugging purposes also. mysql flushes results to the file after each statement, just before it prints its next prompt. <strong>Tee functionality works only in interactive mode.</strong></p>
+</blockquote>
+
+<p>One additional caveat; you need to make sure that the subprocess you are invoking is not doing its own buffering. It took me a bit to figure out that mysql does do that, which is what the <code>--unbuffered</code> flag is there to disable.</p>
+
+
+<hr>
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'chaseseibertblog';
+    var disqus_identifier = '/blog/2012/11/16/python-subprocess-asynchronous-read-stdout';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/python">python</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/subprocess">subprocess</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/threads">threads</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2015/03/27/software-engineering-fireside-chat.html">Introducing the Software Engineering Fireside Chat Podcast</a></li>
+                                
+                                    <li><a href="/blog/2015/02/10/one-on-ones.html">Topics for One on Ones</a></li>
+                                
+                                    <li><a href="/blog/2014/12/22/class-design.html">Thoughts on Object Oriented Class Design</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script src="http://code.jquery.com/jquery-latest.js"></script>
+        <script src="/blog/js/bootstrap.js"></script>
+        <script src="/blog/js/shCore.js"></script>
+        <script src="/blog/js/shBrushBash.js"></script>
+        <script src="/blog/js/shBrushCpp.js"></script>
+        <script src="/blog/js/shBrushCSharp.js"></script>
+        <script src="/blog/js/shBrushCss.js"></script>
+        <script src="/blog/js/shBrushJava.js"></script>
+        <script src="/blog/js/shBrushJScript.js"></script>
+        <script src="/blog/js/shBrushPhp.js"></script>
+        <script src="/blog/js/shBrushPython.js"></script>
+        <script src="/blog/js/shBrushSql.js"></script>
+        <script src="/blog/js/shBrushRuby.js"></script>
+        <script src="/blog/js/shBrushXml.js"></script>
+
+        <script type="text/javascript">
+            dp.SyntaxHighlighter.BloggerMode();
+            dp.SyntaxHighlighter.HighlightAll("code");
+        </script>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

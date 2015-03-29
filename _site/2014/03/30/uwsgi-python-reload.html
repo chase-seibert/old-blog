@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Reload Python inside uWSGI as fast as humanely possible</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/shCore.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2014/03/30/uwsgi-python-reload.html" />
+
+        <meta property="og:title" content="Reload Python inside uWSGI as fast as humanely possible"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2014/03/30/uwsgi-python-reload.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Reload Python inside uWSGI as fast as humanely possible
+                            
+                                <span class="post-date subtitle">30 Mar 2014</span>
+                            
+                        </h1>
+                    
+                    <p>The Django development web server you get when you execute <code>./manage.py runserver</code> optimizes for one thing; fast hot reloading when you change your Python code. It does almost nothing else well, by design.</p>
+
+<blockquote>
+<p>DO NOT USE THIS SERVER IN A PRODUCTION SETTING. It has not gone through security audits or performance tests. (And that’s how it’s gonna stay. We’re in the business of making Web frameworks, not Web servers, so improving this server to be able to handle a production environment is outside the scope of Django.)...
+The development server automatically reloads Python code for each request, as needed. You don’t need to restart the server for code changes to take effect. -  <a href="https://docs.djangoproject.com/en/dev/ref/django-admin/#runserver-port-or-address-port">The Django Docs</a></p>
+</blockquote>
+
+<p>If you&#39;re running <a href="http://projects.unbit.it/uwsgi/">uWSGI</a> in production, you may decide that you want to run it in development, as well. But you&#39;ll quickly notice that by default, code is not hot-reloaded in uWSGI. You can enable that with the <a href="http://uwsgi-docs.readthedocs.org/en/latest/Options.html#py-auto-reload-py-autoreload-python-auto-reload-python-autoreload">py-autoreload setting</a>. It works by polling the code every X seconds.</p>
+
+<p>Polling is already not ideal, but the story gets even worse if your code is on a remote file system, like an NFS share. This is a common setup if your development environment is running in a VM, like <a href="http://www.vagrantup.com/">Vagrant</a>. The problem is that polling is relatively slow over NFS. It can take 10 seconds on a medium sized code base to pick up changes. This is a bummer if you&#39;re coming from a virtually instantaneous runserver reload.</p>
+
+<p>Recent versions of uwsgi also support <a href="https://github.com/unbit/uwsgi-docs/blob/master/Changelog-1.9.14.rst#filesystem-monitoring-interface-fsmon">inotify</a> to pick up changes more quickly. But that also doesn&#39;t work over NFS.</p>
+
+<p>The good news is that uWSGI also supports touch reloading. Basically you set a <code>touch-reload</code> file in your config, and if you do a <code>touch thatfile</code>, your Python code gets reloaded immediately. This works well over NFS because uWSGI polls that file much more quickly.</p>
+
+<p>So how can we get an OSX host machine to update the touch file in the guest Linux host every time your code changes? Basically, you can use an inotify replacement for OSX called <a href="https://github.com/alandipert/fswatch">fswatch</a>. In this case, we&#39;re going to have it run a command to open a socket to the guest VM, and tell a custom daemon to touch the reload file.</p>
+
+<p>First, you need to install fswatch locally.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">brew install fswatch</code></pre></div>
+
+<p>Then, fork off a process watching your code directory, and pinging the remote daemon. I&#39;m assuming that your VM has an entry in your hosts file called <code>vagrant-vm</code>. You can also use a static IP. The daemon will be listening on port 9001. <em>Note: fswatch does not currently take an extension filter, so this will restart uWSGI on ANY file change.</em></p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">fswatch ~/mycode <span class="s2">&quot;echo &#39;.&#39; |nc vagrant-vm 9001&quot;</span> <span class="p">&amp;</span></code></pre></div>
+
+<p>Then, on the Linux VM guest, you fork off the daemon listener.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">nc -l <span class="m">9001</span> -k &gt; ~/mycode/.reload</code></pre></div>
+
+<p>This is assuming you have the uWSGI <code>touch-reload</code> file set to <code>~/mycode/.reload</code>. That&#39;s it! When you update a file in <code>~/mycode</code> locally, you should see the following immediately in the uWSGI logs:</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">...gracefully killing workers...
+Gracefully killing worker <span class="m">1</span> <span class="o">(</span>pid: 25505<span class="o">)</span>...
+worker <span class="m">1</span> buried after <span class="m">1</span> seconds
+binary reloading uWSGI...
+...
+WSGI app <span class="m">0</span> <span class="o">(</span><span class="nv">mountpoint</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="o">)</span> ready in <span class="m">0</span> seconds on interpreter 0x239b270 pid: <span class="m">18792</span> <span class="o">(</span>default app<span class="o">)</span>
+gracefully <span class="o">(</span>RE<span class="o">)</span>spawned uWSGI master process <span class="o">(</span>pid: 18792<span class="o">)</span>
+spawned uWSGI worker <span class="m">1</span> <span class="o">(</span>pid: 25512, cores: 1<span class="o">)</span>
+Sun Mar <span class="m">30</span> 18:01:26 <span class="m">2014</span> - <span class="o">[</span>emperor<span class="o">]</span> vassal is ready to accept requests
+Python auto-reloader enabled</code></pre></div>
+
+
+<hr>
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'chaseseibertblog';
+    var disqus_identifier = '/blog/2014/03/30/uwsgi-python-reload';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/python">python</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/uwsgi">uwsgi</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2015/03/27/software-engineering-fireside-chat.html">Introducing the Software Engineering Fireside Chat Podcast</a></li>
+                                
+                                    <li><a href="/blog/2015/02/10/one-on-ones.html">Topics for One on Ones</a></li>
+                                
+                                    <li><a href="/blog/2014/12/22/class-design.html">Thoughts on Object Oriented Class Design</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script src="http://code.jquery.com/jquery-latest.js"></script>
+        <script src="/blog/js/bootstrap.js"></script>
+        <script src="/blog/js/shCore.js"></script>
+        <script src="/blog/js/shBrushBash.js"></script>
+        <script src="/blog/js/shBrushCpp.js"></script>
+        <script src="/blog/js/shBrushCSharp.js"></script>
+        <script src="/blog/js/shBrushCss.js"></script>
+        <script src="/blog/js/shBrushJava.js"></script>
+        <script src="/blog/js/shBrushJScript.js"></script>
+        <script src="/blog/js/shBrushPhp.js"></script>
+        <script src="/blog/js/shBrushPython.js"></script>
+        <script src="/blog/js/shBrushSql.js"></script>
+        <script src="/blog/js/shBrushRuby.js"></script>
+        <script src="/blog/js/shBrushXml.js"></script>
+
+        <script type="text/javascript">
+            dp.SyntaxHighlighter.BloggerMode();
+            dp.SyntaxHighlighter.HighlightAll("code");
+        </script>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

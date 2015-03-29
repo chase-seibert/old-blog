@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Checking RabbitMQ queue size/age with Nagios</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/shCore.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2011/07/01/checking-rabbitmq-queue-sizeage-with-nagios.html" />
+
+        <meta property="og:title" content="Checking RabbitMQ queue size/age with Nagios"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2011/07/01/checking-rabbitmq-queue-sizeage-with-nagios.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Checking RabbitMQ queue size/age with Nagios
+                            
+                                <span class="post-date subtitle">01 Jul 2011</span>
+                            
+                        </h1>
+                    
+                    <p>
+For months we were using RabbitMQ (with celery) with no real insight into what was going on inside the queue. Recently, we deployed the <a href="http://www.rabbitmq.com/management.html">mangement plug-in</a>, which has a nifty web UI:
+</p>
+
+<img src="https://lh3.googleusercontent.com/-erYc4JHiPgE/Tg4r4RcL_aI/AAAAAAAALeM/yGHvFuBNHtk/s800/overview.png">
+
+<p>
+From there, is seemed like a logical thing to add a Nagios check for. Here is some Python code to do just that.
+</p>
+
+<pre name="code" class="python">
+#!/usr/bin/python
+
+from optparse import OptionParser
+import urllib2
+import json
+import pprint
+import time
+import datetime
+
+def getOptions():
+    arguments = OptionParser()
+    arguments.add_option("--host", dest="host", help="Host rabbitmq is running on", type="string", default="localhost")
+    arguments.add_option("--queue", dest="queue", help="Name of the queue in inspect", type="string", default="celery")
+    arguments.add_option("--username", dest="username", help="RabbitMQ API username", type="string", default="rabbitmq")
+    arguments.add_option("--password", dest="password", help="RabbitMQ API password", type="string", default="rabbitmq")
+    arguments.add_option("--port", dest="port", help="RabbitMQ API port", type="string", default="55672")
+
+    arguments.add_option("--warning-queue-size", dest="warn_queue", help="Size of the queue to alert as warning", type="int", default=10000)
+    arguments.add_option("--critical-queue-size", dest="crit_queue", help="Size of the queue to alert as critical", type="int", default=20000)
+
+    arguments.add_option("--warning-seconds", dest="warn_seconds", help="Last event processes in seconds ago to alert as warning", type="int", default=3600)
+    arguments.add_option("--critical-seconds", dest="crit_seconds", help="Last event processes in seconds ago to alert as critical", type="int", default=14400)
+
+    return arguments.parse_args()[0]
+
+if __name__ == '__main__':
+
+    options = getOptions()
+
+    url = "http://%s:%s/api/queues/reach/%s" % (options.host, options.port, options.queue)
+
+    # handle HTTP Auth
+    password_mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
+    top_level_url = url
+    password_mgr.add_password(None, top_level_url, options.username, options.password)
+    handler = urllib2.HTTPBasicAuthHandler(password_mgr)
+    opener = urllib2.build_opener(handler)
+
+    response = None
+    try:
+        request = opener.open(url)
+        response = request.read()
+        request.close()
+    except urllib2.HTTPError, e:
+        print "Error code %s hitting %s" % (e.code, url)
+        exit(1)
+
+    data = json.loads(response)
+
+    #pp = pprint.PrettyPrinter(indent=4)
+    #pp.pprint(data)
+
+    num_messages = data.get("messages")
+    if num_messages > options.crit_queue or num_messages > options.warn_queue:
+        print "%s messages in %s queue" % (num_messages, options.queue)
+        exit(1 if num_messages > options.crit_queue else 2)
+
+    message_stats = data.get("message_stats")
+    deliver_details = message_stats.get("deliver_details")
+    rate = deliver_details.get("rate")
+
+    #1309542487
+    #1309548601517
+    last_event = deliver_details.get("last_event") / 1000
+    last_event_time = time.ctime(last_event)
+
+    #diff = abs(last_event_time - datetime.datetime.today())
+    #last_event_time_diff_seconds = diff.seconds + diff.days * 86400
+    last_event_time_diff_seconds = abs(last_event - int(time.time()))
+    if last_event_time_diff_seconds > options.crit_seconds or last_event_time_diff_seconds > options.warn_seconds:
+        print "%s seconds since last event consumed on %s" % (last_event_time_diff_seconds, options.queue)
+        exit(1 if last_event_time_diff_seconds > options.crit_seconds else 2)
+
+    print "Last event consumed: %s" % last_event_time
+</pre>
+
+<p>
+You can run it manually:
+</p>
+
+<pre name="code" class="bash">
+check_rabbitmq --host sched1 --warning-queue-size 100 --critical-queue-size 400 --warning-seconds 600 --critical-seconds 2400
+</pre>
+
+<p>
+Or, you can configure Nagios to run it:
+</p>
+
+<pre name="code" class="bash">
+# vim /etc/nagios3/conf.d/services_nagios2.cfg
+define command {
+        command_name    check_rabbitmq
+        command_line    /usr/lib/nagios/plugins/check_rabbitmq --host $HOSTADDRESS$ --queue $ARG1$ --warning-queue-size $ARG2$ --critical-queue-size $ARG3$ --warning-seconds $ARG4$ --critical-seconds $ARG5$
+}
+
+define service {
+        host_name                       sched1
+        service_description             QUEUE
+        check_command                   check_rabbitmq!celery!100!400!600!2400
+        contact_groups                  pager
+        use                             generic-service
+        notification_interval           0 ; set &gt; 0 if you want to be renotified
+}
+</pre>
+
+<img src="https://lh4.googleusercontent.com/--Q5GTSNNqac/Tg4tIdgAErI/AAAAAAAALeU/GM1BSU7lWOE/s800/Screenshot-Current%252520Network%252520Status%252520-%252520Google%252520Chrome.png">
+
+
+<hr>
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'chaseseibertblog';
+    var disqus_identifier = '/blog/2011/07/01/checking-rabbitmq-queue-sizeage-with-nagios';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/rabbitmq">rabbitmq</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/nagios">nagios</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2015/03/27/software-engineering-fireside-chat.html">Introducing the Software Engineering Fireside Chat Podcast</a></li>
+                                
+                                    <li><a href="/blog/2015/02/10/one-on-ones.html">Topics for One on Ones</a></li>
+                                
+                                    <li><a href="/blog/2014/12/22/class-design.html">Thoughts on Object Oriented Class Design</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script src="http://code.jquery.com/jquery-latest.js"></script>
+        <script src="/blog/js/bootstrap.js"></script>
+        <script src="/blog/js/shCore.js"></script>
+        <script src="/blog/js/shBrushBash.js"></script>
+        <script src="/blog/js/shBrushCpp.js"></script>
+        <script src="/blog/js/shBrushCSharp.js"></script>
+        <script src="/blog/js/shBrushCss.js"></script>
+        <script src="/blog/js/shBrushJava.js"></script>
+        <script src="/blog/js/shBrushJScript.js"></script>
+        <script src="/blog/js/shBrushPhp.js"></script>
+        <script src="/blog/js/shBrushPython.js"></script>
+        <script src="/blog/js/shBrushSql.js"></script>
+        <script src="/blog/js/shBrushRuby.js"></script>
+        <script src="/blog/js/shBrushXml.js"></script>
+
+        <script type="text/javascript">
+            dp.SyntaxHighlighter.BloggerMode();
+            dp.SyntaxHighlighter.HighlightAll("code");
+        </script>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

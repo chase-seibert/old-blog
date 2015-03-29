@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Sqoop/HBase Quickstart on Linux</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/shCore.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2013/06/07/sqoop-quickstart.html" />
+
+        <meta property="og:title" content="Sqoop/HBase Quickstart on Linux"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2013/06/07/sqoop-quickstart.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Sqoop/HBase Quickstart on Linux
+                            
+                                <span class="post-date subtitle">07 Jun 2013</span>
+                            
+                        </h1>
+                    
+                    <p><a href="http://sqoop.apache.org/">Sqoop</a> is a tool for bulk copying data between a relational database like MySQL and HDFS or another Hadoop based data store like Hive or HBase. It can either export a table or set of tables, or you can specify a custom SQL query to pull the data out. It&#39;s the best solution out there for moving massive data sets; it can even fan out sqoop workers to a configurable number of Hadoop data nodes, which will all run partitioned versions of the main SQL query in parallel.</p>
+
+<h1>Install</h1>
+
+<p>To get started, you will need to install Sqoop. The easiest method on Linux is to use the <a href="http://www.cloudera.com/content/cloudera-content/cloudera-docs/CDH4/latest/CDH4-Installation-Guide/CDH4-Installation-Guide.html">Cloudera</a> repository. You will also need the JDBC MySQL driver, and the JDK (Sqoop compiles a JAR on the fly and sends it out as a MapReduce job).</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">cat <span class="s">&lt;&lt;EOF &gt;&gt; /etc/apt/sources.list.d/cloudera.list</span>
+<span class="s">deb [arch=amd64] http://archive.cloudera.com/cdh4/ubuntu/precise/amd64/cdh precise-cdh4 contrib</span>
+<span class="s">deb-src http://archive.cloudera.com/cdh4/ubuntu/precise/amd64/cdh precise-cdh4 contrib</span>
+<span class="s">EOF</span>
+curl -s http://archive.cloudera.com/cdh4/ubuntu/lucid/amd64/cdh/archive.key<span class="p">|</span> sudo apt-key add -
+sudo apt-get update
+sudo apt-get install sqoop libmysql-java openjdk-7-jdk</code></pre></div>
+
+<h1>Run it!</h1>
+
+<p>Say you have a MySQL table <code>user</code> and a HBase table with the same name. If you want to do a straight copy of the data and use the <code>id</code> column as the HBase rowkey and store all the columns in a HBase column family named <code>data</code>, all you need to do is:</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">sqoop-import --connect jdbc:mysql://<span class="nv">$MYSQL_SERVER</span>/<span class="nv">$DATABASE</span> --driver com.mysql.jdbc.Driver --username <span class="nv">$USER</span> --password <span class="nv">$PASSWORD</span> --table user --hbase-table user --hbase-row-key id --column-family data</code></pre></div>
+
+<p>At least for HBase, you are almost always want to compose some more sophisticated rowkey, to avoid <a href="http://my.safaribooksonline.com/book/databases/database-design/9781449314682/optimizing-splits-and-compactions/id3163684">region hotspotting</a>. If you can express that rowkey as a SQL statement, you&#39;re good to go. Instead of <code>--table</code>, you specify a <code>--query</code>, and change the column referenced in <code>--hbase-row-key</code>.</p>
+
+<p>Say we want the rowkey to be the first five characters of the md5 hash of the <code>company_id</code> field in the <code>user</code> table, plus the <code>date_added</code> field formatted as an eight character string, plus the <code>id</code> field. Example: <code>a8f5c-20130101-47</code>.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">sqoop-import --connect jdbc:mysql://<span class="nv">$MYSQL_SERVER</span>/<span class="nv">$DATABASE</span> --driver com.mysql.jdbc.Driver --username <span class="nv">$USER</span> --password <span class="nv">$PASSWORD</span> --hbase-table user --hbase-row-key id --column-family data --query <span class="s2">&quot;SELECT  CONCAT_WS(&#39;-&#39;, SUBSTR(MD5(a.company_id), 1, 5), DATE_FORMAT(a.date_added, &#39;%Y%m%d&#39;), a.id) as rowkey, a.* FROM user a WHERE \$CONDITIONS&quot;</span></code></pre></div>
+
+<p><em>Note: the <code>$CONDITIONS</code> is a placeholder for the dynamic partitioning of data across server. You may also need to specify a <code>--split-by</code> column.</em></p>
+
+<h1>Tuning</h1>
+
+<p>For a large number of rows, you may find that Sqoop is using a lot of memory to copy the data over. You may even run into a <code>java.lang.OutOfMemoryError: Java heap space</code> or a <code>java.lang.OutOfMemoryError: GC overhead limit exceeded</code>. If you do, it&#39;s likely because the MySQL database driver is fetching all of the rows of the table, and keeping them in memory. You can tell it to chunk up the query into pages and use a cursor by changing the connect string to: <code>mysql://$MYSQL_SERVER/$DATABASE?dontTrackOpenResources=true\&amp;defaultFetchSize=1000\&amp;useCursorFetch=true</code>. See the <a href="http://dev.mysql.com/doc/refman/5.1/en/connector-j-reference-configuration-properties.html">documentation</a>.</p>
+
+<h1>Trouble-shooting</h1>
+
+<p>If you get an error saying that sqoop cannot load the MySQL driver, you may need to do a manual <code>sudo cp /usr/share/java/mysql.jar /usr/lib/sqoop/lib</code> to copy it to the right place.</p>
+
+<p>If you get the error <code>0000-00-00 00:00:00&#39; can not be represented as java.sql.Timestamp</code>, you should modify your connect string to add the <code>zeroDateTimeBehavior</code> flag, ie <code>mysql://$MYSQL_SERVER/$DATABASE?zeroDateTimeBehavior=convertToNull</code></p>
+
+
+<hr>
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'chaseseibertblog';
+    var disqus_identifier = '/blog/2013/06/07/sqoop-quickstart';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/sqoop">sqoop</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/hadoop">hadoop</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/hbase">hbase</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2015/03/27/software-engineering-fireside-chat.html">Introducing the Software Engineering Fireside Chat Podcast</a></li>
+                                
+                                    <li><a href="/blog/2015/02/10/one-on-ones.html">Topics for One on Ones</a></li>
+                                
+                                    <li><a href="/blog/2014/12/22/class-design.html">Thoughts on Object Oriented Class Design</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script src="http://code.jquery.com/jquery-latest.js"></script>
+        <script src="/blog/js/bootstrap.js"></script>
+        <script src="/blog/js/shCore.js"></script>
+        <script src="/blog/js/shBrushBash.js"></script>
+        <script src="/blog/js/shBrushCpp.js"></script>
+        <script src="/blog/js/shBrushCSharp.js"></script>
+        <script src="/blog/js/shBrushCss.js"></script>
+        <script src="/blog/js/shBrushJava.js"></script>
+        <script src="/blog/js/shBrushJScript.js"></script>
+        <script src="/blog/js/shBrushPhp.js"></script>
+        <script src="/blog/js/shBrushPython.js"></script>
+        <script src="/blog/js/shBrushSql.js"></script>
+        <script src="/blog/js/shBrushRuby.js"></script>
+        <script src="/blog/js/shBrushXml.js"></script>
+
+        <script type="text/javascript">
+            dp.SyntaxHighlighter.BloggerMode();
+            dp.SyntaxHighlighter.HighlightAll("code");
+        </script>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

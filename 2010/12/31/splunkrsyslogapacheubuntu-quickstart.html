@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Splunk/Rsyslog/Apache/Ubuntu Quickstart</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/shCore.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2010/12/31/splunkrsyslogapacheubuntu-quickstart.html" />
+
+        <meta property="og:title" content="Splunk/Rsyslog/Apache/Ubuntu Quickstart"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2010/12/31/splunkrsyslogapacheubuntu-quickstart.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Splunk/Rsyslog/Apache/Ubuntu Quickstart
+                            
+                                <span class="post-date subtitle">31 Dec 2010</span>
+                            
+                        </h1>
+                    
+                    <p>
+I've been using <a href="http://www.splunk.com/">Splunk</a> for several years. It's a great tool for log file visualization and analytics. One thing I use it for is to <a href="http://www.splunk.com/base/Documentation/latest/User/InteractiveFieldExtractionExample">generate a graph of average milliseconds</a> per request on an apache instance. Up until recently, I was running this directly on the production web server.
+</p>
+
+<p>
+Lately, it became clear that we needed to move this to a dedicated machine. For one thing, we were about to add a second apache server. Also, I have noticed that running this report hammers the server pretty hard, especially if you're doing field extraction on the fly. In any case, I decided it was time to look into syslog.
+</p>
+
+<blockquote>Syslog is a standard for logging program messages. It allows separation of the software that generates messages from the system that stores them and the software that reports and analyzes them. It also provides devices which would otherwise be unable to communicate a means to notify administrators of problems or performance. - <a href="http://en.wikipedia.org/wiki/Syslog">Wikipedia</a></blockquote>
+
+<p>
+In practice, the specific feature of syslog I wanted to leverage was the forwarding of log events from the production machine(s) to the Splunk server. In Splunk, the setup is just enabling TCP data inputs.
+</p>
+
+<img src="http://lh3.ggpht.com/_EE2zVzGv1Ds/TR30FHd9ANI/AAAAAAAALZw/Yt8JL-513qs/s800/splunk-tcp.png">
+
+<p>
+Port 5011 is a commonly unused port I chose at random. In my case, I also needed to open this port in iptables (the firewall) on the Splunk server.
+</p>
+
+<pre name="code" class="bash">
+iptables-save &gt; /etc/iptables.conf
+vim /etc/iptables.conf
+
+# add the following (allow the 10.177 subnet to open TCP port 5011 to the Splunk server)
+-A INPUT -s 10.177.0.0/16 -p tcp -m tcp --dport 5011 -j ACCEPT
+
+/sbin/iptables-restore &lt; /etc/iptables.conf
+</pre>
+
+<p>
+On a current Ubuntu installation, syslog service is provided by <a href="http://www.rsyslog.com/">rsyslog</a>. The first step is to configure rsyslog to forward log events to the Splunk server. In my case, the Splunk server is at 10.177.0.204.
+</p>
+
+<pre name="code" class="bash">
+vim /etc/rsyslog.d/50-default.conf
+
+# add the following, which defines a common format, and then forwards ALL syslog events
+$template SyslFormat,"%timegenerated% %HOSTNAME% %syslogtag%%msg:::space$
+*.* @@10.177.0.204:5011;SyslFormat
+
+service rsyslog restart
+</pre>
+
+<p>
+Again, I also needed to open port 5011 (outbound this time) in iptables.
+</p>
+
+<pre name="code" class="bash">
+-A OUTPUT -p tcp -m tcp --dport 5011 -j ACCEPT
+</pre>
+
+<p>
+At this point, you should start seeing syslog events in Splunk. An easy way to test it is to restart rsyslog. You should see the log events for shutting down/starting the rsyslog process. If not, you may want to try the following trouble-shooting steps. In my case, I initially ran into trouble because I was assuming the traffic was being sent over UDP, but in rsyslog it's TCP by default.
+</p>
+
+<pre name="code" class="bash">
+# tail the local syslog file, make sure events are being generated
+tail -f /var/log/syslog
+
+# try to open a port from the apache server to the splunk server, it's successful unless you see connection refused
+telnet 10.177.0.204 5011
+
+# try to open port 5011 on the Splunk server itself
+telnet localhost 5011
+</pre>
+
+<p>
+The next step is to get <a href="http://wiki.rsyslog.com/index.php/Working_Apache_and_Rsyslog_configuration">Apache to log to syslog</a>. In my case, the following was sufficient to log anything that Django prints to the console.
+</p>
+
+<pre name="code" class="bash">
+vim /etc/apache2/sites-available/default
+
+# add the following, logs most events in syslog
+ErrorLog syslog:local7
+
+service apache2 restart
+</pre>
+
+<p>
+Now you should be getting Apache + other syslog events into Splunk. But they all show up with a source type of "tcp:5011" by default. What's happening is that Splunk is seeing them all as the same virtual log file. Luckily, there is an easy <a href="http://blogs.splunk.com/2010/02/11/sourcetypes-gone-wild/">configuration</a> to break them out into separate source types.
+</p>
+
+<pre name="code" class="bash">
+vim /opt/splunk/etc/apps/search/default/props.conf
+
+# add the following to act on anything from tcp:5011
+[source::tcp:5011]
+TRANSFORMS-yummy = setSourceApache, setSourcePostfix
+
+vim /opt/splunk/etc/apps/search/default/transforms.conf
+
+# add the following to define setSourceApache and setSourcePostfix
+[setSourceApache]
+DEST_KEY = MetaData:Sourcetype
+# any log line that contains apache2
+REGEX = apache2
+FORMAT = sourcetype::apache
+
+[setSourcePostfix]
+DEST_KEY = MetaData:Sourcetype
+REGEX = postfix
+FORMAT = sourcetype::postfix
+
+/opt/splunk/bin/splunk restart
+</pre>
+
+<p>
+Finally, while you're trouble-shooting all of this, you will likely be generating junk log events. If you find yourself wanting to start over, you can aways bring up a set of results in Splunk, and just pipe the <a href="http://www.splunk.com/base/Documentation/latest/Admin/RemovedatafromSplunk">search to "|delete"</a> to blow them away.
+</p>
+
+
+<hr>
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'chaseseibertblog';
+    var disqus_identifier = '/blog/2010/12/31/splunkrsyslogapacheubuntu-quickstart';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/splunk">splunk</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/syslog">syslog</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/rsyslog">rsyslog</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/apache">apache</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2015/03/27/software-engineering-fireside-chat.html">Introducing the Software Engineering Fireside Chat Podcast</a></li>
+                                
+                                    <li><a href="/blog/2015/02/10/one-on-ones.html">Topics for One on Ones</a></li>
+                                
+                                    <li><a href="/blog/2014/12/22/class-design.html">Thoughts on Object Oriented Class Design</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script src="http://code.jquery.com/jquery-latest.js"></script>
+        <script src="/blog/js/bootstrap.js"></script>
+        <script src="/blog/js/shCore.js"></script>
+        <script src="/blog/js/shBrushBash.js"></script>
+        <script src="/blog/js/shBrushCpp.js"></script>
+        <script src="/blog/js/shBrushCSharp.js"></script>
+        <script src="/blog/js/shBrushCss.js"></script>
+        <script src="/blog/js/shBrushJava.js"></script>
+        <script src="/blog/js/shBrushJScript.js"></script>
+        <script src="/blog/js/shBrushPhp.js"></script>
+        <script src="/blog/js/shBrushPython.js"></script>
+        <script src="/blog/js/shBrushSql.js"></script>
+        <script src="/blog/js/shBrushRuby.js"></script>
+        <script src="/blog/js/shBrushXml.js"></script>
+
+        <script type="text/javascript">
+            dp.SyntaxHighlighter.BloggerMode();
+            dp.SyntaxHighlighter.HighlightAll("code");
+        </script>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

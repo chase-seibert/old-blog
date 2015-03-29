@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Hacking Django runserver to run multiple Django instances</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/shCore.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2013/11/03/django-runserver-launch-multiple-screen.html" />
+
+        <meta property="og:title" content="Hacking Django runserver to run multiple Django instances"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2013/11/03/django-runserver-launch-multiple-screen.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Hacking Django runserver to run multiple Django instances
+                            
+                                <span class="post-date subtitle">03 Nov 2013</span>
+                            
+                        </h1>
+                    
+                    <p>Recently at work we&#39;ve been on a &quot;servicifying&quot; kick, meaning we&#39;re slowly converting our monolithic Django app into separate services. To start, this just means breaking up the existing runtime into pieces. Instead of one logical web process, we now have different ones for the web app, admin, login, apis, etc.</p>
+
+<p>For production, this doesn&#39;t change the deployment model all that much. We just have separate servers for various roles. For development, we still want to be able to easily run all the services at once on your local machine.</p>
+
+<p>Enter <code>runservices</code>, an extension of the Django <code>runserver</code> command that just launches a bunch of processes in a <code>screen</code> session (a natural choices for us, as we&#39;re already using <code>screen</code> intensively). It turns out that screen has the ability to <a href="http://superuser.com/questions/386059/how-can-i-start-multiple-screen-sessions-automatically">launch multiple windows on startup</a> using a custom <code>.screenrc</code> file, passed on the command-line with <code>-c my.screenrc</code>. The format needed inside the <code>.screenrc</code> file is as follows:</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="c"># create two windows, called &quot;TODO&quot; and &quot;coding&quot; in vim</span>
+screen -t TODO vim TODO.txt
+screen -t coding vim ~/code</code></pre></div>
+
+<p>When I first saw this, I thought we could use it to launch our various services. What I did was write a custom Django management command that dynamically writes a <code>.screenrc</code> file and executes it. You can run all the services, or specify just a few. Our services are launched by settings corresponding environment variables, which can be done on the command line itself.</p>
+
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">django.template.base</span> <span class="kn">import</span> <span class="n">Template</span>
+<span class="kn">from</span> <span class="nn">django.template.base</span> <span class="kn">import</span> <span class="n">Context</span>
+<span class="kn">from</span> <span class="nn">django.core.management.base</span> <span class="kn">import</span> <span class="n">BaseCommand</span>
+
+
+<span class="n">SERVICES</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="c"># nothreading == to help with sqlite locking issues</span>
+    <span class="p">(</span><span class="s">&#39;web&#39;</span><span class="p">,</span> <span class="s">&#39;./manage.py runserver 0:8000 --nothreading&#39;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s">&#39;admin&#39;</span><span class="p">,</span> <span class="s">&#39;ADMIN=True ./manage.py runserver 0:8001 --nothreading&#39;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s">&#39;login&#39;</span><span class="p">,</span> <span class="s">&#39;LOGIN=True ./manage.py runserver 0:8002 --nothreading&#39;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s">&#39;celery&#39;</span><span class="p">,</span> <span class="s">&#39;./manage.py celery beat&#39;</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="n">ACTIVATE_REL_PATH</span> <span class="o">=</span> <span class="s">&#39;../virtualenv/bin/activate&#39;</span>
+
+<span class="n">DEFAULT_SERVICES</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s">&#39;web&#39;</span><span class="p">,</span>
+    <span class="s">&#39;admin&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">Command</span><span class="p">(</span><span class="n">BaseCommand</span><span class="p">):</span>
+
+    <span class="n">help</span> <span class="o">=</span> <span class="s">&#39;Runs all the services&#39;</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="s">&#39;appname appname&#39;</span>
+
+    <span class="k">def</span> <span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">):</span>
+        <span class="n">allowed_services</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">DEFAULT_SERVICES</span> <span class="o">+</span> <span class="n">args</span><span class="p">))</span>
+        <span class="n">services</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">SERVICES</span> <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">allowed_services</span><span class="p">]</span>
+        <span class="n">multiplexer</span> <span class="o">=</span> <span class="n">ScreenMultiplexer</span><span class="p">(</span><span class="n">services</span><span class="p">)</span>
+        <span class="n">multiplexer</span><span class="o">.</span><span class="n">write_rc_file</span><span class="p">()</span>
+        <span class="n">multiplexer</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">render_template</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">context_dict</span><span class="p">):</span>
+    <span class="n">template</span> <span class="o">=</span> <span class="n">Template</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="n">Context</span><span class="p">(</span><span class="n">context_dict</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">ScreenMultiplexer</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">services</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">services</span> <span class="o">=</span> <span class="n">services</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rc_file</span> <span class="o">=</span> <span class="s">&#39;.screenrc&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rc_template</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;</span>
+<span class="s">caption always &quot;%{= kw}%-w%{= BW}%n %t%{-}%+w %-= Exit: C-a \ </span><span class="si">%c</span><span class="s">&quot;</span>
+<span class="s">{</span><span class="si">% f</span><span class="s">or name, command in services %}</span>
+<span class="s">screen -t {{ name }} bash -c &quot;{{ venv }}; {{ command }}&quot;</span>
+<span class="s">{</span><span class="si">% e</span><span class="s">ndfor %}</span>
+<span class="s">select 0</span>
+<span class="s">&#39;&#39;&#39;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">venv</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">activate</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="n">ACTIVATE_REL_PATH</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">activate</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Could not locate virtualenv script </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">activate</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s">&#39;source </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">activate</span>
+
+    <span class="k">def</span> <span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rc_template</span><span class="p">,</span> <span class="p">{</span>
+            <span class="s">&#39;venv&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">venv</span><span class="p">,</span>
+            <span class="s">&#39;services&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">services</span><span class="p">,</span>
+        <span class="p">})</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">rc_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">rc_file</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">write_rc_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rc_path</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">render</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">execlp</span><span class="p">(</span><span class="s">&#39;screen&#39;</span><span class="p">,</span> <span class="s">&#39;screen&#39;</span><span class="p">,</span> <span class="s">&#39;-c&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rc_path</span><span class="p">)</span></code></pre></div>
+
+<p>The resulting <code>.screenrc</code> files ends up looking like (added comments):</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="c"># set a nice screen footer</span>
+caption always <span class="s2">&quot;%{= kw}%-w%{= BW}%n %t%{-}%+w %-= Exit: C-a \ %c&quot;</span>
+
+<span class="c"># run web</span>
+screen -t web bash -c <span class="s2">&quot;source /Users/myuser/code/myproject/virtualenv/bin/activate; ./manage.py runserver 0:8000 --nothreading&quot;</span>
+
+<span class="c"># run admin</span>
+screen -t admin bash -c <span class="s2">&quot;source /Users/myuser/code/myproject/virtualenv/bin/activate; ADMIN=True ./manage.py runserver 0:8000 --nothreading&quot;</span>
+
+<span class="c"># select the first window (web) by default</span>
+<span class="k">select</span> 0</code></pre></div>
+
+<p>The only tricky bit was getting <code>virtualenv</code> to activate properly inside the screen session. Because it uses the bash <code>source</code> command, I needed to have <code>screen</code> actually execute bash directly, and pass the source command.</p>
+
+<p>The result is a single session of multiple windows that you can toggle through with the standard screen commans like <code>C-a</code>.</p>
+
+<p><img src="/blog/images/screen.png" alt="screen django"></p>
+
+<p><em>Note</em>: I&#39;m also running into intermittent issues with <code>sqlite3</code> locking the database, due to many processes trying to access it. Running with <code>--nothreading</code> and reducing celery to one worker seems to have helped, but we may need to move to <code>mysql</code> for development.</p>
+
+
+<hr>
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'chaseseibertblog';
+    var disqus_identifier = '/blog/2013/11/03/django-runserver-launch-multiple-screen';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/django">django</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2015/03/27/software-engineering-fireside-chat.html">Introducing the Software Engineering Fireside Chat Podcast</a></li>
+                                
+                                    <li><a href="/blog/2015/02/10/one-on-ones.html">Topics for One on Ones</a></li>
+                                
+                                    <li><a href="/blog/2014/12/22/class-design.html">Thoughts on Object Oriented Class Design</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script src="http://code.jquery.com/jquery-latest.js"></script>
+        <script src="/blog/js/bootstrap.js"></script>
+        <script src="/blog/js/shCore.js"></script>
+        <script src="/blog/js/shBrushBash.js"></script>
+        <script src="/blog/js/shBrushCpp.js"></script>
+        <script src="/blog/js/shBrushCSharp.js"></script>
+        <script src="/blog/js/shBrushCss.js"></script>
+        <script src="/blog/js/shBrushJava.js"></script>
+        <script src="/blog/js/shBrushJScript.js"></script>
+        <script src="/blog/js/shBrushPhp.js"></script>
+        <script src="/blog/js/shBrushPython.js"></script>
+        <script src="/blog/js/shBrushSql.js"></script>
+        <script src="/blog/js/shBrushRuby.js"></script>
+        <script src="/blog/js/shBrushXml.js"></script>
+
+        <script type="text/javascript">
+            dp.SyntaxHighlighter.BloggerMode();
+            dp.SyntaxHighlighter.HighlightAll("code");
+        </script>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

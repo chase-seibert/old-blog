@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Youtube&#58; Detecting X-Frame-Options/framebreaking in Python</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/shCore.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2011/01/21/youtube-detecting-x-frame-optionsframebreaking-in-python.html" />
+
+        <meta property="og:title" content="Youtube&#58; Detecting X-Frame-Options/framebreaking in Python"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2011/01/21/youtube-detecting-x-frame-optionsframebreaking-in-python.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Youtube&#58; Detecting X-Frame-Options/framebreaking in Python
+                            
+                                <span class="post-date subtitle">21 Jan 2011</span>
+                            
+                        </h1>
+                    
+                    <p>
+My current project involves URL shortening. Like many URL shorteners, we wanted to get into frame bars. These are alternately called banners, share bars and "eyebrows". It's basically just putting some small content on the top of the screen, and then wrapping the "real" content in an IFRAME that takes the rest of the screen. Maybe you've seen when LinkedIn does this.
+</p>
+
+<img src="http://lh3.ggpht.com/_EE2zVzGv1Ds/TTnNvbKkWfI/AAAAAAAALaM/tk8awd4swmc/s800/linkedin-banner.png">
+
+<p>
+Now, I'm not crazy about the ethics of framing other peoples' content. I'm not even convinced that it would not be ruled illegal some day. In any case, lot's of people are doing it, and we decided we needed to be doing it too. In my case, we're just showing you who shared it, we're not doing ads or anything.
+</p>
+
+<p>
+Understandably, many sites don't want you to frame their content. This has lead to a kind of arms race, where content sites use javascript to try to break out of the frame (aka framebreaking), and then the wrapper sites try to <a href="http://stackoverflow.com/questions/958997/frame-buster-buster-buster-code-needed">break the framebreaker</a>.
+</p>
+
+<p>
+This eventually lead to full-fledged support at the browser level for framebreaking, in the form of the <a href="https://developer.mozilla.org/en/the_x-frame-options_response_header">X-Frame-Options header</a>. Essentially, a site can publish this HTTP header on all their content, and most modern browsers will display an error/warning if the content is put into a frame (or, at least a frame on another domain). In Firefox, this looks like the following.
+</p>
+
+<img src="http://lh6.ggpht.com/_EE2zVzGv1Ds/TTnPz7ol06I/AAAAAAAALaU/yqdmzffPmms/s800/x-frame-options.png">
+
+<p>
+This is actually a pretty cool development. However, in order to provide a good user experience when you're frame barring (is that an oxymoron?), you ideally would detect ahead of time whether the site you're framing has this X-Frame-Option set, and just redirect to the content in that case.
+</p>
+
+<p>
+Here is some Python code that does just that. It basically just makes an HTTP call to the content server to server.
+</p>
+
+<pre name="code" class="python">
+def is_framing_allowed(url)
+   request = urllib2.Request(url)
+   request.add_header("Referer", "http://example.com") # you should put your real URL here
+   opener = urllib2.urlopen(request)
+   # returns True if ANY x-frame-options header is present
+   # the only options at present are DENY and SAMEORIGIN, either of which means you can't frame
+   return "x-frame-options" in opener.headers.dict
+</pre>
+
+<p>
+Notice that I'm setting a Referer here. Youtube in particular requires that this be set before it will serve a x-frame-options header:
+</p>
+
+<pre name="code" class="bash">
+curl "http://www.youtube.com/watch?v=kdoCBJe0F3o" -D headers.txt &gt;/dev/null 2&gt;&amp;1; cat headers.txt
+HTTP/1.1 200 OK
+Date: Fri, 21 Jan 2011 18:35:39 GMT
+Server: wiseguy/0.6.7
+X-Content-Type-Options: nosniff
+Set-Cookie: use_hitbox=72c46ff6cbcdb7c5585c36411b6b334edAEAAAAw; path=/; domain=.youtube.com
+Set-Cookie: VISITOR_INFO1_LIVE=nMjwYxkZq0Q; path=/; domain=.youtube.com; expires=Sun, 18-Sep-2011 18:35:39 GMT
+Set-Cookie: recently_watched_video_id_list=7291701d6005203af93186bd50b882b5WwEAAABzCwAAAGtkb0NCSmUwRjNv; path=/; domain=.youtube.com
+Set-Cookie: GEO=1fe4b343c2bea46a564b0990ff037b32cwsAAAAzVVPRyoNiTTnR+w==; path=/; domain=.youtube.com
+Expires: Tue, 27 Apr 1971 19:44:06 EST
+Cache-Control: no-cache
+Content-Type: text/html; charset=utf-8
+Transfer-Encoding: chunked
+
+curl "http://www.youtube.com/watch?v=kdoCBJe0F3o" -e "http://example.com" -D headers.txt &gt;/dev/null 2&gt;&amp;1; cat headers.txt
+HTTP/1.1 200 OK
+Date: Fri, 21 Jan 2011 18:35:55 GMT
+...
+X-Frame-Options: SAMEORIGIN
+</pre>
+
+
+<hr>
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'chaseseibertblog';
+    var disqus_identifier = '/blog/2011/01/21/youtube-detecting-x-frame-optionsframebreaking-in-python';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/python">python</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/iframe">iframe</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/framebreaking">framebreaking</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/youtube">youtube</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2015/03/27/software-engineering-fireside-chat.html">Introducing the Software Engineering Fireside Chat Podcast</a></li>
+                                
+                                    <li><a href="/blog/2015/02/10/one-on-ones.html">Topics for One on Ones</a></li>
+                                
+                                    <li><a href="/blog/2014/12/22/class-design.html">Thoughts on Object Oriented Class Design</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script src="http://code.jquery.com/jquery-latest.js"></script>
+        <script src="/blog/js/bootstrap.js"></script>
+        <script src="/blog/js/shCore.js"></script>
+        <script src="/blog/js/shBrushBash.js"></script>
+        <script src="/blog/js/shBrushCpp.js"></script>
+        <script src="/blog/js/shBrushCSharp.js"></script>
+        <script src="/blog/js/shBrushCss.js"></script>
+        <script src="/blog/js/shBrushJava.js"></script>
+        <script src="/blog/js/shBrushJScript.js"></script>
+        <script src="/blog/js/shBrushPhp.js"></script>
+        <script src="/blog/js/shBrushPython.js"></script>
+        <script src="/blog/js/shBrushSql.js"></script>
+        <script src="/blog/js/shBrushRuby.js"></script>
+        <script src="/blog/js/shBrushXml.js"></script>
+
+        <script type="text/javascript">
+            dp.SyntaxHighlighter.BloggerMode();
+            dp.SyntaxHighlighter.HighlightAll("code");
+        </script>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

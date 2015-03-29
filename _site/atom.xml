@@ -1,0 +1,1798 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+    <title>Chase Seibert | blog</title>
+    <link href="http://chase-seibert.github.com/blog/atom.xml" rel="self"/>
+    <link href="http://chase-seibert.github.com/blog/" />
+    <updated>2015-03-29T10:49:05-07:00</updated>
+    <id>http://chase-seibert.github.com/blog/</id>
+    <author>
+        <name>Chase Seibert</name>
+        <email>chase.seibert+blog@gmail.com</email>
+    </author>
+
+    
+        <entry>
+            <title>Introducing the Software Engineering Fireside Chat Podcast</title>
+            <link href="/blog/2015/03/27/software-engineering-fireside-chat.html"/>
+            <updated>2015-03-27T00:00:00-07:00</updated>
+            <id>http://chase-seibert.github.com/blog//2015/03/27/software-engineering-fireside-chat</id>
+            <content type="html">&lt;p&gt;I&amp;#39;m pleased to announce the first episodes of the &lt;a href=&quot;https://itunes.apple.com/us/podcast/sofware-engineering-fireside/id978896299&quot;&gt;Software Engineering Fireside Chat&lt;/a&gt; podcast are available for download. Along with my colleagues &lt;a href=&quot;https://twitter.com/slobdell3&quot;&gt;Scott Lobdell&lt;/a&gt; and &lt;a href=&quot;https://twitter.com/captbaritone&quot;&gt;Jordan Eldredge&lt;/a&gt;, we are going to be talking about the tech startup scene in the Bay Area. Instead of making this a purely technical podcast, we are actually going to cover ancillary topics such as how to survive tech busts, how to transition from QA to engineering, the state of hacking bootcamps, etc.&lt;/p&gt;
+
+&lt;p&gt;Here is an over-view of the initial episodes:&lt;/p&gt;
+
+&lt;h2&gt;Episode 0 - Introduction&lt;/h2&gt;
+
+&lt;p&gt;Scott, Jordan and I introduce ourselves and give an overview of our backgrounds. We talk about how we got into coding in the first place, how we ended up working for a startup, and what kind of projects we work on outside of work.&lt;/p&gt;
+
+&lt;h2&gt;Episode 1 - Debbie Sterling&lt;/h2&gt;
+
+&lt;p&gt;We interview &lt;a href=&quot;http://www.engineergirl.org/Engineers/Directory/13512.aspx&quot;&gt;Debbie Sterling&lt;/a&gt;, engineer and founder of &lt;a href=&quot;http://www.goldieblox.com&quot;&gt;GoldieBlox&lt;/a&gt;, a construction toy and book series targeted at young girls. Debbie shares with us how she got started, and some of the challenges along the way.&lt;/p&gt;
+
+&lt;h2&gt;Episode 2 - Ben Henry&lt;/h2&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://twitter.com/bjhenry&quot;&gt;Ben Henry&lt;/a&gt;, a director of engineering at
+&lt;a href=&quot;http://hearsaysocial.com/&quot;&gt;Hearsay Social&lt;/a&gt; talks about tech bust cycles in the Bay Area. Specifically, we discuss how to limit your exposure to crisis like the original dot-com bust in the early 2000&amp;#39;s, as well as the financial crisis in 2008.&lt;/p&gt;
+
+&lt;h2&gt;What about future episodes?&lt;/h2&gt;
+
+&lt;p&gt;We are planning to release one episode a week, on Fridays. If you&amp;#39;re not an iTunes person, or you just love raw RSS, you can visit our &lt;a href=&quot;http://fireside.libsyn.com/&quot;&gt;podcast page&lt;/a&gt; on libsyn.&lt;/p&gt;
+
+&lt;h2&gt;Call for guests speakers!&lt;/h2&gt;
+
+&lt;p&gt;If you&amp;#39;re interested in being on the show, drop us a line on Twitter!&lt;/p&gt;
+</content>
+        </entry>
+    
+        <entry>
+            <title>Topics for One on Ones</title>
+            <link href="/blog/2015/02/10/one-on-ones.html"/>
+            <updated>2015-02-10T00:00:00-08:00</updated>
+            <id>http://chase-seibert.github.com/blog//2015/02/10/one-on-ones</id>
+            <content type="html">&lt;p&gt;I like to ask other managers what kind of questions they ask during their one on ones. Everyone has their own style, so I often get some interesting responses. Getting good information out of your one on one conversations is something of an art. Given the amount of time over a career that you will spend during one on ones, it&amp;#39;s worth a small time investment to improve your skills.&lt;/p&gt;
+
+&lt;h2&gt;Managing Humans&lt;/h2&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;Schedule one-on-ones with direct reports, keep them on the same day and time, and never cancel them. - Lopp, Michael (&lt;a href=&quot;http://www.amazon.com/Managing-Humans-Humorous-Software-Engineering/dp/1430243147&quot;&gt;Managing Humans&lt;/a&gt;)&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;This book is commonly held up as the work of God when it comes to managing people. Here are my blatant crib notes of the text.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Start with the question &amp;quot;How are you?&amp;quot;.&lt;/li&gt;
+&lt;li&gt;Your biggest job is to gauge mood.&lt;/li&gt;
+&lt;li&gt;Learn something from every one on one.&lt;/li&gt;
+&lt;li&gt;Status is not the point.&lt;/li&gt;
+&lt;li&gt;Three things that are working, three things that are not, what are we going to do about it?&lt;/li&gt;
+&lt;li&gt;Never cancel them, it sends a bad message.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;When you&amp;#39;re stuck, Michael suggests some emergency topics.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Prepared points - i.e. context items from GTD.&lt;/li&gt;
+&lt;li&gt;Mini performance review.&lt;/li&gt;
+&lt;li&gt;Your current disaster.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;How is it going?&lt;/h2&gt;
+
+&lt;p&gt;This is a variation on &amp;quot;How are you&amp;quot;? This does lead to a status update most times, so you often need to redirect. It&amp;#39;s important to lead with something that lets people talk about whatever they want.&lt;/p&gt;
+
+&lt;h2&gt;How do you feel about coming to work every day?&lt;/h2&gt;
+
+&lt;p&gt;More direct question to get at their mood/happiness.&lt;/p&gt;
+
+&lt;h2&gt;How do you feel about working on project X?&lt;/h2&gt;
+
+&lt;p&gt;Give the employee permission to say that they don&amp;#39;t like their current project, as well as implicitly tell them that it&amp;#39;s something we can change.&lt;/p&gt;
+
+&lt;h2&gt;How is it going working with person X?&lt;/h2&gt;
+
+&lt;p&gt;Is there some asshole that&amp;#39;s bothering you? Maybe I can help.&lt;/p&gt;
+
+&lt;h2&gt;What features would you add?&lt;/h2&gt;
+
+&lt;p&gt;Are you thinking about the long-term future of the software? I care about what you think!&lt;/p&gt;
+
+&lt;h2&gt;What could I be doing better?&lt;/h2&gt;
+
+&lt;p&gt;I try to ask this as often as I can, but often forget.&lt;/p&gt;
+
+&lt;h2&gt;Other ideas&lt;/h2&gt;
+
+&lt;p&gt;One thing I like to do is change the scenery of a one on one. Taking a walk outside is a great idea. I also like to do a one on one over lunch occasionally. On the other hand, you definitely want to be in a traditional conference room if you need to give hard feedback, or have a tough conversation.&lt;/p&gt;
+</content>
+        </entry>
+    
+        <entry>
+            <title>Thoughts on Object Oriented Class Design</title>
+            <link href="/blog/2014/12/22/class-design.html"/>
+            <updated>2014-12-22T00:00:00-08:00</updated>
+            <id>http://chase-seibert.github.com/blog//2014/12/22/class-design</id>
+            <content type="html">&lt;blockquote&gt;
+&lt;p&gt;The problem with object-oriented languages is they&amp;#39;ve got all this implicit environment that they carry around with them. You wanted a banana but what you got was a gorilla holding the banana and the entire jungle. - Joe Armstrong&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;In my experience, class design is an area where software engineers are prone to over-estimate their own abilities. This also happens with SQL and regular expressions. The concepts seem simple enough that it&amp;#39;s easy to fool yourself into thinking that knowing the basics is equivalent to being an expert. The reality is that most people could use a refresher on what makes a good object oriented abstraction.&lt;/p&gt;
+
+&lt;h2&gt;Encapsulation - Hiding Implementation Details&lt;/h2&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;[Encapsulation is] the process of compartmentalizing the elements of an abstraction that constitute its structure and behavior; encapsulation serves to separate the contractual interface of an abstraction and its implementation. - Gary Brooch&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;At the core, class design is about encapsulation. You want to make it easier to think about your problem space by limiting what you need to keep in your brain at any given time. You want classes that hide unnecessary implementation details from the outside world, are well tested, and are easy to use. That allows you to think about your problem space as the interaction of instance of these objects, versus the low level detail.&lt;/p&gt;
+
+&lt;p&gt;For example, say you have a class that represents a zipped file. Internally, it uses a regular file descriptor to access the base file. That&amp;#39;s not something you want to expose to callers; it&amp;#39;s an implementation detail. Maybe you decide later that you want to be able to have the base file be an S3 URL. If you expose the internal file descriptor in the initial implementation, that may end up limiting your options down the road.&lt;/p&gt;
+
+&lt;p&gt;In some languages like Python, it&amp;#39;s not possible to hide implementation details by marking methods and members as private. Even there, it&amp;#39;s well worth using standard conventions for communicating to other developers what should and should not be accessed.&lt;/p&gt;
+
+&lt;h2&gt;Cohesion - Consistency of Abstraction&lt;/h2&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;Cohesion refers to the degree to which the elements of a module belong together. Thus, it is a measure of how strongly related each piece of functionality expressed by the source code of a software module is.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;I think of cohesion as the level of consistency in the abstraction. If you have a class that represent a web request, you could conceivably try to handle HTTP methods, URL parameters, headers in one large class with a hundred methods on it. But you&amp;#39;re probably better off breaking that down into separate more focussed classes. That way your URL parameters class has just a few methods on it, and they are all related to a small problem space.&lt;/p&gt;
+
+&lt;p&gt;One tool I find helpful for writing cohesive classes is to start by thinking about the class API first. What are you going to call the class? What are the methods you are going to provide? By thinking first about how you would ideally like to use this hypothetical class, you can focus on making the API cohesive before getting bogged down in implementation details. Once you have started implementation, it&amp;#39;s very tempting to allow the scope of the class to grow.&lt;/p&gt;
+
+&lt;p&gt;Good naming is one of the hardest parts of writing any code. It&amp;#39;s especially important for writing cohesive classes; if your class methods are becoming too awkward, it may be because your class is doing to much.&lt;/p&gt;
+
+&lt;h2&gt;Loose Coupling - Swappable Components&lt;/h2&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://i.stack.imgur.com/OJFhI.jpg&quot; alt=&quot;loose coupling&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;If your components are encapsulated and cohesive, it should be easy to compose them together. It should also be easy to swap out a particular component for another version that implements the same interface. The degree to which this is easy determines whether your system is loosely coupled.&lt;/p&gt;
+
+&lt;p&gt;You can typically make components less coupled by reducing the number of things needed to construct them. Similarly, you can have your methods take standard primitives and collections versus custom objects.&lt;/p&gt;
+
+&lt;h2&gt;Common Pitfalls&lt;/h2&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;The phrase &amp;quot;object-oriented&amp;quot; means a lot of things. Half are obvious, and the other half are mistakes. - Paul Graham&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Here are some common mistakes in class design.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Large interfaces. Even small changes in the API may require many updates.&lt;/li&gt;
+&lt;li&gt;Subclass methods that are empty/pass. This may be a sign that the abstraction needs to be refactored.&lt;/li&gt;
+&lt;li&gt;Multiple inheritance. Often hard to reason about. Limit yourself to simple mixins if you must do it.&lt;/li&gt;
+&lt;li&gt;Tying the interface to the implementation. Example: persistent object that exposes underlying database functions directly.&lt;/li&gt;
+&lt;li&gt;Invalid method sequences. If you can&amp;#39;t call &lt;code&gt;process&lt;/code&gt; until you call &lt;code&gt;open&lt;/code&gt;, then &lt;code&gt;process&lt;/code&gt; should do that for you.&lt;/li&gt;
+&lt;/ul&gt;
+</content>
+        </entry>
+    
+        <entry>
+            <title>Creating a Budget and Sticking to It</title>
+            <link href="/blog/2014/11/30/pay-yourself-weekly.html"/>
+            <updated>2014-11-30T00:00:00-08:00</updated>
+            <id>http://chase-seibert.github.com/blog//2014/11/30/pay-yourself-weekly</id>
+            <content type="html">&lt;p&gt;The hardest part of doing anything is starting. If you&amp;#39;re someone who has delayed
+getting serious about retirement savings, or budgeting in general, I would encourage
+you to simply begin, today. I&amp;#39;ll describe my personal budgeting system, not because I
+think it&amp;#39;s the best system, but because it&amp;#39;s a place you can start if you&amp;#39;re not sure
+where to begin.&lt;/p&gt;
+
+&lt;h2&gt;Track Expenses&lt;/h2&gt;
+
+&lt;p&gt;In order to create a realistic budget, you first need to quantify what you currently
+spend your money on. You may already have some idea of what you spend on the basics
+like housing, food and utilities. But what about other large, less frequent expenditures
+like vacations, insurance and holiday gifts?&lt;/p&gt;
+
+&lt;p&gt;I recommend using a tool like &lt;a href=&quot;http://www.mint.com&quot;&gt;Mint.com&lt;/a&gt;, which can automatically
+track purchases and categorize them for you. It will correctly guess the expense category
+for the vast majority of charges, and you can manually fix any errant transactions on either
+their website or mobile app.&lt;/p&gt;
+
+&lt;p&gt;Your goal should be to create a pie chart of all your expenses by category. You can start with as
+little as 30 days worth of data, but a year would be better.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://www.mint.com/blog/wp-content/uploads/2012/07/trends_blog_screenshot-copy.png&quot; alt=&quot;mint.com&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;Note: Mint works by storing the passwords for your bank accounts. This is obviously a security
+concern. If you want, you can replicate this same data manually. But I would caution you to be
+realistic about whether you are going to keep up with that consistently. Like many other pieces
+of my personal budgeting system, I highly value the capability to put things on auto-pilot.&lt;/p&gt;
+
+&lt;h2&gt;Create a Budget&lt;/h2&gt;
+
+&lt;p&gt;Next, you need to use that information to create a budget. I would start by simply budgeting for
+the actual amounts you spend. Don&amp;#39;t try to cut down expenses just yet. Here is a fabricated
+budget for someone who is single, living with roommates and making $100k/year, which is
+a &lt;a href=&quot;http://www.quora.com/What-is-the-average-starting-salary-for-a-software-engineer-with-a-BS-degree-in-San-Francisco-Bay-Area&quot;&gt;realistic salary&lt;/a&gt;
+for a junior software engineer in the bay area.&lt;/p&gt;
+
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Category&lt;/th&gt;
+        &lt;th&gt;$/Year&lt;/th&gt;
+        &lt;th&gt;$/Month&lt;/th&gt;
+        &lt;th&gt;$/Week&lt;/th&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;&lt;b&gt;Gross Pay&lt;/b&gt;&lt;/td&gt;
+        &lt;td&gt;$100,000&lt;/td&gt;
+        &lt;td&gt;$8,333&lt;/td&gt;
+        &lt;td&gt;$1,917&lt;/td&gt;
+    &lt;/tr&gt;
+        &lt;td&gt;Federal Tax&lt;/td&gt;
+        &lt;td&gt;$14,521&lt;/td&gt;
+        &lt;td&gt;$1,210&lt;/td&gt;
+        &lt;td&gt;$278&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Social Security&lt;/td&gt;
+        &lt;td&gt;$6,143&lt;/td&gt;
+        &lt;td&gt;$512&lt;/td&gt;
+        &lt;td&gt;$118&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Medicare&lt;/td&gt;
+        &lt;td&gt;$1,433&lt;/td&gt;
+        &lt;td&gt;$119&lt;/td&gt;
+        &lt;td&gt;$27&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;CA Income Tax&lt;/td&gt;
+        &lt;td&gt;$5,848&lt;/td&gt;
+        &lt;td&gt;$487&lt;/td&gt;
+        &lt;td&gt;$112&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;401k&lt;/td&gt;
+        &lt;td&gt;$17,500&lt;/td&gt;
+        &lt;td&gt;$1,458&lt;/td&gt;
+        &lt;td&gt;$335&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Medical/Benefits&lt;/td&gt;
+        &lt;td&gt;$696&lt;/td&gt;
+        &lt;td&gt;$58&lt;/td&gt;
+        &lt;td&gt;$13&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;&lt;b&gt;Net Pay&lt;/b&gt;&lt;/td&gt;
+        &lt;td&gt;$46,306&lt;/td&gt;
+        &lt;td&gt;$3,859&lt;/td&gt;
+        &lt;td&gt;$887&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Housing&lt;/td&gt;
+        &lt;td&gt;$14,400&lt;/td&gt;
+        &lt;td&gt;$1,200&lt;/td&gt;
+        &lt;td&gt;$276&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Food&lt;/td&gt;
+        &lt;td&gt;$7,200&lt;/td&gt;
+        &lt;td&gt;$600&lt;/td&gt;
+        &lt;td&gt;$138&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Utilities&lt;/td&gt;
+        &lt;td&gt;$3,600&lt;/td&gt;
+        &lt;td&gt;$300&lt;/td&gt;
+        &lt;td&gt;$69&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Vacation&lt;/td&gt;
+        &lt;td&gt;$6,000&lt;/td&gt;
+        &lt;td&gt;$500&lt;/td&gt;
+        &lt;td&gt;$115&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Christmas&lt;/td&gt;
+        &lt;td&gt;$1,200&lt;/td&gt;
+        &lt;td&gt;$100&lt;/td&gt;
+        &lt;td&gt;$23&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Insurance&lt;/td&gt;
+        &lt;td&gt;$1,200&lt;/td&gt;
+        &lt;td&gt;$100&lt;/td&gt;
+        &lt;td&gt;$23&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Emergency Savings&lt;/td&gt;
+        &lt;td&gt;$6,000&lt;/td&gt;
+        &lt;td&gt;$500&lt;/td&gt;
+        &lt;td&gt;$115&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Contingency&lt;/td&gt;
+        &lt;td&gt;$1,200&lt;/td&gt;
+        &lt;td&gt;$100&lt;/td&gt;
+        &lt;td&gt;$23&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;&lt;b&gt;Left over&lt;/b&gt;&lt;/td&gt;
+        &lt;td&gt;$5,506&lt;/td&gt;
+        &lt;td&gt;$459&lt;/td&gt;
+        &lt;td&gt;$106&lt;/td&gt;
+    &lt;/tr&gt;
+&lt;/table&gt;
+
+&lt;p&gt;Notice that I have included a weekly dollar amount. More on that in the next section.
+I have also maxed out the 401k contribution. Please &lt;a href=&quot;http://chase-seibert.github.io/blog/2014/01/01/saving-for-retirement-as-a-software-engineer.html&quot;&gt;read this&lt;/a&gt; before deciding to axe that budget item!&lt;/p&gt;
+
+&lt;h2&gt;Pay Yourself Weekly&lt;/h2&gt;
+
+&lt;p&gt;Most people either get paid twice a month, or every other week. I prefer to pay myself
+weekly. Basically I deposit my paycheck into a holding account, and I transfer set amounts
+every Friday into various specific purpose accounts. I&amp;#39;m never more than a week away from
+a paycheck. If spending money is running low, it&amp;#39;s easier to hold out for a few days
+versus a week or more. This makes it more likely that I will stick to my budget and not
+cheat.&lt;/p&gt;
+
+&lt;p&gt;In addition, this system evens out irregular pay cycles. If you get paid on the first and
+the fifteenth of the month, some months you will have up to four more days on the second
+pay cycle. It also makes scheduling transfers easier. Instead of lining up transfers with
+you paychecks, they can happen weekly.&lt;/p&gt;
+
+&lt;h2&gt;Consider Separate Accounts&lt;/h2&gt;
+
+&lt;p&gt;I actually have 17 bank accounts. Some are savings accounts, but most are checking accounts.
+Why? It allows me to set aside money for a particular line item in my budget. I can see
+at a glance how much money I have saved for vacation. I can be sure that my mortgage check
+will never bounce; nothing else draws from that account.&lt;/p&gt;
+
+&lt;p&gt;Most importantly, I know when I&amp;#39;m out of spending money for the week. My wife and I both have
+our own accounts that receive $350 a week. We make most of our purchases that fall under the
+&amp;quot;shopping&amp;quot; category out of these accounts. I can drain that account guilt-free on &amp;quot;wants&amp;quot;
+over the weekend, knowing that all our actual needs are accounted for in other accounts. This
+makes me hyper aware of what I&amp;#39;m spending. In the ten years I have been doing this, I can
+count on one hand the number of times I have overdrawn.&lt;/p&gt;
+
+&lt;p&gt;To fund these accounts, I have a series of standing scheduled transfers on Fridays that move
+the budgeted amounts from the holding account into the various purposed accounts. Keep in mind
+there are &lt;a href=&quot;https://www.google.com/search?q=weeks%20in%20a%20year&amp;amp;rct=j&quot;&gt;52.1775 weeks in a year&lt;/a&gt;,
+so I use the formula &lt;code&gt;transfer = yearly budget / 52.1175&lt;/code&gt; to determine the amounts.&lt;/p&gt;
+
+&lt;p&gt;Many banks offer free unlimited accounts if you keep a combined balance over some low
+threshold like $10,000.&lt;/p&gt;
+
+&lt;h2&gt;Save Before You Spend&lt;/h2&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;The ability to discipline yourself to delay gratification in the short term
+in order to enjoy greater rewards in the long term, is the indispensable
+prerequisite for success. &lt;a href=&quot;https://www.goodreads.com/quotes/23014-the-ability-to-discipline-yourself-to-delay-gratification-in-the&quot;&gt;Brian Tracy&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Separate accounts are only useful if you are placing money aside &lt;em&gt;before&lt;/em&gt; you spend it. This
+is as apposed to using credit. This has numerous benefits:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;You cannot go into debt on a purchase you have budgeted for.&lt;/li&gt;
+&lt;li&gt;You can spread the cost of once a year purchases like insurance and Christmas over the course of the year.&lt;/li&gt;
+&lt;li&gt;You can blow a large amount of money on something relatively guilt free - you saved for it!&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Perhaps the biggest benefit is that it forces you to wait for medium sized purchases. Maybe the
+new MacBook is out, and you are really tempted to drop $1300 for it. Great! It should only take
+you a few months to save for it. If you&amp;#39;re like me, most of the time the impulse to purchase
+will fade over the course of even ten days, to the point where you may no longer think it&amp;#39;s a
+good use of money.&lt;/p&gt;
+
+&lt;p&gt;If not, you can do ahead and purchase it without using credit. Plus, you&amp;#39;ll know that it was something
+you really wanted. You were willing to make some sacrifice for it. To me, delayed gratification is
+the definition of maturity.&lt;/p&gt;
+
+&lt;p&gt;What about credit card rewards? You can still make purchases on a credit card and pay off
+the card from the correct account. Just make sure you are keeping track of your budget. If
+you can&amp;#39;t consistently stay under budget using a credit card, and especially if you can&amp;#39;t pay
+off the balance every week, I would recommend not using a credit card.&lt;/p&gt;
+
+&lt;h2&gt;Emergency Fund &amp;amp; Contingencies&lt;/h2&gt;
+
+&lt;p&gt;One of the great things about sticking to a budget is being able to set aside money for the
+unexpected. Even in hot job markets like software engineering, there have been regular downturns
+where many people find themselves out of work. One common strategy is save six to twelve months
+of expenses (rent, food, utilities) in an emergency savings account, and only touch it in the case
+of job loss or catastrophic medical issue.&lt;/p&gt;
+
+&lt;p&gt;For the example budget, rent, food and utilities total $2,100 a month. To save &lt;code&gt;6 * 2100 == $12,600&lt;/code&gt;
+would take just 25 weeks, or half a year, at the budgeted emergency savings rate of $500. Afterwards,
+you free up that money for other things. Just remember to bump your emergency savings as your expenses
+increase!&lt;/p&gt;
+
+&lt;p&gt;Having an emergency fund is your number one protection against going into debt unexpectedly. Some people
+will also dip into the emergency fund for things like replacing a stolen bike or a busted water heater.
+Personally, I keep a separate smaller account for items like that called &amp;quot;contingencies&amp;quot;.&lt;/p&gt;
+</content>
+        </entry>
+    
+        <entry>
+            <title>Sync dotfiles with GitHub</title>
+            <link href="/blog/2014/11/23/dotfiles.html"/>
+            <updated>2014-11-23T00:00:00-08:00</updated>
+            <id>http://chase-seibert.github.com/blog//2014/11/23/dotfiles</id>
+            <content type="html">&lt;h2&gt;What are dotfiles?&lt;/h2&gt;
+
+&lt;p&gt;The term dotfiles refers to configuration files for various Linux or OSX utilities, primarily command line applications, which reside in your home directory and begin with a period character. Examples are &lt;code&gt;.vimrc&lt;/code&gt; for Vim and &lt;code&gt;.bashrc&lt;/code&gt; for Bash.&lt;/p&gt;
+
+&lt;p&gt;Some programs have hundreds of options, granting a multitude of permutations on form and function. For example, you can change your color scheme, or automate a common task with a shortcut.&lt;/p&gt;
+
+&lt;p&gt;It&amp;#39;s common for software engineers to &lt;a href=&quot;http://dotfiles.github.io/&quot;&gt;maintain a set of these dotfiles&lt;/a&gt; and evolve them over the course of their career. Eventually, they may end up with interfaces that are hyper optimized just for them.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/blog/images/dotfiles.png&quot; alt=&quot;dotfiles&quot;&gt;&lt;/p&gt;
+
+&lt;h2&gt;Why host them on version control?&lt;/h2&gt;
+
+&lt;p&gt;Hosting your dotfiles on a site like GitHub has several advantages. Centralization means you can easily sync your configuration between any number of machines that you use regularly. Having them publicly available means that you can easily share them with other developers. Versioning them makes it easy to roll back a recent change.&lt;/p&gt;
+
+&lt;h2&gt;How you can use GitHub to sync dotfiles&lt;/h2&gt;
+
+&lt;p&gt;If you simply maintain a shared folder of configuration files, whether it&amp;#39;s on GitHub or Dropbox, you will quickly run into an irksome maintenance problem every time you need to provision a new machine, or update an exiting one. Because these configuration files need to be located in your home directly to take effect, you will end up manually copying or maybe sym-linking them one at a time.&lt;/p&gt;
+
+&lt;p&gt;You might think to write a script for this. No need! There are plenty of exiting utilities out there that do just this. As a Python developer, I choose to use a utility on pip called simply &lt;a href=&quot;https://github.com/jbernard/dotfiles&quot;&gt;dotfiles&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;I encourage you to read the documentation, but essentially this tool maintaines a single directory with a master copy of all your configuration options, and syncs them into the correct place on demand. This should be enough to get you started:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;n&quot;&gt;pip&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;install&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dotfiles&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;dotfiles&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;--&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;~/.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;vimrc&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;cd&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;~/&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Dotfiles&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;git&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;init&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;git&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;add&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;vimrc&lt;/span&gt;  &lt;span class=&quot;c&quot;&gt;# notice that the canonical version does not start with a dot&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;git&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;commit&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;m&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Added vimrc, welcome aboard!&amp;quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;From then on, you can &lt;code&gt;git push&lt;/code&gt; your changes to your GitHub account. When you want to sync your dotfiles to a new machine, just do a &lt;code&gt;git clone&lt;/code&gt; and then run &lt;code&gt;dotfiles --sync&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h2&gt;Gotchas&lt;/h2&gt;
+
+&lt;p&gt;I did not personally like the default &lt;code&gt;~/Dotfiles&lt;/code&gt; directory. Instead, I used &lt;code&gt;~/.dotfiles&lt;/code&gt;, which you can specify in your &lt;a href=&quot;https://github.com/chase-seibert/dotfiles/blob/master/dotfilesrc&quot;&gt;.dotfilesrc&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;I also ended up using the configuration options for &lt;code&gt;ignores&lt;/code&gt; and &lt;code&gt;packages&lt;/code&gt;. The later symlinks entire configuration directories, like &lt;code&gt;~/.ssh&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Note: do not check your SSH private key into a public repository!&lt;/em&gt;&lt;/p&gt;
+
+&lt;h2&gt;Some gems from my &lt;a href=&quot;https://github.com/chase-seibert/dotfiles/blob/master/vimrc&quot;&gt;personal dotfiles&lt;/a&gt;&lt;/h2&gt;
+
+&lt;p&gt;My most extensive configuration is my &lt;a href=&quot;https://github.com/chase-seibert/dotfiles/blob/master/vimrc&quot;&gt;vimrc&lt;/a&gt;. Check it out; it&amp;#39;s pretty well commented. I especially like the &lt;a href=&quot;https://github.com/klen/python-mode&quot;&gt;python-mode&lt;/a&gt; integration, for features like jumping into the definitions of other modules, and doing in-editor linting.&lt;/p&gt;
+
+&lt;p&gt;I have an &lt;a href=&quot;https://github.com/chase-seibert/dotfiles/blob/master/install.sh&quot;&gt;install.sh&lt;/a&gt; script, which contains different blocks for various platforms:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;unamestr&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;sb&quot;&gt;`&lt;/span&gt;uname&lt;span class=&quot;sb&quot;&gt;`&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;[[&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$unamestr&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;Linux&amp;#39;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;]]&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;then&lt;/span&gt;
+    ...
+&lt;span class=&quot;k&quot;&gt;elif&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;[[&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$unamestr&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;Darwin&amp;#39;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;]]&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;then&lt;/span&gt;
+    ...
+&lt;span class=&quot;k&quot;&gt;fi&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;I&amp;#39;ve also done some work to &lt;a href=&quot;https://gist.github.com/burke/5960455&quot;&gt;enable integration&lt;/a&gt; with the OSX clipboard for copying and pasting while inside an SSH session.&lt;/p&gt;
+</content>
+        </entry>
+    
+        <entry>
+            <title>My favorite coding interview question</title>
+            <link href="/blog/2014/10/10/my-favorite-interview-question.html"/>
+            <updated>2014-10-10T00:00:00-07:00</updated>
+            <id>http://chase-seibert.github.com/blog//2014/10/10/my-favorite-interview-question</id>
+            <content type="html">&lt;p&gt;Every software engineering interview I have ever participated in has involved a coding exercise. For one position, I
+would expect three two five separate coding tests. I&amp;#39;ve &lt;a href=&quot;/blog/2012/08/31/how-to-prepare-for-a-software-engineer-interview.html&quot;&gt;written previously&lt;/a&gt;
+about why every company asks these questions, and the best way to handle these as a candidate. But what makes a good coding question?&lt;/p&gt;
+
+&lt;p&gt;There is very little data out there about effective interviewing. What data does exists seems to suggest interviews are
+only good for filtering out candidates that do not meet the minimum bar. According to one popular
+&lt;a href=&quot;http://www.forbes.com/sites/quora/2013/06/28/is-there-a-link-between-job-interview-performance-and-job-performance/&quot;&gt;Google internal study&lt;/a&gt;,
+there is no correlation between interview results and on the job performance.&lt;/p&gt;
+
+&lt;p&gt;With this in mind, the coding question I ask is simple. I have found that you can hardly ask a question that&amp;#39;s too
+simple; a substantial number of candidates will have no problem hanging themselves with the smallest amount of rope
+that you can give them.&lt;/p&gt;
+
+&lt;h2&gt;The Question&lt;/h2&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;Write a function that takes two parameters, a string and an integer. The function will return another string that
+is similar to the input string, but with certain characters removed. It&amp;#39;s going to remove characters from consecutive
+runs of the same character, where the length of the run is greater than the input parameter.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;Ex: &amp;quot;aaab&amp;quot;, 2 =&amp;gt; &amp;quot;aab&amp;quot;
+Ex: &amp;quot;aabb&amp;quot;, 1 =&amp;gt; &amp;quot;ab&amp;quot;
+Ex: &amp;quot;aabbaa&amp;quot;, 1 =&amp;gt; &amp;quot;aba&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;em&gt;Note: I&amp;#39;m evaluating your answer on the simplicity of your code. The goal is for it to be readable; someone new
+should be able to walk into this room afterwards and instantly understand what your function is doing.&lt;/em&gt;&lt;/p&gt;
+
+&lt;h2&gt;The Evaluation&lt;/h2&gt;
+
+&lt;p&gt;I explicitly state the part about what I&amp;#39;m looking for with the candidate. I tell them to use the language they are
+most comfortable with. Here is what I consider an ideal solution, in Python:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;remove_extra_consecutive&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;input_str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;max_consecutive_chars&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;output&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;prev_char&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;current_char_seen&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;#39;&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;current_char&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;input_str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;current_char&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;prev_char&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;current_char_seen&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;current_char_seen&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;prev_char&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;current_char&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;current_char_seen&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;max_consecutive_chars&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;output&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;current_char&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;output&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;While the candidate is writing code, I focus on the following.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Thought process. How do they get to a solution? Did they talk about their strategy?&lt;/li&gt;
+&lt;li&gt;It needs to work. If it doesn&amp;#39;t, I will keep pushing them until it does.&lt;/li&gt;
+&lt;li&gt;Are the function and the variables well named?&lt;/li&gt;
+&lt;li&gt;Is the code as simple as possible, but not more simple?&lt;/li&gt;
+&lt;li&gt;Is the candidate struggling to remember standard library functions? Help them out.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;Other Solutions&lt;/h2&gt;
+
+&lt;p&gt;The most common variant answer I see is conflating the clauses that count the character and append to the output. Typically this results in a bug where the last character in a run is omitted.&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;remove_extra_consecutive&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;input_str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;max_consecutive_chars&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;output&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;prev_char&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;current_char_seen&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;#39;&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;current_char&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;input_str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;current_char&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;prev_char&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;current_char_seen&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;max_consecutive_chars&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;current_char_seen&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;output&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;current_char&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;current_char&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;!=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;prev_char&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;current_char_seen&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;output&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;current_char&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;prev_char&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;current_char&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;output&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Another variant is using indexes instead of a named variable for the previous character. This can often lead to an index out of bounds bug. It&amp;#39;s also common to forget to add the last character.&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;remove_extra_consecutive&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;input_str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;max_consecutive_chars&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;output&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;current_char_seen&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;#39;&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;range&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;input_str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;input_str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;input_str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]:&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;current_char_seen&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;current_char_seen&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;current_char_seen&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;max_consecutive_chars&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;output&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;input_str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;current_char_seen&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;max_consecutive_chars&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;output&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;input_str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;output&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Finally some candidates try to alter the input string itself, or sometimes loop indexes, which can lead of off by one errors.&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;remove_extra_consecutive&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;max_consecutive_chars&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;range&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)):&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;j&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;while&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;j&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;!=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;j&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]:&lt;/span&gt;
+                &lt;span class=&quot;k&quot;&gt;break&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;j&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;max_consecutive_chars&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+                &lt;span class=&quot;nb&quot;&gt;str&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;j&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;j&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:]&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;j&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;str&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2&gt;Summary&lt;/h2&gt;
+
+&lt;p&gt;I like this problem because it has one simple and robust solution, and a number of more complicated and brittle solutions. If a candidate gets through it quickly and correctly, I follow up by asking them about which edge cases they would want to create unit tests for. If it&amp;#39;s in a dynamic language, I ask about how to make the function operate on any iterable.&lt;/p&gt;
+</content>
+        </entry>
+    
+        <entry>
+            <title>Picking a place to live in the East Bay</title>
+            <link href="/blog/2014/09/06/picking-a-place-to-live-east-bay.html"/>
+            <updated>2014-09-06T00:00:00-07:00</updated>
+            <id>http://chase-seibert.github.com/blog//2014/09/06/picking-a-place-to-live-east-bay</id>
+            <content type="html">&lt;p&gt;My wife and I recently bought a house in the San Francisco bay area. Having no family in the area, and no real ties to any neighborhood, it was surprisingly difficult to simply pick a town. Initially we just went to open houses at random, often travelling to three or four completely different locales in the same Sunday.&lt;/p&gt;
+
+&lt;p&gt;Our experience buying a condo in Boston told us that you can spend months looking and not really getting excited about any of the places. But if all of a sudden you find the neighborhood that&amp;#39;s right for you, then every place starts looking pretty good. For us that was the South End in Boston. In the bay area, it turned out to be &lt;a href=&quot;http://www.streetadvisor.com/search/neighborhoods-in-alameda-alameda-county-california&quot;&gt;Alameda&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/blog/images/alameda.jpg&quot; alt=&quot;alameda&quot;&gt;&lt;/p&gt;
+
+&lt;h2&gt;Picking a town&lt;/h2&gt;
+
+&lt;p&gt;We made a spreadsheet. A glorious spreadsheet of the things that were important to us. Things like reasonable prices, good schools and low crime.&lt;/p&gt;
+
+&lt;table style=&quot;font-size: 70%;&quot;&gt;
+    &lt;thead&gt;
+        &lt;th&gt;Name&lt;/th&gt;
+        &lt;th&gt;$/sqft&lt;/th&gt;
+        &lt;th&gt;Schools&lt;/th&gt;
+        &lt;th&gt;Violent Crime&lt;/th&gt;
+        &lt;th&gt;Other Crime&lt;/th&gt;
+        &lt;th&gt;Public Trans&lt;/th&gt;
+        &lt;th&gt;Driving&lt;/th&gt;
+        &lt;th&gt;Walking&lt;/th&gt;
+        &lt;th&gt;Weather&lt;/th&gt;
+        &lt;th&gt;Earthquake&lt;/th&gt;
+        &lt;th&gt;Score&lt;/th&gt;
+    &lt;/thead&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Alameda&lt;/td&gt;
+        &lt;td&gt;413&lt;/td&gt;
+        &lt;td&gt;8&lt;/td&gt;
+        &lt;td&gt;0.31&lt;/td&gt;
+        &lt;td&gt;2.6&lt;/td&gt;
+        &lt;td&gt;44&lt;/td&gt;
+        &lt;td&gt;25&lt;/td&gt;
+        &lt;td&gt;69&lt;/td&gt;
+        &lt;td&gt;9&lt;/td&gt;
+        &lt;td&gt;5&lt;/td&gt;
+        &lt;td&gt;97&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Orinda&lt;/td&gt;
+        &lt;td&gt;509&lt;/td&gt;
+        &lt;td&gt;10&lt;/td&gt;
+        &lt;td&gt;0.06&lt;/td&gt;
+        &lt;td&gt;1.79&lt;/td&gt;
+        &lt;td&gt;49&lt;/td&gt;
+        &lt;td&gt;24&lt;/td&gt;
+        &lt;td&gt;22&lt;/td&gt;
+        &lt;td&gt;7&lt;/td&gt;
+        &lt;td&gt;1&lt;/td&gt;
+        &lt;td&gt;96&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Walnut Creek&lt;/td&gt;
+        &lt;td&gt;367&lt;/td&gt;
+        &lt;td&gt;9&lt;/td&gt;
+        &lt;td&gt;0.17&lt;/td&gt;
+        &lt;td&gt;3.81&lt;/td&gt;
+        &lt;td&gt;63&lt;/td&gt;
+        &lt;td&gt;33&lt;/td&gt;
+        &lt;td&gt;65&lt;/td&gt;
+        &lt;td&gt;6&lt;/td&gt;
+        &lt;td&gt;1&lt;/td&gt;
+        &lt;td&gt;94&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Rockridge&lt;/td&gt;
+        &lt;td&gt;599&lt;/td&gt;
+        &lt;td&gt;8&lt;/td&gt;
+        &lt;td&gt;0.4&lt;/td&gt;
+        &lt;td&gt;4.5&lt;/td&gt;
+        &lt;td&gt;38&lt;/td&gt;
+        &lt;td&gt;21&lt;/td&gt;
+        &lt;td&gt;81&lt;/td&gt;
+        &lt;td&gt;7&lt;/td&gt;
+        &lt;td&gt;1&lt;/td&gt;
+        &lt;td&gt;93&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Piedmonte&lt;/td&gt;
+        &lt;td&gt;623&lt;/td&gt;
+        &lt;td&gt;10&lt;/td&gt;
+        &lt;td&gt;0.18&lt;/td&gt;
+        &lt;td&gt;2.84&lt;/td&gt;
+        &lt;td&gt;65&lt;/td&gt;
+        &lt;td&gt;22&lt;/td&gt;
+        &lt;td&gt;50&lt;/td&gt;
+        &lt;td&gt;8&lt;/td&gt;
+        &lt;td&gt;1&lt;/td&gt;
+        &lt;td&gt;93&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Moraga&lt;/td&gt;
+        &lt;td&gt;398&lt;/td&gt;
+        &lt;td&gt;10&lt;/td&gt;
+        &lt;td&gt;0.09&lt;/td&gt;
+        &lt;td&gt;1.26&lt;/td&gt;
+        &lt;td&gt;66&lt;/td&gt;
+        &lt;td&gt;33&lt;/td&gt;
+        &lt;td&gt;20&lt;/td&gt;
+        &lt;td&gt;7&lt;/td&gt;
+        &lt;td&gt;1&lt;/td&gt;
+        &lt;td&gt;92&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Dublin&lt;/td&gt;
+        &lt;td&gt;341&lt;/td&gt;
+        &lt;td&gt;9&lt;/td&gt;
+        &lt;td&gt;0.21&lt;/td&gt;
+        &lt;td&gt;1.82&lt;/td&gt;
+        &lt;td&gt;61&lt;/td&gt;
+        &lt;td&gt;38&lt;/td&gt;
+        &lt;td&gt;42&lt;/td&gt;
+        &lt;td&gt;6&lt;/td&gt;
+        &lt;td&gt;1&lt;/td&gt;
+        &lt;td&gt;90&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Upper Rockridge&lt;/td&gt;
+        &lt;td&gt;501&lt;/td&gt;
+        &lt;td&gt;8&lt;/td&gt;
+        &lt;td&gt;0.3&lt;/td&gt;
+        &lt;td&gt;2.65&lt;/td&gt;
+        &lt;td&gt;60&lt;/td&gt;
+        &lt;td&gt;22&lt;/td&gt;
+        &lt;td&gt;50&lt;/td&gt;
+        &lt;td&gt;8&lt;/td&gt;
+        &lt;td&gt;1&lt;/td&gt;
+        &lt;td&gt;89&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Lafayette&lt;/td&gt;
+        &lt;td&gt;507&lt;/td&gt;
+        &lt;td&gt;10&lt;/td&gt;
+        &lt;td&gt;0.09&lt;/td&gt;
+        &lt;td&gt;1.97&lt;/td&gt;
+        &lt;td&gt;68&lt;/td&gt;
+        &lt;td&gt;31&lt;/td&gt;
+        &lt;td&gt;33&lt;/td&gt;
+        &lt;td&gt;6&lt;/td&gt;
+        &lt;td&gt;3&lt;/td&gt;
+        &lt;td&gt;80&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Potrero Hill&lt;/td&gt;
+        &lt;td&gt;756&lt;/td&gt;
+        &lt;td&gt;2.2&lt;/td&gt;
+        &lt;td&gt;0.32&lt;/td&gt;
+        &lt;td&gt;2.7&lt;/td&gt;
+        &lt;td&gt;28&lt;/td&gt;
+        &lt;td&gt;7&lt;/td&gt;
+        &lt;td&gt;88&lt;/td&gt;
+        &lt;td&gt;9&lt;/td&gt;
+        &lt;td&gt;1&lt;/td&gt;
+        &lt;td&gt;80&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;San Mateo&lt;/td&gt;
+        &lt;td&gt;563&lt;/td&gt;
+        &lt;td&gt;7&lt;/td&gt;
+        &lt;td&gt;0.35&lt;/td&gt;
+        &lt;td&gt;2.71&lt;/td&gt;
+        &lt;td&gt;45&lt;/td&gt;
+        &lt;td&gt;24&lt;/td&gt;
+        &lt;td&gt;67&lt;/td&gt;
+        &lt;td&gt;5&lt;/td&gt;
+        &lt;td&gt;1&lt;/td&gt;
+        &lt;td&gt;79&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Albany&lt;/td&gt;
+        &lt;td&gt;494&lt;/td&gt;
+        &lt;td&gt;9&lt;/td&gt;
+        &lt;td&gt;0.33&lt;/td&gt;
+        &lt;td&gt;4.9&lt;/td&gt;
+        &lt;td&gt;64&lt;/td&gt;
+        &lt;td&gt;23&lt;/td&gt;
+        &lt;td&gt;86&lt;/td&gt;
+        &lt;td&gt;4&lt;/td&gt;
+        &lt;td&gt;5&lt;/td&gt;
+        &lt;td&gt;74&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Daly City&lt;/td&gt;
+        &lt;td&gt;447&lt;/td&gt;
+        &lt;td&gt;6&lt;/td&gt;
+        &lt;td&gt;0.29&lt;/td&gt;
+        &lt;td&gt;2.32&lt;/td&gt;
+        &lt;td&gt;50&lt;/td&gt;
+        &lt;td&gt;11&lt;/td&gt;
+        &lt;td&gt;63&lt;/td&gt;
+        &lt;td&gt;2&lt;/td&gt;
+        &lt;td&gt;1&lt;/td&gt;
+        &lt;td&gt;71&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Montclair&lt;/td&gt;
+        &lt;td&gt;450&lt;/td&gt;
+        &lt;td&gt;6&lt;/td&gt;
+        &lt;td&gt;0.2&lt;/td&gt;
+        &lt;td&gt;3&lt;/td&gt;
+        &lt;td&gt;69&lt;/td&gt;
+        &lt;td&gt;25&lt;/td&gt;
+        &lt;td&gt;64&lt;/td&gt;
+        &lt;td&gt;7&lt;/td&gt;
+        &lt;td&gt;5&lt;/td&gt;
+        &lt;td&gt;70&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;San Bruno&lt;/td&gt;
+        &lt;td&gt;462&lt;/td&gt;
+        &lt;td&gt;6&lt;/td&gt;
+        &lt;td&gt;0.32&lt;/td&gt;
+        &lt;td&gt;2.63&lt;/td&gt;
+        &lt;td&gt;55&lt;/td&gt;
+        &lt;td&gt;16&lt;/td&gt;
+        &lt;td&gt;58&lt;/td&gt;
+        &lt;td&gt;4&lt;/td&gt;
+        &lt;td&gt;3&lt;/td&gt;
+        &lt;td&gt;67&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Palo Alto&lt;/td&gt;
+        &lt;td&gt;1028&lt;/td&gt;
+        &lt;td&gt;10&lt;/td&gt;
+        &lt;td&gt;0.11&lt;/td&gt;
+        &lt;td&gt;3.25&lt;/td&gt;
+        &lt;td&gt;94&lt;/td&gt;
+        &lt;td&gt;36&lt;/td&gt;
+        &lt;td&gt;63&lt;/td&gt;
+        &lt;td&gt;9&lt;/td&gt;
+        &lt;td&gt;1&lt;/td&gt;
+        &lt;td&gt;67&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Bernal Heights&lt;/td&gt;
+        &lt;td&gt;719&lt;/td&gt;
+        &lt;td&gt;2.4&lt;/td&gt;
+        &lt;td&gt;0.5&lt;/td&gt;
+        &lt;td&gt;2.7&lt;/td&gt;
+        &lt;td&gt;44&lt;/td&gt;
+        &lt;td&gt;13&lt;/td&gt;
+        &lt;td&gt;87&lt;/td&gt;
+        &lt;td&gt;7&lt;/td&gt;
+        &lt;td&gt;1&lt;/td&gt;
+        &lt;td&gt;64&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Pleasanton&lt;/td&gt;
+        &lt;td&gt;395&lt;/td&gt;
+        &lt;td&gt;9&lt;/td&gt;
+        &lt;td&gt;0.1&lt;/td&gt;
+        &lt;td&gt;2.31&lt;/td&gt;
+        &lt;td&gt;131&lt;/td&gt;
+        &lt;td&gt;46&lt;/td&gt;
+        &lt;td&gt;50&lt;/td&gt;
+        &lt;td&gt;6&lt;/td&gt;
+        &lt;td&gt;1&lt;/td&gt;
+        &lt;td&gt;64&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;San Ramon&lt;/td&gt;
+        &lt;td&gt;354&lt;/td&gt;
+        &lt;td&gt;9&lt;/td&gt;
+        &lt;td&gt;0.13&lt;/td&gt;
+        &lt;td&gt;1.8&lt;/td&gt;
+        &lt;td&gt;116&lt;/td&gt;
+        &lt;td&gt;40&lt;/td&gt;
+        &lt;td&gt;32&lt;/td&gt;
+        &lt;td&gt;6&lt;/td&gt;
+        &lt;td&gt;3&lt;/td&gt;
+        &lt;td&gt;63&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;San Leandro&lt;/td&gt;
+        &lt;td&gt;281&lt;/td&gt;
+        &lt;td&gt;4&lt;/td&gt;
+        &lt;td&gt;0.82&lt;/td&gt;
+        &lt;td&gt;5.32&lt;/td&gt;
+        &lt;td&gt;47&lt;/td&gt;
+        &lt;td&gt;30&lt;/td&gt;
+        &lt;td&gt;65&lt;/td&gt;
+        &lt;td&gt;7&lt;/td&gt;
+        &lt;td&gt;5&lt;/td&gt;
+        &lt;td&gt;61&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;North Berkeley&lt;/td&gt;
+        &lt;td&gt;503&lt;/td&gt;
+        &lt;td&gt;7&lt;/td&gt;
+        &lt;td&gt;0.64&lt;/td&gt;
+        &lt;td&gt;7.2&lt;/td&gt;
+        &lt;td&gt;54&lt;/td&gt;
+        &lt;td&gt;24&lt;/td&gt;
+        &lt;td&gt;85&lt;/td&gt;
+        &lt;td&gt;4&lt;/td&gt;
+        &lt;td&gt;5&lt;/td&gt;
+        &lt;td&gt;58&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Berkeley Hills&lt;/td&gt;
+        &lt;td&gt;497&lt;/td&gt;
+        &lt;td&gt;7&lt;/td&gt;
+        &lt;td&gt;0.45&lt;/td&gt;
+        &lt;td&gt;5.5&lt;/td&gt;
+        &lt;td&gt;110&lt;/td&gt;
+        &lt;td&gt;29&lt;/td&gt;
+        &lt;td&gt;45&lt;/td&gt;
+        &lt;td&gt;8&lt;/td&gt;
+        &lt;td&gt;1&lt;/td&gt;
+        &lt;td&gt;57&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Berkeley&lt;/td&gt;
+        &lt;td&gt;508&lt;/td&gt;
+        &lt;td&gt;7&lt;/td&gt;
+        &lt;td&gt;0.64&lt;/td&gt;
+        &lt;td&gt;7.2&lt;/td&gt;
+        &lt;td&gt;48&lt;/td&gt;
+        &lt;td&gt;23&lt;/td&gt;
+        &lt;td&gt;82&lt;/td&gt;
+        &lt;td&gt;3&lt;/td&gt;
+        &lt;td&gt;5&lt;/td&gt;
+        &lt;td&gt;56&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Twin Peaks&lt;/td&gt;
+        &lt;td&gt;606&lt;/td&gt;
+        &lt;td&gt;4.4&lt;/td&gt;
+        &lt;td&gt;0.32&lt;/td&gt;
+        &lt;td&gt;2.7&lt;/td&gt;
+        &lt;td&gt;46&lt;/td&gt;
+        &lt;td&gt;17&lt;/td&gt;
+        &lt;td&gt;63&lt;/td&gt;
+        &lt;td&gt;2&lt;/td&gt;
+        &lt;td&gt;1&lt;/td&gt;
+        &lt;td&gt;55&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Sausalito&lt;/td&gt;
+        &lt;td&gt;575&lt;/td&gt;
+        &lt;td&gt;5&lt;/td&gt;
+        &lt;td&gt;0.12&lt;/td&gt;
+        &lt;td&gt;2.35&lt;/td&gt;
+        &lt;td&gt;57&lt;/td&gt;
+        &lt;td&gt;29&lt;/td&gt;
+        &lt;td&gt;20&lt;/td&gt;
+        &lt;td&gt;4&lt;/td&gt;
+        &lt;td&gt;1&lt;/td&gt;
+        &lt;td&gt;52&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Temescal&lt;/td&gt;
+        &lt;td&gt;468&lt;/td&gt;
+        &lt;td&gt;8&lt;/td&gt;
+        &lt;td&gt;1.91&lt;/td&gt;
+        &lt;td&gt;6.1&lt;/td&gt;
+        &lt;td&gt;46&lt;/td&gt;
+        &lt;td&gt;19&lt;/td&gt;
+        &lt;td&gt;87&lt;/td&gt;
+        &lt;td&gt;5&lt;/td&gt;
+        &lt;td&gt;5&lt;/td&gt;
+        &lt;td&gt;51&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Richmond&lt;/td&gt;
+        &lt;td&gt;198&lt;/td&gt;
+        &lt;td&gt;3&lt;/td&gt;
+        &lt;td&gt;1.19&lt;/td&gt;
+        &lt;td&gt;5.33&lt;/td&gt;
+        &lt;td&gt;62&lt;/td&gt;
+        &lt;td&gt;26&lt;/td&gt;
+        &lt;td&gt;55&lt;/td&gt;
+        &lt;td&gt;4&lt;/td&gt;
+        &lt;td&gt;5&lt;/td&gt;
+        &lt;td&gt;35&lt;/td&gt;
+    &lt;/tr&gt;
+&lt;/table&gt;
+
+&lt;p&gt;Most of these values were based on objective third party data:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;http://www.trulia.com/home_prices/California/Berkeley-heat_map/&quot;&gt;trulia.com&lt;/a&gt; (prices per square foot, crime)&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://www.greatschools.org/california/berkeley/Berkeley-Unified/&quot;&gt;greatschools.org&lt;/a&gt; (schools)&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://map.google.com&quot;&gt;maps.google.com&lt;/a&gt; (transit times) &lt;em&gt;Note: this is to the SOMA area in SF&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://www.walkscore.com/CA/Oakland/Montclair&quot;&gt;walkscore.com&lt;/a&gt; (walk-ability)&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://gis.abag.ca.gov/website/liquefactionsusceptibility/index.html&quot;&gt;gis.abag.ca.gov&lt;/a&gt; (earthquake)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Weather I could not find excellent data for. I was interested in lots of sun and moderate temperature. In the end, I basically made up these numbers based on anecdotal evidence.&lt;/p&gt;
+
+&lt;p&gt;Some of the numbers are on different scales, so I normalized them around 1.0 and applied a crude heuristic to spread the scores out more evenly from 1-100.&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;4*&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;-18+100*AVERAGE&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;B&lt;span class=&quot;nv&quot;&gt;$33&lt;/span&gt;*&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;1-B2/1000&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;, C&lt;span class=&quot;nv&quot;&gt;$33&lt;/span&gt;*&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;C2/10&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;, AVERAGE&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;D&lt;span class=&quot;nv&quot;&gt;$33&lt;/span&gt;*&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;1-D2&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;, E&lt;span class=&quot;nv&quot;&gt;$33&lt;/span&gt;*&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;1-E2/10&lt;span class=&quot;o&quot;&gt;))&lt;/span&gt;, AVERAGE&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;F&lt;span class=&quot;nv&quot;&gt;$33&lt;/span&gt;*&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;1-F2/60&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;, G&lt;span class=&quot;nv&quot;&gt;$33&lt;/span&gt;*&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;1-G2/60&lt;span class=&quot;o&quot;&gt;))&lt;/span&gt;, H&lt;span class=&quot;nv&quot;&gt;$33&lt;/span&gt;*&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;H2/100&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;, I&lt;span class=&quot;nv&quot;&gt;$33&lt;/span&gt;*&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;I2/10&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;,J&lt;span class=&quot;nv&quot;&gt;$33&lt;/span&gt;*&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;1-J2/10&lt;span class=&quot;o&quot;&gt;)))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2&gt;Picking a neighborhood&lt;/h2&gt;
+
+&lt;p&gt;Of course particular neighborhoods inside a town can be as different from each other as particular towns in the same area. We started going to all the open houses in Alameda, which turned out to only be three to five new listings a week.&lt;/p&gt;
+
+&lt;p&gt;Even at that low volume, it&amp;#39;s easy to get a sense of the different neighborhoods. The small scale makes it possible to keep track of school districts, landmarks or even individual streets. It turned out that all the houses we liked best were in the same 10 block radius, so we started focusing exclusively on that neighborhood.&lt;/p&gt;
+
+&lt;p&gt;Once we decided on a particular neighborhood, we choose a local broker to work with. Knowing how competitive the housing market was, we selected a broker that specialized in winning bids. But it still took months of seeing houses to actually make our first bid.&lt;/p&gt;
+
+&lt;h2&gt;Picking a house&lt;/h2&gt;
+
+&lt;p&gt;As we had conversations at the open houses about what we did and did not like, we wrote those items down. Then we decided how important each item was to us individually. We also estimated the cost to &amp;quot;correct&amp;quot; a given factor. Many items, like distance to a movie theater, cannot be fixed for any cost.&lt;/p&gt;
+
+&lt;table style=&quot;font-size: 70%;&quot;&gt;
+    &lt;thead&gt;
+        &lt;th&gt;Feature&lt;/th&gt;
+        &lt;th&gt;Cost&lt;/th&gt;
+        &lt;th&gt;Chase&lt;/th&gt;
+        &lt;th&gt;Noel&lt;/th&gt;
+        &lt;th&gt;Score&lt;/th&gt;
+    &lt;/thead&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Outdoor space for grill&lt;/td&gt;
+        &lt;td&gt;10&lt;/td&gt;
+        &lt;td&gt;10&lt;/td&gt;
+        &lt;td&gt;8&lt;/td&gt;
+        &lt;td&gt;9.3&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Outdoor sunny space for garden boxes&lt;/td&gt;
+        &lt;td&gt;10&lt;/td&gt;
+        &lt;td&gt;10&lt;/td&gt;
+        &lt;td&gt;8&lt;/td&gt;
+        &lt;td&gt;9.3&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Walking distance to grocery store&lt;/td&gt;
+        &lt;td&gt;10&lt;/td&gt;
+        &lt;td&gt;8&lt;/td&gt;
+        &lt;td&gt;10&lt;/td&gt;
+        &lt;td&gt;9.3&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Lots of kitchen counter space&lt;/td&gt;
+        &lt;td&gt;9&lt;/td&gt;
+        &lt;td&gt;8&lt;/td&gt;
+        &lt;td&gt;9&lt;/td&gt;
+        &lt;td&gt;8.7&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Open floor plan&lt;/td&gt;
+        &lt;td&gt;10&lt;/td&gt;
+        &lt;td&gt;8&lt;/td&gt;
+        &lt;td&gt;8&lt;/td&gt;
+        &lt;td&gt;8.7&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Tree lined shady streets&lt;/td&gt;
+        &lt;td&gt;10&lt;/td&gt;
+        &lt;td&gt;7&lt;/td&gt;
+        &lt;td&gt;8&lt;/td&gt;
+        &lt;td&gt;8.3&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Tall ceilings (especially in stairway)&lt;/td&gt;
+        &lt;td&gt;10&lt;/td&gt;
+        &lt;td&gt;7&lt;/td&gt;
+        &lt;td&gt;8&lt;/td&gt;
+        &lt;td&gt;8.3&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Dining room can seat 12&lt;/td&gt;
+        &lt;td&gt;9&lt;/td&gt;
+        &lt;td&gt;8&lt;/td&gt;
+        &lt;td&gt;8&lt;/td&gt;
+        &lt;td&gt;8.3&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Gas range&lt;/td&gt;
+        &lt;td&gt;4&lt;/td&gt;
+        &lt;td&gt;10&lt;/td&gt;
+        &lt;td&gt;8&lt;/td&gt;
+        &lt;td&gt;7.3&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Tub you can fit in&lt;/td&gt;
+        &lt;td&gt;9&lt;/td&gt;
+        &lt;td&gt;7&lt;/td&gt;
+        &lt;td&gt;6&lt;/td&gt;
+        &lt;td&gt;7.3&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Walking distance to movie theater&lt;/td&gt;
+        &lt;td&gt;10&lt;/td&gt;
+        &lt;td&gt;6&lt;/td&gt;
+        &lt;td&gt;5&lt;/td&gt;
+        &lt;td&gt;7.0&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Hardwood floors&lt;/td&gt;
+        &lt;td&gt;7&lt;/td&gt;
+        &lt;td&gt;5&lt;/td&gt;
+        &lt;td&gt;8&lt;/td&gt;
+        &lt;td&gt;6.7&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Walk-in closet&lt;/td&gt;
+        &lt;td&gt;5&lt;/td&gt;
+        &lt;td&gt;6&lt;/td&gt;
+        &lt;td&gt;8&lt;/td&gt;
+        &lt;td&gt;6.3&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Deck&lt;/td&gt;
+        &lt;td&gt;5&lt;/td&gt;
+        &lt;td&gt;6&lt;/td&gt;
+        &lt;td&gt;8&lt;/td&gt;
+        &lt;td&gt;6.3&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Dual vanity&lt;/td&gt;
+        &lt;td&gt;9&lt;/td&gt;
+        &lt;td&gt;4&lt;/td&gt;
+        &lt;td&gt;6&lt;/td&gt;
+        &lt;td&gt;6.3&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Central AC&lt;/td&gt;
+        &lt;td&gt;7&lt;/td&gt;
+        &lt;td&gt;5&lt;/td&gt;
+        &lt;td&gt;5&lt;/td&gt;
+        &lt;td&gt;5.7&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Shed/basement space for a work bench&lt;/td&gt;
+        &lt;td&gt;10&lt;/td&gt;
+        &lt;td&gt;5&lt;/td&gt;
+        &lt;td&gt;1&lt;/td&gt;
+        &lt;td&gt;5.3&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Walking distance to off-leash field&lt;/td&gt;
+        &lt;td&gt;10&lt;/td&gt;
+        &lt;td&gt;3&lt;/td&gt;
+        &lt;td&gt;3&lt;/td&gt;
+        &lt;td&gt;5.3&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Walking distance to basketball court&lt;/td&gt;
+        &lt;td&gt;10&lt;/td&gt;
+        &lt;td&gt;2&lt;/td&gt;
+        &lt;td&gt;1&lt;/td&gt;
+        &lt;td&gt;4.3&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Built-in bookcase&lt;/td&gt;
+        &lt;td&gt;8&lt;/td&gt;
+        &lt;td&gt;2&lt;/td&gt;
+        &lt;td&gt;2&lt;/td&gt;
+        &lt;td&gt;4.0&lt;/td&gt;
+    &lt;/tr&gt;
+&lt;/table&gt;
+
+&lt;p&gt;This really helped us realistically evaluate homes that had high curb appeal, but which did not ultimately meed all our needs.&lt;/p&gt;
+
+&lt;h2&gt;Picking an offer price&lt;/h2&gt;
+
+&lt;p&gt;Having looked at around 100 homes, and paying attention to asking price and closing price on those, we knew that houses tended to go far over asking price. It turned out that this was a particular problem in Alameda; sellers were routinely listing their house one or two hundred thousand dollars bellow what they actually wanted for it.&lt;/p&gt;
+
+&lt;p&gt;After picking our own three to five open houses a weekend for more than six months, we finally found our house through our broker. It was not actually listed on MLS; the seller wanted to do a private sale. Not opening the house to public bids is great from a buyers perspective, but it did mean that we needed to feel confident in our bid price.&lt;/p&gt;
+
+&lt;p&gt;There was no substitute for paying close attention to closing prices over an extended period. That gave us a decent idea what the house would likely list for, and what it would likely close for on the open market. Luckily, we were able to quickly pick a price that both parties were happy with.&lt;/p&gt;
+</content>
+        </entry>
+    
+        <entry>
+            <title>Why software engineers should maintain a blog</title>
+            <link href="/blog/2014/08/01/why-blogging.html"/>
+            <updated>2014-08-01T00:00:00-07:00</updated>
+            <id>http://chase-seibert.github.com/blog//2014/08/01/why-blogging</id>
+            <content type="html">&lt;p&gt;I have a few pieces of standard advice that I give to anyone starting out in software engineering.
+&lt;a href=&quot;http://chase-seibert.github.io/blog//2013/10/04/what-to-know-before-starting-at-a-startup.html&quot;&gt;Join a startup&lt;/a&gt;,
+&lt;a href=&quot;http://chase-seibert.github.io/blog//2014/01/01/saving-for-retirement-as-a-software-engineer.html&quot;&gt;max out your 401k&lt;/a&gt;
+and &lt;em&gt;start a blog&lt;/em&gt;. Why should you start blogging?&lt;/p&gt;
+
+&lt;h2&gt;Personal Branding&lt;/h2&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://assets.amuniversal.com/8f870570df960131725e005056a9545d&quot; alt=&quot;calvin and hobbes&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;Early on in your career, your biggest asset is your future earning potential. &lt;em&gt;Aside: this is why you should also
+consider buying disability insurance, which is super cheap&lt;/em&gt;. You should be continually re-investing in yourself and
+your career. Part of that is building a personal brand. When a prospective employer Googles your name, they expect
+to find your LinkedIn profile and your Facebook page. If they also find a personal blog full of your writing and
+your code, you just jumped ahead of 95% of applicants.&lt;/p&gt;
+
+&lt;p&gt;Most people on your interview loop with take the time to at least read the latest entries in your blog. They will
+probably ask you questions about something you wrote about recently. &lt;em&gt;Hint: if you&amp;#39;re actively interviewing, think
+carefully about which posts you want to at the top of the list&lt;/em&gt;. These are the absolute easiest interviews you will
+ever have, and some of the most productive. The likely hood that you know more about the subject than the interviewer
+is high.&lt;/p&gt;
+
+&lt;p&gt;Don&amp;#39;t worry too much about the SEO aspect. If you produce good content and put your name in the title of all the pages,
+the rest will take care of itself.&lt;/p&gt;
+
+&lt;h2&gt;Career Growth&lt;/h2&gt;
+
+&lt;p&gt;When I sit down and think about what to write, I usually ask myself &amp;quot;What was the hardest problem I solved in the
+last week&amp;quot;? This is a great reality check. Am I still growing and learning in my current job? If you have honestly been
+putting in the effort to write, but you look back at the last three months of posts and don&amp;#39;t see anything particularly
+interesting, then you have your answer.&lt;/p&gt;
+
+&lt;p&gt;More and more recently, I have begun to blog about the soft side of engineering. I still write posts that explain a
+particular technical issue I ran into, but I also write down my thoughts on my &lt;em&gt;philosophy&lt;/em&gt; of engineering. I find these
+particularly useful when growing your leadership skills. Often I will have a conversation with a new engineer, and then
+reinforce my points by following up with an article I had written in the past.&lt;/p&gt;
+
+&lt;p&gt;You&amp;#39;ll be doing a lot of communication during your career, both verbal and written. Honing your ability to communicate
+well is going to pay dividends on whatever time you can spend on it. A surprising number of times I have found that it
+also pays more direct dividends; searching for a solution and finding the answer in a blog post you had previously
+written and forgotten about always makes me want to do a victory lap around the office.&lt;/p&gt;
+
+&lt;h2&gt;Giving Back&lt;/h2&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;Writing isn&amp;#39;t about making money, getting famous, getting dates, getting laid, or making friends. In the end, it&amp;#39;s
+about enriching the lives of those who will read your work, and enriching your own life, as well. It&amp;#39;s about getting
+up, getting well, and getting over. Getting happy, okay? Getting happy.” ― Stephen King,
+&lt;a href=&quot;https://www.goodreads.com/work/quotes/150292&quot;&gt;On Writing: A Memoir of the Craft&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;How many times a week do you find the perfect StackOverflow article that solves your problem and saves you hours of
+banging your head against a wall? How many times do you spend hours solving a problem, but no one else ever benefits
+from your solution? Help out other poor software engineers by posting your findings! The vast majority of the traffic
+coming to my blog is from engineers searching for specific solutions, such as &amp;quot;python memory leak&amp;quot; or &amp;quot;mysql drop
+column if exists&amp;quot;.&lt;/p&gt;
+
+&lt;p&gt;You&amp;#39;ll be surprised at the number of comments you will get. Most will just be a simple thank you. Yes - occasionally
+someone will comment just to call you an idiot. Dealing with aggressive and confrontational people is also a
+part of career growth.&lt;/p&gt;
+
+&lt;h2&gt;Good for your company&lt;/h2&gt;
+
+&lt;p&gt;Personal blogging is also good for your company. Typical corporate blogs suck at conveying the personality of the actual
+people on the team. Your blog can &lt;a href=&quot;http://www.inc.com/magazine/20100301/lets-take-this-offline.html&quot;&gt;make a bigger impact&lt;/a&gt;
+just by being authentic. If you want to combine your blog, other coworker blogs and the company blog into one site and
+RSS feed, you can use &lt;a href=&quot;http://advocoders.herokuapp.com/&quot;&gt;Advocoders&lt;/a&gt;. There are many services that can then take that
+RSS feed and turn it into a self-updating Facebook page or a Twitter profile.&lt;/p&gt;
+
+&lt;h2&gt;How to get started&lt;/h2&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;I used to tell people who asked me for advice about blogging that if they couldn&amp;#39;t think about one interesting thing
+to write about every week, they weren&amp;#39;t trying hard enough.
+&lt;a href=&quot;http://blog.codinghorror.com/10-years-of-coding-horror/&quot;&gt;Coding Horror&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;The hardest part is writing. The logistics of setting up blog should be easy. I would recommend looking for a platform
+that supports syntax highlighting of code snippets that you include in your posts. Having an RSS feed of your posts is
+critical.&lt;/p&gt;
+
+&lt;p&gt;Personally, I use &lt;a href=&quot;https://pages.github.com/&quot;&gt;GitHub Pages&lt;/a&gt; and a static site generator called
+&lt;a href=&quot;http://jekyllrb.com/&quot;&gt;Jekyll&lt;/a&gt;. The beauty of the system is that your posts are regular GitHub markdown, just like
+when you&amp;#39;re making comments on a pull request. You publish new articles with a simple &lt;code&gt;git push&lt;/code&gt;. You could spend a
+couple of hours crafting the HTML templates and basic Jekyll configuration yourself, or you can fork my repository:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;brew install hub  &lt;span class=&quot;c&quot;&gt;# http://brew.sh/&lt;/span&gt;
+git-hub fork git@github.com:chase-seibert/blog.git
+git-hub clone blog
+&lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;blog
+git branch -D gh-pages
+git checkout origin/quickstart -b gh-pages
+./run.sh
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;A few minutes after you push your &lt;code&gt;gh-pages&lt;/code&gt; branch to GitHub, you should be able to see your blog at
+http://$username.github.io/blog.&lt;/p&gt;
+</content>
+        </entry>
+    
+        <entry>
+            <title>Creating International CSV files with Python</title>
+            <link href="/blog/2014/07/30/international-csv-files-python.html"/>
+            <updated>2014-07-30T00:00:00-07:00</updated>
+            <id>http://chase-seibert.github.com/blog//2014/07/30/international-csv-files-python</id>
+            <content type="html">&lt;p&gt;You might assume that reading and writing files using the CSV format, being a simple and human-readable implementation,
+would be relatively pain free. You would be wrong. It turns out that even though there
+&lt;a href=&quot;http://tools.ietf.org/html/rfc4180&quot;&gt;is a standard&lt;/a&gt;, many applications out there do not conform, or require their own
+additions and modifications. Most notable among the outliers is Microsoft Excel, which forces you to do some crazy things
+if you want to produce CSV files that can be read by any edition of Windows/Office, including international versions.&lt;/p&gt;
+
+&lt;p&gt;Yes, you heard me right. Whether you&amp;#39;re running the US or European version of Windows can effect whether you can
+seemlessly open a CSV file with commas as the delimiter. Apparently some countries prefer their comma delimited text
+to be delimited with semicolons. More on that later.&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;The name &amp;quot;CSV&amp;quot; indicates the use of the comma to separate data fields. Nevertheless, the term &amp;quot;CSV&amp;quot; is widely used
+to refer a large family of formats, which differ in many ways. For example, many so-called &amp;quot;CSV&amp;quot; files in fact use
+the tab character instead of comma (such files can be more precisely referred to as &amp;quot;TSV&amp;quot; for tab separated values);
+some implementations allow or require single or double quotation marks around some or all fields; and some reserve
+the very first record as a header containing a list of field names. The character set being used is undefined:
+some applications require a Unicode BOM to enforce Unicode interpretation - &lt;a href=&quot;http://en.wikipedia.org/wiki/Comma-separated_values#Lack_of_a_standard&quot;&gt;Wikipedia&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2&gt;Diacriticly Delicious&lt;/h2&gt;
+
+&lt;p&gt;The first hurdle when producing international CSV files with Python is the &lt;code&gt;csv&lt;/code&gt; module&amp;#39;s
+&lt;a href=&quot;https://docs.python.org/2/library/csv.html&quot;&gt;lack of native unicode support&lt;/a&gt;:&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;The csv module doesn’t directly support reading and writing Unicode, but it is 8-bit-clean save for some problems
+with ASCII NUL characters. So you can write functions or classes that handle the encoding and decoding for you as
+long as you avoid encodings like UTF-16 that use NULs. UTF-8 is recommended.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Instead, they suggest that you use a a custom &lt;code&gt;UnicodeWriter&lt;/code&gt; class.&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;UnicodeWriter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;sd&quot;&gt;&amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
+&lt;span class=&quot;sd&quot;&gt;    A CSV writer which will write rows to CSV file &amp;quot;f&amp;quot;,&lt;/span&gt;
+&lt;span class=&quot;sd&quot;&gt;    which is encoded in the given encoding.&lt;/span&gt;
+&lt;span class=&quot;sd&quot;&gt;    &amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;__init__&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dialect&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;csv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;excel&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;encoding&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;utf-8&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;kwds&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+        &lt;span class=&quot;c&quot;&gt;# Redirect output to a queue&lt;/span&gt;
+        &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;queue&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cStringIO&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;StringIO&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+        &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;writer&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;csv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;writer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;queue&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dialect&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dialect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;kwds&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;stream&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;f&lt;/span&gt;
+        &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;encoder&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;codecs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;getincrementalencoder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;encoding&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)()&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;writerow&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;row&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+        &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;writer&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;writerow&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;encode&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;utf-8&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;row&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;
+        &lt;span class=&quot;c&quot;&gt;# Fetch UTF-8 output from the queue ...&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;queue&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;getvalue&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;decode&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;utf-8&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;c&quot;&gt;# ... and reencode it into the target encoding&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;encoder&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;encode&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;c&quot;&gt;# write to the target stream&lt;/span&gt;
+        &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;stream&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;write&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;c&quot;&gt;# empty queue&lt;/span&gt;
+        &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;queue&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;truncate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;writerows&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rows&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;row&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rows&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+            &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;writerow&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;row&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;However, even with this handy class, you will find that Excel 2007, 2010 and 2013 will
+&lt;a href=&quot;http://stackoverflow.com/questions/155097/microsoft-excel-mangles-diacritics-in-csv-files#answer-155176&quot;&gt;fail to detect the UTF-8 encoding&lt;/a&gt;.
+I should note that Google Docs and LibreOffice have no problems detecting the encoding. If you&amp;#39;re using earlier versions
+of Excel, it&amp;#39;s even worse. Excel 97, 2000 and 2003 will simply fail to open the file at all unless you use the import
+wizard and manually specify the encoding.&lt;/p&gt;
+
+&lt;h2&gt;Dropping Bombs&lt;/h2&gt;
+
+&lt;p&gt;For the versions of Excel from the modern era, you need to explicitly denote the encoding using a BOM, or
+&lt;a href=&quot;http://en.wikipedia.org/wiki/Byte_order_mark&quot;&gt;Byte Order Mark&lt;/a&gt;.&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;The byte order mark (BOM) is a Unicode character used to signal the endianness (byte order) of a text file or stream.
+It is encoded at U+FEFF byte order mark (BOM). BOM use is optional, and, if used, should appear at the start of the
+text stream. Beyond its specific use as a byte-order indicator, the BOM character may also indicate which of the
+several Unicode representations the text is encoded in.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Fun. I find that meditating on my own endianness is a very relaxing morning ritual. In any case, it&amp;#39;s fairly simple to
+write the UTF-8 BOM to the very start of the file:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;codecs&lt;/span&gt;
+
+
+    &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;__init__&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dialect&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;csv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;excel&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;encoding&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;utf-8&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;kwds&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;...&lt;/span&gt;
+        &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;stream&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;f&lt;/span&gt;
+        &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;stream&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;write&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;codecs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;BOM_UTF8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;...&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;em&gt;Note: You need to write the BOM directly to the file buffer, and not via the UnicodeWriter.writer object, otherwise
+the BOM itself will be encoded as UTF-8, when it needs to be raw bytes.&lt;/em&gt;&lt;/p&gt;
+
+&lt;h2&gt;Separating the Men from the Boys&lt;/h2&gt;
+
+&lt;p&gt;It turns our that there is another insidious issue with international versions of Windows. There is actually a setting
+in Windows &lt;a href=&quot;http://hotware.wordpress.com/2009/12/16/trouble-with-opening-csv-files-with-excel-the-comma-and-semicolon-issue-in-excel-due-to-regional-settings-for-europe/&quot;&gt;Regional and Language&lt;/a&gt;
+control panel called &amp;quot;List Separator&amp;quot;. In the US version of Windows, the default is a comma (&lt;code&gt;,&lt;/code&gt;). In other locales,
+specifically the European version, the default is often a semi-colon (&lt;code&gt;;&lt;/code&gt;).&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/blog/images/regional.png&quot; alt=&quot;regional settings&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;There are several hack solutions to this. The first is to tell all your European users to change their setting. The second
+is to save the file as a .txt file, and tell the users to choose &amp;quot;Open with Excel&amp;quot;, which will then run the import wizard
+and detect the delimiter. The third is to tell them to always use launch the import wizard manually, and not to simply
+double click on the file to open it.&lt;/p&gt;
+
+&lt;p&gt;The fourth, &lt;a href=&quot;http://superuser.com/questions/180964/how-to-open-semicolon-delimited-csv-files-in-us-version-of-excel#answer-420025&quot;&gt;slightly less gross hack&lt;/a&gt;
+to is put &lt;code&gt;sep=,&lt;/code&gt; as the first line in your csv file, which will signal to Excel that you want to explicitly use commas as
+the delimiter.&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;os&lt;/span&gt;
+
+
+    &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;__init__&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dialect&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;csv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;excel&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;encoding&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;utf-8&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;kwds&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;...&lt;/span&gt;
+        &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;stream&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;write&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;sep=,&amp;#39;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;os&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;linesep&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;...&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;em&gt;Note: this line will show up in most spreadsheet applications as the first line of your data. So users may have to
+manually delete the first two every time they start working with a file.&lt;/em&gt;&lt;/p&gt;
+
+&lt;h2&gt;More Fun&lt;/h2&gt;
+
+&lt;p&gt;After some more research, it turns out that Mac Excel simply &lt;a href=&quot;http://answers.microsoft.com/en-us/mac/forum/macoffice2011-macexcel/mac-excel-converts-utf-8-characters-to-underlines/7c4cdaa7-bfa3-41a2-8482-554ae235227b?msgId=c8295574-a053-48a6-b419-51523ce2a247&quot;&gt;does not support UTF-8&lt;/a&gt;
+at all. So forget it ever working there.&lt;/p&gt;
+
+&lt;p&gt;Also, writing BOTH the BOM and the &lt;code&gt;sep=,&lt;/code&gt; will cause Windows Excel to &lt;a href=&quot;http://stackoverflow.com/questions/20395699/sep-statement-breaks-utf8-bom-in-csv-file-which-is-generated-by-xsl#answer-23513342&quot;&gt;forget about the BOM&lt;/a&gt;
+you just specified. So, you basically need to choose whether you want unicode characters to show up correctly, or
+whether you want to have the columns separated automatically.&lt;/p&gt;
+</content>
+        </entry>
+    
+        <entry>
+            <title>Designing a Dimensional Schema for a hierarchy that can change over time</title>
+            <link href="/blog/2014/07/18/dimensional-schema-hierarchy-bridge-slowly-changing.html"/>
+            <updated>2014-07-18T00:00:00-07:00</updated>
+            <id>http://chase-seibert.github.com/blog//2014/07/18/dimensional-schema-hierarchy-bridge-slowly-changing</id>
+            <content type="html">&lt;p&gt;I&amp;#39;ve recently been reading about dimensional schemas, aka star schemas. The whole idea seems to be to optimize for fast queries that are also simple to write, at the expense of extra storage in the form of denormalization. In contrast to standard third normal form relational database schema, there is little to no emphasis on how complicated it will be to write data into the system. This trade-off makes sense, as star schemas are employed primarily for data warehouses, where the user will be a business intelligence analyst writing ad-hoc queries to pull analytics, not an ORM layer or another piece of pre-vetted code hitting previously defined and approved indexes.&lt;/p&gt;
+
+&lt;p&gt;The schema itself can be counter intuitive for engineers who have only worked on normal RDMS schemas. First off, data is broken down into fact tables, which are the events that the analytics are aggregating, and dimension tables, which are the attributes that the events will be rolled up by. For example, we are going to use the fact of social media posts as an example, while the dimensions will be the group that the posting user works at in their company, together with that groups place in the company org chart. To up the level of difficulty, we are also going to talk about how to model an org chart that is changing over time.&lt;/p&gt;
+
+&lt;h2&gt;The Problem&lt;/h2&gt;
+
+&lt;p&gt;&lt;img src=&quot;/blog/images/hierarchy.png&quot; alt=&quot;hierarchy&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;Here we have a somewhat complicated org chart, albeit a small one. Group 10 happens to roll up to both the State and Role hierarchies. This is known as a multi-hierarchy system. The company wants to be able to report on posts made by that group from two different perspectives, depending on the specific report they are trying to run.&lt;/p&gt;
+
+&lt;p&gt;Two particular challenges talked about in the excellent &lt;a href=&quot;http://www.amazon.com/The-Data-WarehouseETL-Toolkit-Techniques/dp/0764567578&quot;&gt;The Data Warehouse ETL Toolkit&lt;/a&gt; are modeling hierarchies (which are essentially trees, and also difficult to model in traditional RDMS systems) and slowly changing dimensions. For example, what happens if a group moves to a different spot in one of the hierarchies, but the company still wants to report on their posts according to the hierarchy they were actually in at the time? More on that later.&lt;/p&gt;
+
+&lt;h2&gt;Test Schema and Data&lt;/h2&gt;
+
+&lt;p&gt;Here is one model for the hierarchy information, aka the Region Bridge Table, or &lt;code&gt;test_region_bridge&lt;/code&gt;. For each of these tables, I will also give the SQL to create the table and insert the same test data.&lt;/p&gt;
+
+&lt;table&gt;
+    &lt;thead&gt;
+        &lt;th&gt;parent_distdict_id&lt;/th&gt;
+        &lt;th&gt;parent_distdict_name&lt;/th&gt;
+        &lt;th&gt;child_distdict_id&lt;/th&gt;
+        &lt;th&gt;child_distdict_name&lt;/th&gt;
+        &lt;th&gt;depth_from_parent&lt;/th&gt;
+    &lt;/thead&gt;
+    &lt;tr&gt;
+        &lt;td&gt;1&lt;/td&gt;
+        &lt;td&gt;All Regions&lt;/td&gt;
+        &lt;td&gt;2&lt;/td&gt;
+        &lt;td&gt;State Hierarchy&lt;/td&gt;
+        &lt;td&gt;1&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;1&lt;/td&gt;
+        &lt;td&gt;All Regions&lt;/td&gt;
+        &lt;td&gt;5&lt;/td&gt;
+        &lt;td&gt;MA&lt;/td&gt;
+        &lt;td&gt;2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;2&lt;/td&gt;
+        &lt;td&gt;State Hierarchy&lt;/td&gt;
+        &lt;td&gt;5&lt;/td&gt;
+        &lt;td&gt;MA&lt;/td&gt;
+        &lt;td&gt;1&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;1&lt;/td&gt;
+        &lt;td&gt;All Regions&lt;/td&gt;
+        &lt;td&gt;3&lt;/td&gt;
+        &lt;td&gt;Role Hierarchy&lt;/td&gt;
+        &lt;td&gt;1&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;1&lt;/td&gt;
+        &lt;td&gt;All Regions&lt;/td&gt;
+        &lt;td&gt;6&lt;/td&gt;
+        &lt;td&gt;Sales&lt;/td&gt;
+        &lt;td&gt;2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;3&lt;/td&gt;
+        &lt;td&gt;Role Hierarchy&lt;/td&gt;
+        &lt;td&gt;6&lt;/td&gt;
+        &lt;td&gt;Sales&lt;/td&gt;
+        &lt;td&gt;1&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;1&lt;/td&gt;
+        &lt;td&gt;All Regions&lt;/td&gt;
+        &lt;td&gt;7&lt;/td&gt;
+        &lt;td&gt;Eng&lt;/td&gt;
+        &lt;td&gt;2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;3&lt;/td&gt;
+        &lt;td&gt;Role Hierarchy&lt;/td&gt;
+        &lt;td&gt;7&lt;/td&gt;
+        &lt;td&gt;Eng&lt;/td&gt;
+        &lt;td&gt;1&lt;/td&gt;
+    &lt;/tr&gt;
+&lt;/table&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-sql&quot; data-lang=&quot;sql&quot;&gt;&lt;span class=&quot;k&quot;&gt;CREATE&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;TABLE&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;test_region_bridge&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;parent_district_id&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;integer&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parent_district_name&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;varchar&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;255&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;child_district_id&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;integer&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;child_district_name&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;varchar&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;255&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;depth_from_parent&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;integer&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;INSERT&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;INTO&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;test_region_bridge&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;parent_district_id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parent_district_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;child_district_id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;child_district_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;depth_from_parent&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+           &lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;All Regions&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;State Hierarchy&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;UNION&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;ALL&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;All Regions&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;MA&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;UNION&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;ALL&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;State Hierarchy&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;MA&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;UNION&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;ALL&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;All Regions&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;Role Hierarchy&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;UNION&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;ALL&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;All Regions&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;6&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;Sales&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;UNION&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;ALL&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;Role Hierarchy&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;6&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;Sales&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;UNION&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;ALL&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;All Regions&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;7&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;Eng&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;UNION&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;ALL&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;Role Hierarchy&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;7&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;Eng&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Notice that every node has a row for each of their children, whether they are direct children (depth 1) or further down. This is intended to make it possible to query for all groups under a certain level without explicitly listing all the children in a dependent sub-query. The parent and child names are given just to make it easier to see what your queries are doing.&lt;/p&gt;
+
+&lt;p&gt;Here is the &lt;code&gt;test_post&lt;/code&gt; table. Notice that it has a &lt;code&gt;group_id&lt;/code&gt;, but not a &lt;code&gt;district_id&lt;/code&gt;.&lt;/p&gt;
+
+&lt;table&gt;
+    &lt;thead&gt;
+        &lt;th&gt;post_id&lt;/th&gt;
+        &lt;th&gt;group_id&lt;/th&gt;
+        &lt;th&gt;text&lt;/th&gt;
+        &lt;th&gt;date&lt;/th&gt;
+    &lt;/thead&gt;
+    &lt;tr&gt;
+        &lt;td&gt;1&lt;/td&gt;
+        &lt;td&gt;8&lt;/td&gt;
+        &lt;td&gt;foo&lt;/td&gt;
+        &lt;td&gt;2014-06-01&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;2&lt;/td&gt;
+        &lt;td&gt;9&lt;/td&gt;
+        &lt;td&gt;bar&lt;/td&gt;
+        &lt;td&gt;2014-06-05&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;3&lt;/td&gt;
+        &lt;td&gt;11&lt;/td&gt;
+        &lt;td&gt;bat&lt;/td&gt;
+        &lt;td&gt;2014-06-20&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;4&lt;/td&gt;
+        &lt;td&gt;11&lt;/td&gt;
+        &lt;td&gt;baz&lt;/td&gt;
+        &lt;td&gt;2014-06-30&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;5&lt;/td&gt;
+        &lt;td&gt;10&lt;/td&gt;
+        &lt;td&gt;far&lt;/td&gt;
+        &lt;td&gt;2014-06-10&lt;/td&gt;
+    &lt;/tr&gt;
+&lt;/table&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-sql&quot; data-lang=&quot;sql&quot;&gt;&lt;span class=&quot;k&quot;&gt;CREATE&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;TABLE&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;test_post&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;hss_post_id&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;integer&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;group_id&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;integer&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;text&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;varchar&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;255&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;date&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;timestamp&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;INSERT&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;INTO&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;test_post&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;hss_post_id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;group_id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;text&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;date&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+           &lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;foo&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;DATE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;2014-06-01&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;UNION&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;ALL&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;9&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;bar&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;DATE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;2014-06-05&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;UNION&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;ALL&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;11&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;bat&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;DATE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;2014-06-20&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;UNION&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;ALL&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;11&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;baz&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;DATE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;2014-06-30&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;UNION&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;ALL&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;far&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;DATE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;2014-06-10&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Finally, here is the &lt;code&gt;test_group_region_bridge&lt;/code&gt; table, which joins &lt;code&gt;group_id&lt;/code&gt; to &lt;code&gt;district_id&lt;/code&gt;:&lt;/p&gt;
+
+&lt;table&gt;
+    &lt;thead&gt;
+        &lt;th&gt;group_id&lt;/th&gt;
+        &lt;th&gt;district_id&lt;/th&gt;
+    &lt;/thead&gt;
+    &lt;tr&gt;
+        &lt;td&gt;8&lt;/td&gt;
+        &lt;td&gt;5&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;9&lt;/td&gt;
+        &lt;td&gt;6&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;10&lt;/td&gt;
+        &lt;td&gt;5&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;10&lt;/td&gt;
+        &lt;td&gt;6&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;11&lt;/td&gt;
+        &lt;td&gt;7&lt;/td&gt;
+    &lt;/tr&gt;
+&lt;/table&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-sql&quot; data-lang=&quot;sql&quot;&gt;&lt;span class=&quot;k&quot;&gt;CREATE&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;TABLE&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;test_group_region_bridge&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;group_id&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;integer&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;district_id&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;integer&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;INSERT&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;INTO&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;test_group_region_bridge&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;group_id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;district_id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+           &lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;UNION&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;ALL&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;9&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;6&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;UNION&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;ALL&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;UNION&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;ALL&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;6&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;UNION&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;ALL&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;11&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;7&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h2&gt;Example Queries&lt;/h2&gt;
+
+&lt;p&gt;Given this schema, how would we write a query to answer the question &lt;em&gt;How many posts were there in each region under the Role Hierarchy between Jun 1, 2014 and Jun 30, 2014?&lt;/em&gt;&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-sql&quot; data-lang=&quot;sql&quot;&gt;&lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;child_district_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+       &lt;span class=&quot;k&quot;&gt;COUNT&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;FROM&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;test_post&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;
+ &lt;span class=&quot;k&quot;&gt;INNER&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;JOIN&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;test_group_region_bridge&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;gr&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;ON&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;gr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;group_id&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;group_id&lt;/span&gt;
+ &lt;span class=&quot;k&quot;&gt;INNER&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;JOIN&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;test_region_bridge&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;ON&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;child_district_id&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;gr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;district_id&lt;/span&gt;
+ &lt;span class=&quot;k&quot;&gt;WHERE&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;parent_district_name&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;Role Hierarchy&amp;#39;&lt;/span&gt;
+   &lt;span class=&quot;k&quot;&gt;AND&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;depth_from_parent&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;
+   &lt;span class=&quot;k&quot;&gt;AND&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;date&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;BETWEEN&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;2014-06-01&amp;#39;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;AND&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;2014-06-30&amp;#39;&lt;/span&gt;
+ &lt;span class=&quot;k&quot;&gt;GROUP&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;BY&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;child_district_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Note that I&amp;#39;m including a &lt;code&gt;depth_from_parent = 1&lt;/code&gt;, otherwise my &lt;code&gt;JOIN&lt;/code&gt; would include a row for any regions that might be under either Sales or Eng, and count posts in the parent regions multiple times.&lt;/p&gt;
+
+&lt;table&gt;
+    &lt;thead&gt;
+        &lt;th&gt;child_district_name&lt;/th&gt;
+        &lt;th&gt;COUNT(*)&lt;/th&gt;
+    &lt;/thead&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Eng&lt;/td&gt;
+        &lt;td&gt;2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Sales&lt;/td&gt;
+        &lt;td&gt;2&lt;/td&gt;
+    &lt;/tr&gt;
+&lt;/table&gt;
+
+&lt;p&gt;We could also ask &lt;em&gt;How many posts per day were there under the State Hierarchy?&lt;/em&gt;&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-sql&quot; data-lang=&quot;sql&quot;&gt;&lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;DATE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;date&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+       &lt;span class=&quot;k&quot;&gt;COUNT&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;FROM&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;test_post&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;
+ &lt;span class=&quot;k&quot;&gt;INNER&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;JOIN&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;test_group_region_bridge&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;gr&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;ON&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;gr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;group_id&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;group_id&lt;/span&gt;
+ &lt;span class=&quot;k&quot;&gt;INNER&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;JOIN&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;test_region_bridge&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;ON&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;child_district_id&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;gr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;district_id&lt;/span&gt;
+ &lt;span class=&quot;k&quot;&gt;WHERE&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;parent_district_name&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;State Hierarchy&amp;#39;&lt;/span&gt;
+ &lt;span class=&quot;k&quot;&gt;GROUP&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;BY&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;DATE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;date&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Which results in:&lt;/p&gt;
+
+&lt;table&gt;
+    &lt;thead&gt;
+        &lt;th&gt;date&lt;/th&gt;
+        &lt;th&gt;COUNT(*)&lt;/th&gt;
+    &lt;/thead&gt;
+    &lt;tr&gt;
+        &lt;td&gt;2014-06-01&lt;/td&gt;
+        &lt;td&gt;1&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;2014-06-10&lt;/td&gt;
+        &lt;td&gt;1&lt;/td&gt;
+    &lt;/tr&gt;
+&lt;/table&gt;
+
+&lt;p&gt;Also, &lt;em&gt;Which posts were there under both Sales and MA?&lt;/em&gt;&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-sql&quot; data-lang=&quot;sql&quot;&gt;&lt;span class=&quot;k&quot;&gt;SElECT&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;FROM&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;test_post&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;
+ &lt;span class=&quot;k&quot;&gt;INNER&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;JOIN&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;test_group_region_bridge&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;gr&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;ON&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;gr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;group_id&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;group_id&lt;/span&gt;
+ &lt;span class=&quot;k&quot;&gt;INNER&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;JOIN&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;test_region_bridge&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;ON&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;child_district_id&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;gr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;district_id&lt;/span&gt;
+   &lt;span class=&quot;k&quot;&gt;AND&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;parent_district_name&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;All Regions&amp;#39;&lt;/span&gt;
+ &lt;span class=&quot;k&quot;&gt;WHERE&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;child_district_name&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;Sales&amp;#39;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;INTERSECT&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;SElECT&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;FROM&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;test_post&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;
+ &lt;span class=&quot;k&quot;&gt;INNER&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;JOIN&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;test_group_region_bridge&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;gr&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;ON&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;gr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;group_id&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;group_id&lt;/span&gt;
+ &lt;span class=&quot;k&quot;&gt;INNER&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;JOIN&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;test_region_bridge&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;ON&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;child_district_id&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;gr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;district_id&lt;/span&gt;
+   &lt;span class=&quot;k&quot;&gt;AND&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;parent_district_name&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;All Regions&amp;#39;&lt;/span&gt;
+ &lt;span class=&quot;k&quot;&gt;WHERE&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;child_district_name&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;MA&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;This one is tricky, but shows the flexibility of SQL. It returns the correct single row.&lt;/p&gt;
+
+&lt;table&gt;
+    &lt;thead&gt;
+        &lt;th&gt;post_id&lt;/th&gt;
+        &lt;th&gt;group_id&lt;/th&gt;
+        &lt;th&gt;text&lt;/th&gt;
+        &lt;th&gt;date&lt;/th&gt;
+    &lt;/thead&gt;
+    &lt;tr&gt;
+        &lt;td&gt;5&lt;/td&gt;
+        &lt;td&gt;10&lt;/td&gt;
+        &lt;td&gt;far&lt;/td&gt;
+        &lt;td&gt;2014-06-10&lt;/td&gt;
+    &lt;/tr&gt;
+&lt;/table&gt;
+
+&lt;h2&gt;Taking it up a notch&lt;/h2&gt;
+
+&lt;p&gt;Now, I promised to address what happens when we also need to account for changes in the hierarchy over time. For example, what if group 11 moved from district 7 (Eng) to district 6 (Sales) on 2014-06-18, and then moved back to district 7 (Eng) on 2014-06-22? There should still be four posts, but now there were three in Sales and one in Eng.&lt;/p&gt;
+
+&lt;p&gt;In order to record the relevant dates, I&amp;#39;ll add &lt;code&gt;change_effective&lt;/code&gt; and &lt;code&gt;change_end&lt;/code&gt; dates to the table, as well as a &lt;code&gt;change_current&lt;/code&gt; to track whether this is the current state of the group. Here is our new &lt;code&gt;test_group_region_bridge&lt;/code&gt; table.&lt;/p&gt;
+
+&lt;table&gt;
+    &lt;thead&gt;
+        &lt;th&gt;group_id&lt;/th&gt;
+        &lt;th&gt;district_id&lt;/th&gt;
+        &lt;th&gt;change_effective&lt;/th&gt;
+        &lt;th&gt;change_end&lt;/th&gt;
+        &lt;th&gt;change_current&lt;/th&gt;
+    &lt;/thead&gt;
+    &lt;tr&gt;
+        &lt;td&gt;8&lt;/td&gt;
+        &lt;td&gt;5&lt;/td&gt;
+        &lt;td&gt;2000-01-01&lt;/td&gt;
+        &lt;td&gt;2100-01-01&lt;/td&gt;
+        &lt;td&gt;1&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;9&lt;/td&gt;
+        &lt;td&gt;6&lt;/td&gt;
+        &lt;td&gt;2000-01-01&lt;/td&gt;
+        &lt;td&gt;2100-01-01&lt;/td&gt;
+        &lt;td&gt;1&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;10&lt;/td&gt;
+        &lt;td&gt;5&lt;/td&gt;
+        &lt;td&gt;2000-01-01&lt;/td&gt;
+        &lt;td&gt;2100-01-01&lt;/td&gt;
+        &lt;td&gt;1&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;10&lt;/td&gt;
+        &lt;td&gt;6&lt;/td&gt;
+        &lt;td&gt;2000-01-01&lt;/td&gt;
+        &lt;td&gt;2100-01-01&lt;/td&gt;
+        &lt;td&gt;1&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;11&lt;/td&gt;
+        &lt;td&gt;7&lt;/td&gt;
+        &lt;td&gt;2000-01-01&lt;/td&gt;
+        &lt;td&gt;2014-06-17&lt;/td&gt;
+        &lt;td&gt;0&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;11&lt;/td&gt;
+        &lt;td&gt;6&lt;/td&gt;
+        &lt;td&gt;2014-06-18&lt;/td&gt;
+        &lt;td&gt;2014-06-21&lt;/td&gt;
+        &lt;td&gt;0&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;11&lt;/td&gt;
+        &lt;td&gt;7&lt;/td&gt;
+        &lt;td&gt;2014-06-22&lt;/td&gt;
+        &lt;td&gt;2100-01-01&lt;/td&gt;
+        &lt;td&gt;1&lt;/td&gt;
+    &lt;/tr&gt;
+&lt;/table&gt;
+
+&lt;p&gt;Notice that I&amp;#39;m using dates in the far past and far future to denote the beginning of time and the end of time, respectively. This is to make queries easier to write.&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-sql&quot; data-lang=&quot;sql&quot;&gt;&lt;span class=&quot;k&quot;&gt;CREATE&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;TABLE&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;test_group_region_bridge&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;group_id&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;integer&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;district_id&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;integer&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;change_effective&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;timestamp&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;change_end&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;timestamp&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;change_current&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;boolean&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;INSERT&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;INTO&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;test_group_region_bridge&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;group_id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;district_id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;change_effective&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;change_end&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;change_current&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+           &lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;DATE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;2000-01-01&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;DATE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;2100-01-01&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;UNION&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;ALL&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;9&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;6&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;DATE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;2000-01-01&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;DATE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;2100-01-01&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;UNION&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;ALL&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;DATE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;2000-01-01&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;DATE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;2100-01-01&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;UNION&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;ALL&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;6&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;DATE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;2000-01-01&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;DATE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;2100-01-01&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;UNION&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;ALL&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;11&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;7&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;DATE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;2000-01-01&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;DATE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;2014-06-17&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;UNION&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;ALL&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;11&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;6&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;DATE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;2014-06-18&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;DATE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;2014-06-21&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;UNION&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;ALL&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;11&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;7&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;DATE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;2014-06-22&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;DATE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;2100-01-01&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Now we can run the same region count query as before, but have it take into account that fact that the post has to have been made while the group was still in that region. You can also use the same schema to fall back to the previous behavior of looking at just the current state of the org chart with &lt;code&gt;change_current = 1&lt;/code&gt;.&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-sql&quot; data-lang=&quot;sql&quot;&gt;&lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;child_district_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+       &lt;span class=&quot;k&quot;&gt;COUNT&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;FROM&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;test_post&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;
+ &lt;span class=&quot;k&quot;&gt;INNER&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;JOIN&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;test_group_region_bridge&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;gr&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;ON&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;gr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;group_id&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;group_id&lt;/span&gt;
+ &lt;span class=&quot;k&quot;&gt;INNER&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;JOIN&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;test_region_bridge&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;ON&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;child_district_id&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;gr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;district_id&lt;/span&gt;
+ &lt;span class=&quot;k&quot;&gt;WHERE&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;parent_district_name&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;Role Hierarchy&amp;#39;&lt;/span&gt;
+   &lt;span class=&quot;k&quot;&gt;AND&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;depth_from_parent&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;
+   &lt;span class=&quot;k&quot;&gt;AND&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;date&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;BETWEEN&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;2014-06-01&amp;#39;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;AND&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;2014-06-30&amp;#39;&lt;/span&gt;
+   &lt;span class=&quot;k&quot;&gt;AND&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;date&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;BETWEEN&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;gr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;change_effective&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;gr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;change_end&lt;/span&gt;
+ &lt;span class=&quot;k&quot;&gt;GROUP&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;BY&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;child_district_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h2&gt;Smoothing out the kinks&lt;/h2&gt;
+
+&lt;p&gt;You may have noticed that these queries are all repeating the same &lt;code&gt;JOIN&lt;/code&gt; syntax. If you think this is going to be a common query pattern, you can create a view as a shortcut.&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-sql&quot; data-lang=&quot;sql&quot;&gt;&lt;span class=&quot;k&quot;&gt;CREATE&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;VIEW&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;test_post_historical_region&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;AS&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+       &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;parent_district_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+       &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;child_district_id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+       &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;child_district_name&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;FROM&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;test_post&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;
+ &lt;span class=&quot;k&quot;&gt;INNER&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;JOIN&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;test_group_region_bridge&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;gr&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;ON&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;gr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;group_id&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;group_id&lt;/span&gt;
+ &lt;span class=&quot;k&quot;&gt;INNER&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;JOIN&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;test_region_bridge&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;ON&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;child_district_id&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;gr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;district_id&lt;/span&gt;
+ &lt;span class=&quot;k&quot;&gt;WHERE&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;date&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;BETWEEN&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;gr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;change_effective&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;gr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;change_end&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;This will make your previous query much simpler.&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-sql&quot; data-lang=&quot;sql&quot;&gt;&lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;DATE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;date&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+       &lt;span class=&quot;k&quot;&gt;COUNT&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;FROM&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;test_post_historical_region&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;
+ &lt;span class=&quot;k&quot;&gt;WHERE&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;child_district_name&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;Sales&amp;#39;&lt;/span&gt;
+   &lt;span class=&quot;k&quot;&gt;AND&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;depth_from_parent&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;
+ &lt;span class=&quot;k&quot;&gt;GROUP&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;BY&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;DATE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;date&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;This also abstracts the existence of the &lt;code&gt;change_*&lt;/code&gt; fields from the user. The hard part is communicating what the view is doing, so query authors know when to use it, and when &lt;em&gt;NOT&lt;/em&gt; to use it. If you want to maximize the performance of the system at the cost of extra storage, you can make this a materialized view.&lt;/p&gt;
+</content>
+        </entry>
+    
+
+</feed>

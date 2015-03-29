@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Python&#58; Convert your FBML Facebook app to IFRAME</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/shCore.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2011/04/01/python-convert-your-fbml-facebook-app-to-iframe.html" />
+
+        <meta property="og:title" content="Python&#58; Convert your FBML Facebook app to IFRAME"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2011/04/01/python-convert-your-fbml-facebook-app-to-iframe.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Python&#58; Convert your FBML Facebook app to IFRAME
+                            
+                                <span class="post-date subtitle">01 Apr 2011</span>
+                            
+                        </h1>
+                    
+                    <p>
+Recently, users started reporting that our Facebook app was returning a blank screen. Tracking it down, it turned out that it was specifically when the user was in the new "Use Facebook as a Page" mode. Some other <a href="http://forum.developers.facebook.net/viewtopic.php?id=89563">developers have reported</a> a similar issue. Given that FBML apps were recently deprecated, I figured it was time to migration to IFRAMEs.
+</p>
+
+<blockquote>With our recent launch of Requests and the support for iframe on Pages Tabs, we are now ready to move forward with our previously announced plans to deprecate FBML and FBJS as a primary technology for building apps on Facebook. On March 11, 2011, you will no longer be able to create new FBML apps and Pages will no longer be able to add the Static FBML app. While all existing apps on Pages using FBML or the Static FBML app will continue to work, we strongly recommend that these apps transition to iframes as soon as possible. - <a href="http://developers.facebook.com/blog/post/462">Facebook Developers Blog</a></blockquote>
+
+<p>
+The first big different is the authentication model. Instead of passing the facebook page id directly, they are now passing a <a href="http://developers.facebook.com/docs/authentication/signed_request/">signed_request field</a>. I was able to track down some <a href="http://sunilarora.org/parsing-signedrequest-parameter-in-python-bas">open source code</a>, and then modify it myself to only optionally take a secret, and remain backwards compatible with the FBML fb_sig_page_id parameter in Django.
+</p>
+
+<pre name="code" class="python">
+import base64
+import hashlib
+import hmac
+import simplejson as json
+
+# from http://sunilarora.org/parsing-signedrequest-parameter-in-python-bas
+
+def base64_url_decode(inp):
+    padding_factor = (4 - len(inp) % 4) % 4
+    inp += "="*padding_factor
+    return base64.b64decode(unicode(inp).translate(dict(zip(map(ord, u'-_'), u'+/'))))
+
+def parse_signed_request(signed_request, secret=None):
+
+    l = signed_request.split('.', 2)
+    encoded_sig = l[0]
+    payload = l[1]
+
+    sig = base64_url_decode(encoded_sig)
+    data = json.loads(base64_url_decode(payload))
+
+    if data.get('algorithm').upper() != 'HMAC-SHA256':
+        print "Facebook: Unknown algorithm"
+        return None
+    else:
+        if secret:
+            expected_sig = hmac.new(secret, msg=payload, digestmod=hashlib.sha256).digest()
+
+    if secret and sig != expected_sig:
+        return None
+
+    return data
+
+def get_facebook_page_id(request):
+    facebook_page_id = request.REQUEST.get("fb_sig_page_id")
+    if not facebook_page_id:
+        signed_request = request.REQUEST.get("signed_request")
+        if signed_request and "." in signed_request:
+            data = parse_signed_request(signed_request)
+            #{'user_id': 'XXX', 'algorithm': 'HMAC-SHA256', 'expires': 0,
+            # 'oauth_token': 'XXX',
+            # 'user': {'locale': 'en_US', 'country': 'us', 'age': {'min': 21&#125;&#125;, 'issued_at': 1301682530, 'page':
+            # {'admin': True, 'liked': False, 'id': 'XXX'&#125;&#125;
+            page = data.get("page")
+            if page:
+                facebook_page_id = page.get("id")
+
+    return facebook_page_id
+</pre>
+
+<p>
+The only change to my existing view code was to call get_facebook_page_id(request) instead of just request.REQUEST.get("fb_sig_page_id").
+</p>
+
+<p>
+The second big change was that you must style your apps yourself if you want it to look like the rest of Facebook in terms of fonts and colors. FBML apps were pretty locked down, which sucked in a lot of ways, but at least it automatically looked like the rest of Facebook. In any case, not such a big deal:
+</p>
+
+<pre name="code" class="html">
+/* put a facebook-app class on your BODY element, or a box div around all your content */
+.facebook-app {
+    font-size: 11px;
+    color: #333;
+    font-family: 'lucida grande', tahoma, verdana, arial;
+}
+.facebook-app a { color: #3B5998; text-decoration: none; }
+</pre>
+
+<p>
+I didn't have to change my HTML at all; it still omits the html/body tags just like FBML apps are required to do, but at least it's backwards compatible. In fact, I can switch my app between FBML and IFRAME modes and not see much difference.
+</p>
+
+
+<hr>
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'chaseseibertblog';
+    var disqus_identifier = '/blog/2011/04/01/python-convert-your-fbml-facebook-app-to-iframe';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/facebook">facebook</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/python">python</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2015/03/27/software-engineering-fireside-chat.html">Introducing the Software Engineering Fireside Chat Podcast</a></li>
+                                
+                                    <li><a href="/blog/2015/02/10/one-on-ones.html">Topics for One on Ones</a></li>
+                                
+                                    <li><a href="/blog/2014/12/22/class-design.html">Thoughts on Object Oriented Class Design</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script src="http://code.jquery.com/jquery-latest.js"></script>
+        <script src="/blog/js/bootstrap.js"></script>
+        <script src="/blog/js/shCore.js"></script>
+        <script src="/blog/js/shBrushBash.js"></script>
+        <script src="/blog/js/shBrushCpp.js"></script>
+        <script src="/blog/js/shBrushCSharp.js"></script>
+        <script src="/blog/js/shBrushCss.js"></script>
+        <script src="/blog/js/shBrushJava.js"></script>
+        <script src="/blog/js/shBrushJScript.js"></script>
+        <script src="/blog/js/shBrushPhp.js"></script>
+        <script src="/blog/js/shBrushPython.js"></script>
+        <script src="/blog/js/shBrushSql.js"></script>
+        <script src="/blog/js/shBrushRuby.js"></script>
+        <script src="/blog/js/shBrushXml.js"></script>
+
+        <script type="text/javascript">
+            dp.SyntaxHighlighter.BloggerMode();
+            dp.SyntaxHighlighter.HighlightAll("code");
+        </script>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>
