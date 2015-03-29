@@ -147,3 +147,7 @@ issues between browsers to relatively simple CSS differences.
 Now get off my lawn!
 
 &gt; END RANT &lt;
+
+*Edit:* This just got posted to Hacker News. Thanks! I guess this hit a minor chord.
+If you want to hear more, I'm going to do a whole episode on it on my new podcast,
+the [Software Engineering Fireside Chat](http://t.co/jqnKhxF1K8). Look for it next Friday.
