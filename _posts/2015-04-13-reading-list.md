@@ -19,4 +19,5 @@ This post is list of articles, blogs and other resources that I commonly referen
 
 # Articles
 
-- [The Twelve Factor App](http://12factor.net/) - Tenents for building microservices
+- [The Twelve Factor App](http://12factor.net/) - Tenets for building microservices
+- [Give it Five Minutes](https://signalvnoise.com/posts/3124-give-it-five-minutes) - Knee jerk idea dismissal
