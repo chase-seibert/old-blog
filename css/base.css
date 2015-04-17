@@ -63,52 +63,6 @@ h2 {
     font-size: 24px;
 }
 
-.dp-highlighter {
-    font-family: Ubuntu Mono !important;
-    font-size: 13px;
-    background-color: inherit;
-}
-
-.dp-highlighter .bar {
-    padding-left: 1em !important;
-}
-
-.dp-highlighter ol {
-    margin-left: 1em !important;
-}
-
-.dp-highlighter ol li {
-    list-style: none;
-    border-left: inherit;
-    background-color: inherit;
-}
-
-.dp-highlighter ol li.alt {
-    color: inherit;
-}
-
-.dp-highlighter ol li:first-child {
-    padding-top: .5em !important;
-}
-
-
-.dp-highlighter ol li:last-child {
-    padding-bottom: .5em !important;
-}
-
-.dp-highlighter .tools {
-    border-left: inherit;
-}
-
-.dp-highlighter .tools a {
-    display: none;
-}
-
-.dp-highlighter .tools a:first-child {
-    display: inherit;
-}
-
-
 code,
 pre {
   font-family: Ubuntu Mono, Monaco, Menlo, Consolas, "Courier New",  monospace;
