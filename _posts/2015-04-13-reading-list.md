@@ -22,3 +22,4 @@ This post is list of articles, blogs and other resources that I commonly referen
 - [Three Snakes](http://www.celebrazio.net/jimb/15.html)
 - [The Twelve Factor App](http://12factor.net/) - Tenets for building microservices
 - [Give it Five Minutes](https://signalvnoise.com/posts/3124-give-it-five-minutes) - Knee jerk idea dismissal
+- [The Hiring Post](http://sockpuppet.org/blog/2015/03/06/the-hiring-post/) - Software engineer interviews suck
