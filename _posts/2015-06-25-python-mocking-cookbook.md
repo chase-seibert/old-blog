@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Python Mock Cookbook
-tags: python
+tags: python, testing
 ---
 
 The python [mock](https://pypi.python.org/pypi/mock) library is one of the awesome things about working in Python. No matter what code you're unit testing, it's possible to mock out various pieces with very little test code. That being said, it's sometimes difficult to figure out the exact syntax for your situation. I attribute this to the nature of how you apply the mocks. Sometimes it feel like you're shooting in the dark.
