@@ -140,3 +140,13 @@ def run(self, result=None):
         self.foo = foo
         super(MyTestCase, self).run(result)
 ```
+
+Alternatively, you can mock out something in `setUp`:
+
+```python
+def setUp(self):
+    patcher = mock.patch('myapp.app.foo')
+    self.mock_foo = patcher.start()
+    self.addCleanup(patcher.stop)
+    super(NWApiTestCase, self).setUp()
+```
