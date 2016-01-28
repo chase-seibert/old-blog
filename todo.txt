@@ -1,3 +1,44 @@
+Sources:
+chrome://history/
+Wiki recent pages
+PRs
+Podcasts listened to
+https://getpocket.com/a/queue/
+recently changed .txt notes
+OSX notes
+Rands Slack
+
+Ideas:
 schematics ListType
-contractors -> engineers
-comprison of Pubnub, Layer, etc...
+naming/terminology documents
+python tricks (txt)
+sqlalchemy postgres statement timeout
+flask/sqlalchemy session pattern - https://github.com/NerdWallet/dit.nerdwallet/pull/33/files
+
+PyCrypto and CryptoJS
+https://gist.github.com/marcoslin/8026990
+http://stackoverflow.com/questions/32526298/porting-aes-decryption-from-cryptojs-to-pycrypto
+
+```
+var Crypto = require('cryptojs');
+Crypto = Crypto.Crypto;
+
+var KEY = 'This is a key123';
+var IV = 'This is an IV456';
+var MODE = new Crypto.mode.CFB(Crypto.pad.ZeroPadding);
+
+var plaintext = 'The answer is no';
+var input_bytes = Crypto.charenc.UTF8.stringToBytes('plaintext: ' + plaintext);
+var key = Crypto.charenc.UTF8.stringToBytes(KEY);
+var options = {iv: Crypto.charenc.UTF8.stringToBytes(IV), asBytes: true, mode: MODE};
+var encrypted = Crypto.AES.encrypt(input_bytes, key, options);
+var encrypted_hex = Crypto.util.bytesToHex(encrypted);
+console.log(encrypted_hex); // this is the value you send
+
+output_bytes = Crypto.util.hexToBytes(encrypted_hex);
+output_plaintext_bytes = Crypto.AES.decrypt(output_bytes, key, options);
+output_plaintext = Crypto.charenc.UTF8.bytesToString(output_plaintext_bytes);
+console.log(output_plaintext);
+```
+
+
