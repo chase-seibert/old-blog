@@ -14,3 +14,4 @@ naming/terminology documents
 python tricks (txt)
 sqlalchemy postgres statement timeout
 flask/sqlalchemy session pattern - https://github.com/NerdWallet/dit.nerdwallet/pull/33/files
+how to write a bug report/qa 101
