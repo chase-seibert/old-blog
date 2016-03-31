@@ -13,5 +13,8 @@ schematics ListType
 naming/terminology documents
 python tricks (txt)
 sqlalchemy postgres statement timeout
-flask/sqlalchemy session pattern - https://github.com/NerdWallet/dit.nerdwallet/pull/33/files
-how to write a bug report/qa 101
+*flask/sqlalchemy session pattern - https://github.com/NerdWallet/dit.nerdwallet/pull/33/files
+solve the problems in front of you
+*GTD
+cyclical constraints between tables SQLAlchemy drop_all
+controller tests
