@@ -3,7 +3,7 @@ layout: post
 title: What makes a (good) product?
 ---
 
-Words matter. When we use the term "product", what do we mean? In the context of tech startups, we often mean product as in [Minimum Viable Product](https://www.quora.com/What-is-a-minimum-viable-product). While there is a lot of discussion about what constitutes the "minumum" part of MVP, the actual definition of product is often implicit, not explicit.
+Words matter. When we use the term "product", what do we mean? In the context of tech startups, we often mean product as in [Minimum Viable Product](https://www.quora.com/What-is-a-minimum-viable-product). While there is a lot of discussion about what constitutes the "minimum" part of MVP, the actual definition of product is often implicit, not explicit.
 
 *Note: I'm specifically focusing on software products.*
 
@@ -11,7 +11,7 @@ It's a slippery concept. Some things that are NOT required to be a product:
 
 - Specific technologies (mobile, web)
 - Payment (ex: Google Search, Facebook)
-- A business plan/monitization plan (this may be required to be successful, though)
+- A business plan/monetization plan (this may be required to be successful, though)
 
 What is certainly required for a product is a user. Specifically, a product solves a user problem. A "user" may also be a company (ie, B2B products), but it cannot be YOUR company. Ie, you are solving a problem for someone else, not yourself.
 
@@ -26,7 +26,7 @@ Users should be actively coming to you to solve this pain point. IMO, web based 
 
 Examples:
 
-- Stackoverflow: you end up there, you don't start there. Is the product the user?
+- StackOverflow: you end up there, you don't start there. Is the product the user?
 
 
 # A Good Product is Deep
@@ -43,16 +43,16 @@ This is an extension of focusing on one problem. A product may be complex and ha
 
 # A Good Product Keeps the Coming Back
 
-A web site is something that users consume. A web application is a website that people engage with - they are primiarly there to do things, not read things. A web product something that users come back to often to solve a particular problem.
+A web site is something that users consume. A web application is a website that people engage with - they are primarily there to do things, not read things. A web product something that users come back to often to solve a particular problem.
 
 Re-engagement is one of the most important metrics for a product. What percentage of users are returning on a regular basis? Lack of re-engagement means that either users are not getting value (not able to solve their problem) or the problem you are solving is not that important to them (they decide they don't need to solve it).
 
-There is a corner case where the problem you need to solve only happens very occasionally. That's OK, but only if it's intrisic to your problem. Example: TurboTax.
+There is a corner case where the problem you need to solve only happens very occasionally. That's OK, but only if it's intrinsic to your problem. Example: TurboTax.
 
 
 # A Good Product has a Virtuous Cycle
 
-A virtuous cycle is a feedback loop in your product that makes it more valualbe over time. This can have concrete benefits for the user, but it's primarily an indicator of product success for the business.
+A virtuous cycle is a feedback loop in your product that makes it more valuable over time. This can have concrete benefits for the user, but it's primarily an indicator of product success for the business.
 
 Examples:
 
@@ -62,7 +62,7 @@ Examples:
 
 # A Good Product Takes Time
 
-Products to not happen over night. The spirit of MVP is to ship quickly, get user feedback and then interate. Iteration will take months, if not years. If you can create a good product in less time, what is stopping anyone from creating the same product?
+Products to not happen over night. The spirit of MVP is to ship quickly, get user feedback and then iterate. Iteration will take months, if not years. If you can create a good product in less time, what is stopping anyone from creating the same product?
 
-User growth is often underestimated. You need a lot of users to validate your product hypothosis, but attracting those initial users will be very difficult. This is even more true on mobile, where the [cost of user acquisition is much higher](http://venturebeat.com/2015/04/30/it-costs-more-than-3-to-acquire-a-mobile-user-now-fiksu-finds/).
+User growth is often underestimated. You need a lot of users to validate your product hypothesis, but attracting those initial users will be very difficult. This is even more true on mobile, where the [cost of user acquisition is much higher](http://venturebeat.com/2015/04/30/it-costs-more-than-3-to-acquire-a-mobile-user-now-fiksu-finds/).
 
