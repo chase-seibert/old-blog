@@ -1,6 +1,6 @@
 ---
 layout: post
-title: What makes a (good) product?
+title: What makes a compelling product?
 ---
 
 Words matter. When we use the term "product", what do we mean? Are we talking about the same thing? In the context of tech startups, we often mean product with a capital "P" - as in [Minimum Viable Product](https://www.quora.com/What-is-a-minimum-viable-product). While there is a lot of discussion about what constitutes the "minimum" part of MVP, the actual definition of product is often implicit, not explicit.
@@ -14,7 +14,7 @@ If we narrow our focus to just software products, how do you know whether what y
 What is certainly IS required for a product is a user. A product solves a problem for a user. A "user" may also be a company (i.e. B2B products), but it cannot be YOUR company. You are solving a problem for someone else, not yourself.
 
 
-# A Good Product Solves a User Problem
+# A Compelling Product Solves a User Problem
 
 "The first step is figuring out the problem that needs to be solved and then developing a minimum viable product (MVP) to begin the process of learning as quickly as possible."
 
@@ -27,19 +27,19 @@ Examples:
 - StackOverflow: you end up there, you don't start there. Is the product the user?
 
 
-# A Good Product is Deep
+# A Compelling Product is Deep
 
 A product can solve a simple, shallow problem. But it may not be a defensible or successful product. If the problem you're solving is easy to solve in other ways, it's going to be difficult to maintain a spot as the primary product users think of for this use case.
 
 Note: this does not mean that your product needs to be complicated. The best products solve a hard problem in a simple way - that does not mean that it's easy.
 
 
-# A Good Product is Cohesive
+# A Compelling Product is Cohesive
 
 This is an extension of focusing on one problem. A product may be complex and have many different features, but these features need to be cohesive. If there are many unrelated features, you have more than one product. It should be obvious to a user how all the pieces relate to each other.
 
 
-# A Good Product Keeps Them Coming Back
+# A Compelling Product Keeps Them Coming Back
 
 A web site is something that users consume. A web application is a website that people engage with - they are primarily there to do things, not read things. A web product is something that users come back to often to solve a particular problem.
 
@@ -48,7 +48,7 @@ Re-engagement is one of the most important metrics for a product. What percentag
 There is a corner case where the problem you need to solve only happens very occasionally. That's OK, but only if it's intrinsic to your problem. Example: TurboTax.
 
 
-# A Good Product has a Virtuous Cycle
+# A Compelling Product has a Virtuous Cycle
 
 A virtuous cycle is a feedback loop in your product that makes it more valuable over time. This can have concrete benefits for the user, but it's primarily an indicator of product success for the business.
 
@@ -58,7 +58,7 @@ Examples:
 - Facebook user growth means there is more content on Facebook for people to look at, which attracts more user signups.
 - Netflix user growth means they can negotiate for more content, which drives further user growth.
 
-# A Good Product Takes Time
+# A Compelling Product Takes Time
 
 Products to not happen over night. The spirit of MVP is to ship quickly, get user feedback and then iterate. Iteration will take months, if not years. If you can create a good product in less time, what is stopping a competitor from creating the same product?
 
