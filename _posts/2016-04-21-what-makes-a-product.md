@@ -39,7 +39,7 @@ Note: this does not mean that your product needs to be complicated. The best pro
 This is an extension of focusing on one problem. A product may be complex and have many different features, but these features need to be cohesive. If there are many unrelated features, you have more than one product. It should be obvious to a user how all the pieces relate to each other.
 
 
-# A Good Product Keeps the Coming Back
+# A Good Product Keeps Them Coming Back
 
 A web site is something that users consume. A web application is a website that people engage with - they are primarily there to do things, not read things. A web product is something that users come back to often to solve a particular problem.
 
