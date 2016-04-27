@@ -24,3 +24,4 @@ This post is list of articles, blogs and other resources that I commonly referen
 - [Give it Five Minutes](https://signalvnoise.com/posts/3124-give-it-five-minutes) - Knee jerk idea dismissal
 - [The Hiring Post](http://sockpuppet.org/blog/2015/03/06/the-hiring-post/) - Software engineer interviews suck
 - [SQLAlchemy for Django Devs](http://lucumr.pocoo.org/2011/7/19/sqlachemy-and-you/)
+- [15 Fundamental Laws of Software Development](http://www.exceptionnotfound.net/fundamental-laws-of-software-development/)
