@@ -31,7 +31,7 @@ completed. Is it bigger than that 3 point story you did last sprint? Almost
 twice as big? Would you say it's another 3, or is it more like 5 or 8?
 
 Fundamentally, we are not estimating how long a task will take, but how large
-it is relative to another task. In [terms of an analogy]https://www.mountaingoatsoftware.com/blog/the-main-benefit-of-story-points),
+it is relative to another task. In [terms of an analogy](https://www.mountaingoatsoftware.com/blog/the-main-benefit-of-story-points),
 we want to know how long the trail is, not how long it would take you to run it.
 
 

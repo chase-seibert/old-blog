@@ -25,14 +25,6 @@ git remote add origin git@github.com:username/blog.git
 
 # Install Dependencies
 
-## Linux
-
-```
-sudo apt-get install ruby1.9.1-dev python-pygments
-sudo gem update --system
-sudo gem install jekyll
-```
-
 ## OSX
 
 ```
@@ -42,9 +34,8 @@ eval "$(rbenv init -)"  # update PATH
 echo 'eval "$(rbenv init -)"' >> ~/.bash_profile  # and update PATH in future shells
 rbenv install
 gem install bundler
-gem install redcarpet
 bundle install  # may need to re-open shell to get updated PATH
-bundle exec jekyll serve
+./run.sh
 ```
 
 # Run it!
