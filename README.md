@@ -42,6 +42,7 @@ eval "$(rbenv init -)"  # update PATH
 echo 'eval "$(rbenv init -)"' >> ~/.bash_profile  # and update PATH in future shells
 rbenv install
 gem install bundler
+gem install redcarpet
 bundle install  # may need to re-open shell to get updated PATH
 bundle exec jekyll serve
 ```
