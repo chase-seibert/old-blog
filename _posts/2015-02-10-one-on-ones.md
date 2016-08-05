@@ -43,6 +43,14 @@ Give the employee permission to say that they don't like their current project, 
 
 Is there some asshole that's bothering you? Maybe I can help.
 
+## Who are your best friends at work?
+
+For some people, work friend ships are critical.
+
+## Who are the top people outside the company who you want to work with again?
+
+We should try to hire them.
+
 ## What features would you add?
 
 Are you thinking about the long-term future of the software? I care about what you think!
@@ -50,6 +58,11 @@ Are you thinking about the long-term future of the software? I care about what y
 ## What could I be doing better?
 
 I try to ask this as often as I can, but often forget.
+
+## How comfortable are you with uncertainty?
+
+i.e. - how much insight into the sausage making can you stomach? Is that
+motivational for you, or counter-productive?
 
 ## Other ideas
 
