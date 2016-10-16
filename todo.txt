@@ -21,4 +21,4 @@ celery rant (dupes, tasks stop processing)
 test flight sucks - just go in the app store
 python 2/3 - https://asmeurer.github.io/blog/posts/moving-away-from-python-2/
 tmux
-management 101 - 1:1s, motivators, coaching skill/will, hiring
+cross training/cross functional
