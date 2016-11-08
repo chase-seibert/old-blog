@@ -8,8 +8,6 @@ tags:
 > A tiger team is a diversified group of experts brought together for a single project, need, or event. They are usually assigned to investigate, solve, build, or recommend possible solutions to unique situations or problems. They are almost always populated with mature experts who know what's at stake, what needs to be done, and how to work well with others. Their strengths are diversity of knowledge, a single focus or purpose, cross-functional communications, decision-making sovereignty, and organizational agility. Once their venture is completed they cease to be a team and usually go back to their previous assignments.
 
 
-Based on the time I got three days notice that we need to ship two new mobile apps in five weeks.
-
 # Scope, Time and Money
 
 As an engineering manager, you can typically have some input on the scope, time and resources allocated to a project. This is a variation of the ["pick two problem"](https://en.wikipedia.org/wiki/Project_management_triangle#.22Pick_any_two.22). When the project scope and timeline are largely dictated by business needs for a high priority project, resourcing may be the most flexible factor.
