@@ -89,3 +89,10 @@ This makes it clear to the team that they are not being held accountable for
 hours, there is a great tendency to say "you said this would take one hour, but
 it really took three". That doesn't matter! You should not even measure it.
 What matters is, did you complete all of the stories in the sprint?
+
+
+# References
+
+- [Is there any published research about story points vs time estimation?](http://pm.stackexchange.com/questions/11675/is-there-any-published-research-about-story-points-vs-time-estimation)
+- [Sprint Planning: Story Points Versus Hours](https://www.infoq.com/news/2009/09/story-points-versus-hours)
+- [Scrum + Engineering Practices: Experiences of Three Microsoft Teams](https://collaboration.csc.ncsu.edu/laurie/Papers/ESEM11_SCRUM_Experience_CameraReady.pdf)
