@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Death to Meetings (and other alternatives)
-tags: process reading-list
+tags: process reading-list meetings
 ---
 
 > What percentage of your time at work do spend in meetings? If you’re a middle manager, it's likely about 35% of your time, and if you’re in upper management, it can be a whopping 50%. What's worse is how unproductive these meetings usually are. - [themuse.com](https://www.themuse.com/advice/how-much-time-do-we-spend-in-meetings-hint-its-scary)

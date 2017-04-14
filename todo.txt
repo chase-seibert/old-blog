@@ -9,16 +9,11 @@ OSX notes
 Rands Slack
 
 Ideas:
-schematics ListType
-naming/terminology documents
-python tricks (txt)
-sqlalchemy postgres statement timeout
-cyclical constraints between tables SQLAlchemy drop_all
-controller tests
-python threading/healthchecks
-sqlalchemy association tables example
 celery rant (dupes, tasks stop processing)
 test flight sucks - just go in the app store
-python 2/3 - https://asmeurer.github.io/blog/posts/moving-away-from-python-2/
-tmux
-cross training/cross functional
+meeting hours/blocks of time ideal world
+  no meeting days vs. bands
+remote team members
+timebox
+max direct reports
+financials: insurance, credit cards vs. debit, 529, 

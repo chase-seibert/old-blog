@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Best Practices for Meetings
-tags:
+tags: meetings
 ---
 
 Every team meeting needs a primary owner. If you are the owner of the meeting,
