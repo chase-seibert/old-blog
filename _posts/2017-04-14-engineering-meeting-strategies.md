@@ -5,7 +5,7 @@ tags: meetings
 ---
 
 Any software engineer knows the feeling of being "in the flow", or
-"in the zone". It's when you get a large chunk of uninterrupted time to just
+"in the zone". It's when you get a large block of uninterrupted time to just
 code. These periods are rare, super productive and morale boosting.
 
 # Importance of Flow
@@ -18,16 +18,16 @@ disrupt flow, they must be minimized. Beyond that, what should our goal be
 for flow time?
 
 
-# Maximize Large Chunks of Flow Time
+# Maximize Large Blocks of Flow Time
 
 The current state of the industry is that a programmer is likely to get just
 one two hour session of flow per day [[Programmer Interrupted](http://blog.ninlabs.com/2013/01/programmer-interrupted/)]. That
-should be our absolute floor. [Paul Graham](http://www.paulgraham.com/makersschedule.html) advocates for half day chunks (4 hours). For context, [air traffic controllers
+should be our absolute floor. [Paul Graham](http://www.paulgraham.com/makersschedule.html) advocates for half day blocks (4 hours). For context, [air traffic controllers
 are required to take a break every two hours](https://www.quora.com/What-is-a-typical-shift-length-for-an-air-traffic-controller).
 
 In the absence of any research on the maximum duration a software engineer can
 be in the flow, let's say that our goal should be to maximize the number of
-two to four hour chunks of flow per week.
+two to four hour blocks of flow per week.
 
 For a 40 hour week, we could theoretically schedule 10 four hour flow sessions
 or 20 two hour flow sessions. That's assuming 100% capacity. Based on experience,
@@ -56,9 +56,9 @@ Notice that these are entirely on the individual engineer to manage. What
 can we do as managers to help?
 
 
-# Strategies to Maximize Flow Chunks
+# Strategies to Maximize Flow Blocks
 
-As managers, the most effective way to maximize the number of chunks of flow
+As managers, the most effective way to maximize the number of blocks of flow
 our teams get is to clear the calendar. In this context, what types of calendar
 items constitute an interruption? Basically, anything. Regular meetings, 1:1s,
 interviews are all obvious interruptions.
@@ -79,13 +79,13 @@ The great advantage of this tactic is that it's easy to communication and
 understand. It's also relatively easy to get buy-in to delay a meeting by at
 most one day.
 
-In the best case scenario, this translates to a 1 four hour chunk
-per week and 4 two hour chunks a week, for a total of 12 flow hours.
+In the best case scenario, this translates to a 1 four hour block
+per week and 4 two hour blocks a week, for a total of 12 flow hours.
 
 ## Consolidating Meetings to One or Two days
 
 If you hold all meetings on one or two days a week, and leave the entire rest
-of the calendar free, you would have 3 or 4 four hour chunks per week. Assume
+of the calendar free, you would have 3 or 4 four hour blocks per week. Assume
 that the one or two days you actually have meetings are complete write-offs.
 That results in a total of 12 to 15 flow hours.
 
@@ -97,13 +97,13 @@ or between 1pm and 5pm, etc. In practice, it would be important to align
 this with times people are actually in the office, if you allow flexible work
 hours.
 
-This would result in 5 three or four hour chunks a week. Any non-free time
+This would result in 5 three or four hour blocks a week. Any non-free time
 can be assumed to involve interruptions. Let's estimate 15 to 20 flow hours.
 
 # Conclusion
 
 Given that engineers are going to get at most five effective hours a day, the
-ideal set up from a flow perspective is to get a 3-4 hour chunk of time blocked off
+ideal set up from a flow perspective is to get a 3-4 hour block of time blocked off
 every single day with no interruptions. Interestingly, this is 80% as effective
 as never having any interruptions at all - the equivalent of a 100% meeting
 free week. It's also the same 20 hours of coding that engineers are typically
