@@ -25,3 +25,4 @@ This post is list of articles, blogs and other resources that I commonly referen
 - [The Hiring Post](http://sockpuppet.org/blog/2015/03/06/the-hiring-post/) - Software engineer interviews suck
 - [SQLAlchemy for Django Devs](http://lucumr.pocoo.org/2011/7/19/sqlachemy-and-you/)
 - [15 Fundamental Laws of Software Development](http://www.exceptionnotfound.net/fundamental-laws-of-software-development/)
+- [The Scrum Guide](http://www.scrumguides.org/scrum-guide.html)
