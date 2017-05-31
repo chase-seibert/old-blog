@@ -11,8 +11,8 @@ so far?
 
 # Initial reasoning
 
-We initially choose React Native because it was the only way to hit our goals. We
-didn't have any mobile native engineers, and we had been asked to deliver an
+We initially chose React Native because it was the only way to hit our goals. We
+didn't have any native mobile engineers, and we had been asked to deliver an
 iOS and Android app from scratch in just five weeks. We also happened to have
 very solid React experience on the team. Additionally, the app overlapped very
 nicely with some features we already had on the web, and we thought we could
@@ -55,10 +55,10 @@ focused on them.
 ## Performance
 
 We have seen persistent issues with app performance, particularly around the
-time to switch between tabs in the navigation. For this issue, we feel confident
-that we're simply not following React best practices, and that many components
-are being rendered behind the scenes which are not actually on the screen. But,
-the performance has been good enough that we have not dedicated time to look
+time to switch between tabs in the navigation. That issue seems to be due to a
+bug in our navigation library, `react-native-router-flux`. But it's important
+to call out that performance is largely dependent on getting React basics right.
+Performance has been good enough that we have not dedicated time to look
 into it further. In general, we still don't think there is anything that most
 apps need to do for which React Native will not perform well, except maybe
 custom animations.
@@ -76,7 +76,7 @@ don't have a good sense of how difficult complex custom animations will be.
 ## Fonts
 
 Initially we did not use the correct default fonts for each platform. It turned
-out to be relatively simple to use either San Fransisco or Roboto based on the
+out to be relatively simple to use either San Francisco or Roboto based on the
 platform. Some font variants that are normally available are not included. This
 ended up being something that probably took more time to get right than a native
 app would, but if you pay attention to it the first time it should be smooth.
@@ -95,7 +95,7 @@ The second largest risk I see is a little more insidious. As we have ramped up
 the team with engineers who have prior mobile experience, they have begun to
 point out areas where we are not following best UX practices. Some of these are
 intentional. It's very tempting once you have a cross platform app to make UX
-decisions to optimize for code re-use, not the best use experience. Even more
+decisions to optimize for code re-use, not the best user experience. Even more
 troubling is the times when the engineers themselves don't realize that a
 particular design is not following best practice UX; typically due to many of
 them not having mobile experience.
@@ -103,7 +103,7 @@ them not having mobile experience.
 # Question marks
 
 In my mind, the biggest open question is around how these mobile native
-platforms continue to evolve. Both Android and iOS have there developer
+platforms continue to evolve. Both Android and iOS have their developer
 conferences this time of year. Neither are expected to announce anything ground
 breaking in terms of how we build apps. This is a natural trend as the platforms
 mature; there is less interesting stuff to do. This happened to the PC operating
