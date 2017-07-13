@@ -16,4 +16,9 @@ meeting hours/blocks of time ideal world
 remote team members
 timebox
 max direct reports
-financials: insurance, credit cards vs. debit, 529, 
+financials: insurance, credit cards vs. debit, 529,
+RSUs
+Finding a QA person
+Splitting the team
+Over communicatiing
+
