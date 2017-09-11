@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Tiger Team Survival Guide - Part 1
-tags:
+tags: manager
 ---
 
 

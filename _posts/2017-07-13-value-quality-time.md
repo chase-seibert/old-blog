@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Trading off Value, Quality and Time
-tags:
+tags: manager
 ---
 
 The traditional [Iron Triangle](https://en.wikipedia.org/wiki/Project_management_triangle)

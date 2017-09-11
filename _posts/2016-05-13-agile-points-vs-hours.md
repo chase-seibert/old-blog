@@ -1,6 +1,7 @@
 ---
 layout: post
 title: Using Points vs Hours for Estimates
+tags: manager
 ---
 
 One of the key innovations of Agile is that estimates should NOT be in hours,

@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Estimating Epic Stories in Three Steps
-tags:
+tags: manager
 ---
 
 In Agile, an Epic story is a potentially large placeholder story in the backlog.

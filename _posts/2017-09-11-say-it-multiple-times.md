@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Saying the Same Thing Multiple Times
-tags:
+tags: manager
 ---
 
 To communicate something to an organization of people, you need to repeat
