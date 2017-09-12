@@ -71,7 +71,7 @@ Don't do these.
 
 - Email a bunch of people without any clear calls to action.
 - Write a book in an email.
-- Write multiple paragraphs with headings, lists or other structure conducive to
+- Write multiple paragraphs without headings, lists or other structure conducive to
 skimming.
 
 # Advanced Communication Tips
