@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Topics for One on Ones
-tags: manager reading-list
+tags: manager reading-list newboss
 ---
 
 I like to ask other managers what kind of questions they ask during their one on ones. Everyone has their own style, so I often get some interesting responses. Getting good information out of your one on one conversations is something of an art. Given the amount of time over a career that you will spend during one on ones, it's worth a small time investment to improve your skills.

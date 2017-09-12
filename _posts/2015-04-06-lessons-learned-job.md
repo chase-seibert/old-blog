@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Lessons Learned at My Most Recent Job
-tags:
+tags: newboss
 ---
 
 Today is my first day of "unemployment" in the last 12 years. I'm switching jobs, soon to start at NerdWallet. This time, I decided to take a couple of weeks off in between to reset and reflect. Here are some thoughts from my last job.

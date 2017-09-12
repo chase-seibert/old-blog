@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Book Review - Leadership and Self Deception
-tags: book-review
+tags: book-review newboss
 ---
 
 This is a review of [Leadership and Self-Deception: Getting Out of the Box](http://www.amazon.com/Leadership-Self-Deception-Getting-Out-Box-ebook/dp/B00GUPYRUS) by The Arbinger Institute.

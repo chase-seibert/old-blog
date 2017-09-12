@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Long Term Software Estimates
-tags: manager
+tags: manager newboss
 ---
 
 > False scheduling to match a patron's desired date is more common in our discipline than elsewhere in engineering because it is VERY DIFFICULT to make a vigorous, plausible, job-risking defense of an estimate that is derived by no quantitative method, supported by little data, and brought about by the hunches of developers.

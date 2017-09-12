@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Cross Functional Scrum Teams
-tags: scrum
+tags: scrum newboss
 ---
 
 > Teams are also cross-functional; Team members must have all of the skills
