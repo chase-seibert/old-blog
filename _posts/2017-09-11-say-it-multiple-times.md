@@ -53,7 +53,7 @@ Notice that these methods start out targeting specific groups surgically,
 and get more general. That's intentional; you want the most targeted audience
 to hear it the most often. Side benefit: by the time you are communicating in
 a larger group, you have a good chance of having the most effected sub-groups
-already knoding their heads.
+already nodding their heads.
 
 For anything important that many people need to hear about, you should plan on
 going all the way up to #6 or #7 *and all the steps before that*.
