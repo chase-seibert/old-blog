@@ -28,7 +28,7 @@ to a remote team to run it on fifteen to twenty phones.
 
 The existing documentation turned out to be very useful. Not only did it remind
 me about a bunch of test cases I would have forgotten about, but it had all kinds
-of hits about the most efficient way to test a specific case.
+of hints about the most efficient way to test a specific case.
 
 # Communication
 
@@ -64,4 +64,4 @@ out of our build pipeline, so there were not any problems getting a given
 build onto a phone. But I was blocked for days at a time on things like third
 party API integration staging environments being down. In one case, it took
 way too much time to discover that the breakage was related to a new network
-configuration in the office; we had forgotten to whitelist some IPs. 
+configuration in the office; we had forgotten to whitelist some IPs.
