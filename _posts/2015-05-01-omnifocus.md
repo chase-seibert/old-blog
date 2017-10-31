@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Using OmniFocus to manage your todo list and get shit done
-tags: reading-list gtd newboss
+tags: reading-list gtd newboss manager
 ---
 
 Over the years, I've gone through many todo systems. From paper, to text files, to Evernote, to iOS Reminders (ugh), I've tried an array of solutions. Maybe you're like me and are constantly looking for a better solution. For the last four months I've been using [OmniFocus](https://www.omnigroup.com/omnifocus), and I think I'm in love.
