@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>HBase/Pig/Python Quickstart on OSX</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2013/02/01/getting-starting-with-hbase-and-pig.html" />
+
+        <meta property="og:title" content="HBase/Pig/Python Quickstart on OSX"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2013/02/01/getting-starting-with-hbase-and-pig.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            HBase/Pig/Python Quickstart on OSX
+                            
+                                <span class="post-date subtitle">01 Feb 2013</span>
+                            
+                        </h1>
+                    
+                    <p>Having spent a good chunk of the last two weeks getting a prototype analytics system running, I thought I would write up my findings. I was pleased to find that installing all the pieces was smooth via <a href="http://mxcl.github.com/homebrew/">Homebrew</a>, but getting them all to play together was less smooth.</p>
+
+<h1>The Playing Field</h1>
+
+<ul>
+<li><a href="http://hadoop.apache.org/">Hadoop</a> is an framework for distributed computing. It&#39;s also used interchangibly to reference an entire ecosystem of technologies.</li>
+<li><a href="http://en.wikipedia.org/wiki/Apache_Hadoop#Hadoop_Distributed_File_System">HDFS</a> is the underlying distributed file ssytem that makes Hadoop possible.</li>
+<li><a href="http://hbase.apache.org/">HBase</a> is non-relational data store built on top of Hadoop. It provides concepts like rows, columns and keys. The similarity to relational databases stops there.</li>
+<li><a href="http://zookeeper.apache.org/">Zookeeper</a> provides configuration management for Hadoop cluster machines</li>
+<li><a href="http://pig.apache.org/">Pig</a> is high level language for map/reduce queries</li>
+<li><a href="http://hive.apache.org/">Hive</a> is a SQL-like high level language for map/reduce queries</li>
+<li><a href="http://wiki.apache.org/hadoop/Hbase/ThriftApi">Thrift</a> is a REST API for HBase</li>
+<li><a href="https://github.com/wbolster/happybase">HappyBase</a> is a python client for Thrift</li>
+</ul>
+
+<h1>Installing</h1>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">brew install hadoop hbase pig hive</code></pre></figure>
+
+<h1>Getting Started with HBase</h1>
+
+<p>First, you start the server with <code>start-hbase.sh</code>, then you can enter an interactive shell with <code>hbase shell</code> and create some test tables. HBase schema is a whole separate discussion. For now, we&#39;re going to create a table with a column family of &quot;stats&quot;. Our primary keys are going to be in the format <code>md5(customer id)[:5] + customer id + date</code>.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">create <span class="s1">&#39;test_table&#39;</span>, <span class="s1">&#39;stats&#39;</span>
+put <span class="s1">&#39;test_table&#39;</span>, <span class="s1">&#39;c41e4:1:20130201&#39;</span>, <span class="s1">&#39;stats:count&#39;</span>, 100
+put <span class="s1">&#39;test_table&#39;</span>, <span class="s1">&#39;c41e4:1:20130202&#39;</span>, <span class="s1">&#39;stats:count&#39;</span>, 102
+put <span class="s1">&#39;test_table&#39;</span>, <span class="s1">&#39;ed516:2:20130201&#39;</span>, <span class="s1">&#39;stats:count&#39;</span>, 80
+scan <span class="s1">&#39;test_table&#39;</span>, <span class="o">{</span><span class="nv">LIMIT</span><span class="o">=</span>&gt;25<span class="o">}</span>
+    ROW                                      COLUMN
+     c41e4:1:20130201                        <span class="nv">column</span><span class="o">=</span>stats:count, <span class="nv">timestamp</span><span class="o">=</span>1359402726388, <span class="nv">value</span><span class="o">=</span>100
+     c41e4:1:20130202                        <span class="nv">column</span><span class="o">=</span>stats:count, <span class="nv">timestamp</span><span class="o">=</span>1359402786126, <span class="nv">value</span><span class="o">=</span>102
+     ed516:2:20130201                        <span class="nv">column</span><span class="o">=</span>stats:count, <span class="nv">timestamp</span><span class="o">=</span>1359402786180, <span class="nv">value</span><span class="o">=</span>80
+    <span class="m">3</span> row<span class="o">(</span>s<span class="o">)</span> in 0.0150 seconds</code></pre></figure>
+
+<p>Take a look at the full list of <a href="http://wiki.apache.org/hadoop/Hbase/Shell">HBase shell commands</a>.</p>
+
+<h1>Getting Started with Pig</h1>
+
+<p>Getting Pig to connect to HBase is a little tricky. It involves some monkeying around with <code>CLASSPATH</code> variables. You can run these <code>export</code> commands in bash to set everything up properly. Note, this is for a very specific combination of versions, but you can substibute newer versions easily.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">export </span><span class="nv">JAVA_HOME</span><span class="o">=</span><span class="k">$(</span>/usr/libexec/java_home<span class="k">)</span>
+<span class="nb">export </span><span class="nv">HBASE_HOME</span><span class="o">=</span>/usr/local/Cellar/hbase/0.94.2/
+<span class="nb">export </span><span class="nv">PIG_CLASSPATH</span><span class="o">=</span><span class="s2">&quot;/usr/local/Cellar/hbase/0.94.2/libexec/conf/hbase-site.xml:/usr/local/Cellar/hbase/0.94.2/libexec/hbase-0.94.2.jar:/usr/local/Cellar/hbase/0.94.2/libexec/lib/zookeeper-3.4.3.jar:/usr/local/Cellar/hbase/0.94.2/libexec/lib/guava-11.0.2.jar:/usr/local/Cellar/hbase/0.94.2/libexec/lib/protobuf-java-2.4.0a.jar&quot;</span>
+<span class="nb">export </span><span class="nv">HBASE_CONF_DIR</span><span class="o">=</span>/usr/local/Cellar/hbase/0.94.2/libexec/conf</code></pre></figure>
+
+<h2>Exporting Data</h2>
+
+<p>You can enter the pig shell (aka grunt), by simply running <code>pig</code>. You may find it useful if you run into problems to examine pig&#39;s classpath with <code>pip -secretDebugCmd</code>, and run pig in verbose mode with <code>pig -debug DEBUG -versbose</code>.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">data</span> <span class="o">=</span> load <span class="s1">&#39;hbase://test_table&#39;</span> using org.apache.pig.backend.hadoop.hbase.HBaseStorage<span class="o">(</span><span class="s1">&#39;stats:count&#39;</span>, <span class="s1">&#39;-loadKey true&#39;</span><span class="o">)</span> AS <span class="o">(</span>id:chararray, count:chararray<span class="o">)</span><span class="p">;</span>
+store data into <span class="s1">&#39;/tmp/test_table.csv&#39;</span> using PigStorage<span class="o">(</span><span class="s1">&#39;,&#39;</span><span class="o">)</span><span class="p">;</span>
+cat /tmp/test_table.csv
+grunt&gt;
+c41e4:1:20130201,100
+c41e4:1:20130202,102
+ed516:2:20130201,80</code></pre></figure>
+
+<p>Note: the last <code>cat</code> command is Pig&#39;s version of cat. Outside pig, the data is actually stored in a <em>directory</em> called <code>/tmp/test_table.csv/</code>, in separate parts files. But they are just regular text files.</p>
+
+<h2>Importing Data</h2>
+
+<p>For this example, let&#39;s create a larger data set. Here is a simple python script to create a CSV file in the correct format.</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">random</span>
+<span class="k">for</span> <span class="n">md5</span><span class="p">,</span> <span class="n">customer_id</span> <span class="ow">in</span> <span class="p">((</span><span class="s">&#39;c41e4&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;ed516&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;a86f4&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">)):</span>
+    <span class="k">for</span> <span class="n">month</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">12</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">day</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">30</span><span class="p">):</span>
+            <span class="k">print</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">:</span><span class="si">%s</span><span class="s">:2013</span><span class="si">%02d%02d</span><span class="s">,</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">md5</span><span class="p">,</span> <span class="n">customer_id</span><span class="p">,</span> <span class="n">month</span><span class="p">,</span> <span class="n">day</span><span class="p">,</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="mi">150</span><span class="p">))</span></code></pre></figure>
+
+<p>You can grab a pre-rendered version and save it locally with <code>curl -L http://chase-seibert.github.com/blog/files/import.csv &gt; /tmp/import.csv</code>. Then, you can import it in <code>pig</code> like so. One confusing note here is that you don&#39;t include the ID field in the store command; that&#39;s automatic.</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">data</span> <span class="o">=</span> <span class="n">load</span> <span class="s">&#39;/tmp/import.csv&#39;</span> <span class="n">using</span> <span class="n">PigStorage</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">)</span> <span class="n">AS</span> <span class="p">(</span><span class="nb">id</span><span class="p">:</span><span class="n">chararray</span><span class="p">,</span><span class="n">count</span><span class="p">:</span><span class="n">chararray</span><span class="p">);</span>
+<span class="n">store</span> <span class="n">data</span> <span class="n">into</span> <span class="s">&#39;hbase://test_table&#39;</span> <span class="n">using</span> <span class="n">org</span><span class="o">.</span><span class="n">apache</span><span class="o">.</span><span class="n">pig</span><span class="o">.</span><span class="n">backend</span><span class="o">.</span><span class="n">hadoop</span><span class="o">.</span><span class="n">hbase</span><span class="o">.</span><span class="n">HBaseStorage</span><span class="p">(</span><span class="s">&#39;stats:count&#39;</span><span class="p">);</span></code></pre></figure>
+
+<p>If you switch back to hbase shell, you should be able to scan and see those records.</p>
+
+<h2>Aggregating with Map/Reduce</h2>
+
+<p>There is a <a href="http://pig.apache.org/docs/r0.7.0/piglatin_ref1.html#Using+Comments+in+Scripts">lot</a> you can do with the built-in <a href="http://pig.apache.org/docs/r0.7.0/piglatin_ref2.html#Overview">pig latin language</a>. Here is one example, where we are going to get an average count by day for all customers. Because my day is only represented as an encoded portion of my row key, I will break that up as part of the aggregation.</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">A</span> <span class="o">=</span> <span class="n">load</span> <span class="s">&#39;hbase://test_table&#39;</span> <span class="n">using</span> <span class="n">org</span><span class="o">.</span><span class="n">apache</span><span class="o">.</span><span class="n">pig</span><span class="o">.</span><span class="n">backend</span><span class="o">.</span><span class="n">hadoop</span><span class="o">.</span><span class="n">hbase</span><span class="o">.</span><span class="n">HBaseStorage</span><span class="p">(</span><span class="s">&#39;stats:count&#39;</span><span class="p">,</span> <span class="s">&#39;-loadKey true&#39;</span><span class="p">)</span> <span class="n">AS</span> <span class="p">(</span><span class="nb">id</span><span class="p">:</span><span class="n">chararray</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span><span class="nb">int</span><span class="p">);</span>
+<span class="n">B</span> <span class="o">=</span> <span class="n">foreach</span> <span class="n">A</span> <span class="n">generate</span> <span class="nb">id</span><span class="p">,</span> <span class="n">FLATTEN</span><span class="p">(</span><span class="n">STRSPLIT</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="s">&#39;:&#39;</span><span class="p">))</span> <span class="k">as</span> <span class="p">(</span><span class="n">md5</span><span class="p">:</span><span class="n">chararray</span><span class="p">,</span> <span class="n">customer_id</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span> <span class="n">date</span><span class="p">:</span><span class="n">chararray</span><span class="p">),</span> <span class="n">count</span><span class="p">;</span>
+<span class="n">C</span> <span class="o">=</span> <span class="n">group</span> <span class="n">B</span> <span class="n">by</span> <span class="n">date</span><span class="p">;</span>
+<span class="n">D</span> <span class="o">=</span> <span class="n">foreach</span> <span class="n">C</span> <span class="n">generate</span> <span class="n">group</span><span class="p">,</span> <span class="n">AVG</span><span class="p">(</span><span class="n">B</span><span class="o">.</span><span class="n">count</span><span class="p">);</span>
+<span class="n">dump</span> <span class="n">D</span><span class="p">;</span>
+<span class="o">...</span>
+<span class="mi">20</span> <span class="n">seconds</span> <span class="n">later</span>
+<span class="o">...</span>
+<span class="p">(</span><span class="mi">20130101</span><span class="p">,</span><span class="mf">63.333333333333336</span><span class="p">)</span>
+<span class="p">(</span><span class="mi">20130102</span><span class="p">,</span><span class="mf">97.33333333333333</span><span class="p">)</span>
+<span class="p">(</span><span class="mi">20130103</span><span class="p">,</span><span class="mf">96.66666666666667</span><span class="p">)</span>
+<span class="p">(</span><span class="mi">20130104</span><span class="p">,</span><span class="mf">94.0</span><span class="p">)</span>
+<span class="p">(</span><span class="mi">20130105</span><span class="p">,</span><span class="mf">74.0</span><span class="p">)</span>
+<span class="p">(</span><span class="mi">20130106</span><span class="p">,</span><span class="mf">135.33333333333334</span><span class="p">)</span>
+<span class="o">...</span></code></pre></figure>
+
+<p>You could save this dataset back to HBase using <code>store D into &#39;hbase://test_table2&#39; using org.apache.pig.backend.hadoop.hbase.HBaseStorage(&#39;stats:date stats:count&#39;);</code>. Remember that you need to create the table first.</p>
+
+<h1>Trouble-shooting</h1>
+
+<p>If you have not setup your <code>CLASSPATH</code> propery (ie, the <code>export</code> statements), you may get any one of the following errors:</p>
+
+<ul>
+<li><code>ERROR org.apache.pig.tools.grunt.Grunt - ERROR 2998: Unhandled internal error. org/apache/hadoop/hbase/filter/WritableByteArrayComparable</code></li>
+</ul>
+
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/hbase">hbase</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/pig">pig</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/hadoop">hadoop</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/python">python</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

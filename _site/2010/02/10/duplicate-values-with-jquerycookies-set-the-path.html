@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>duplicate values with jQuery.cookies (set the path!)</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2010/02/10/duplicate-values-with-jquerycookies-set-the-path.html" />
+
+        <meta property="og:title" content="duplicate values with jQuery.cookies (set the path!)"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2010/02/10/duplicate-values-with-jquerycookies-set-the-path.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            duplicate values with jQuery.cookies (set the path!)
+                            
+                                <span class="post-date subtitle">10 Feb 2010</span>
+                            
+                        </h1>
+                    
+                    <blockquote>A program should follow the "Law of Least Astonishment". What is this law? It is simply that the program should always respond to the user in the way that astonishes him least. - Geoffrey James, <a href="http://www.canonical.org/~kragen/tao-of-programming.html#book4">The Tao of Programming</a></blockquote>
+
+<p>
+I recently ran into an astonishing behaviour in an API I was using, namely the official <a href="http://plugins.jquery.com/project/cookie">jQuery cookie plug-in</a>. But first, a little background on cookies.
+</p>
+
+<p>
+Now, I've been writing web-apps that use cookies for about 15 years. But I had no idea that cookies could be associated with specific paths. <a href="http://www.quirksmode.org/js/cookies.html">Quirksmode</a> (as usual) gives the low-down:
+</p>
+
+<blockquote>The path gives you the chance to specify a directory where the cookie is active. So if you want the cookie to be only sent to pages in the directory cgi-bin, set the path to /cgi-bin. Usually the path is set to /, which means the cookie is valid throughout the entire domain.</blockquote>
+
+<p>
+The fact that it defaults to "/" is why I would venture to guess that relatively few developers are aware of this option. After all, in 99% of the cases, cookies are used to persist a session, which you want to be valid at the domain or sub-domain level, but invariant bellow that. 
+</p>
+
+<p>
+The jQuery cookie plug-in, however, inexplicably defaults the path to the actual path of the URL you're at. This forces you to set default the path to "/" <span style="font-style:italic;">manually</span>, a fact that the top-level "documentation", which only exists in the form of <a href="http://plugins.jquery.com/files/jquery.cookie.js.txt">comments in the code</a>, exacerbates by showing the initial example without the path:
+</p>
+
+<pre name="code" class="javascript">
+ * @example $.cookie('the_cookie', 'the_value');
+ * @desc Set the value of a cookie
+</pre>
+
+<p>
+Of course, you would probably spend 20 minutes or so tearing you're hair out about why cookies were not persisting properly. Finally, you would use Firebug to inspect the actual request/response pairs, and realise that there are multiple values of "the_cookie" being passed for each request. In fact, what virtually everyone using this API will want to do is the following:
+</p>
+
+<pre name="code" class="javascript">
+ $.cookie('the_cookie', 'the_value', { path: "/" });
+</pre>
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

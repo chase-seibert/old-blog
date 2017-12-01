@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Ajax grid performance in IE</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2008/12/05/ajax-grid-performance-in-ie.html" />
+
+        <meta property="og:title" content="Ajax grid performance in IE"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2008/12/05/ajax-grid-performance-in-ie.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Ajax grid performance in IE
+                            
+                                <span class="post-date subtitle">05 Dec 2008</span>
+                            
+                        </h1>
+                    
+                    <p>Generating a grid (table) view from the results of an Ajax call is a common Web 2.0 use case. But performance can be an issue, especially on IE7.</p>
+
+<p>Let's look at an example without the actual Ajax part; just generating a table and inserting it into the DOM. Here is a naive implementation:</p>
+
+<pre name="code" class="js">
+
+ &lt;script src="prototype.js" type="text/javascript"&gt;&lt;/script&gt;
+
+ &lt;SCRIPT&gt;
+
+ var MAX_ROWS = 500;
+ var MAX_COLS = 20;
+
+ function populate() {
+
+     var tableDom = new Element("table");
+     var tableBodyDom = new Element("tbody");
+
+     for (var row = 0; row &lt; MAX_ROWS; row++) {
+        var rowDom = new Element("tr");
+        for (var col = 0; col &lt; MAX_COLS; col++) {
+            var colDom = new Element("td");
+            colDom.innerHTML = row + ":" + col;
+            rowDom.appendChild(colDom);
+        }
+        tableBodyDom.appendChild(rowDom);
+     }
+
+     tableDom.appendChild(tableBodyDom);
+     $("grid").appendChild(tableDom);
+ }
+
+ function populateTimer() {
+
+    var start = new Date().getTime();
+    populate();
+    $("info").update(new Date().getTime() - start + "ms");
+ }
+
+ Event.observe(window, "load", populateTimer);
+
+ &lt;/SCRIPT&gt;
+
+ &lt;DIV id="info"&gt;
+ &lt;/DIV&gt;
+
+ &lt;DIV id="grid"&gt;
+ &lt;/DIV&gt;
+
+</pre>
+
+Results:
+
+<ul>
+  <li>Firefox - 1660ms</li>
+  <li>Chrome - 446ms</li>
+  <li>IE7 - 6906ms</li>
+</ul>
+
+<p>Constructing the table with via the DOM is fairly slow, especially on IE. This is well documented at <a href="http://www.quirksmode.org/dom/innerhtml.html">quirksmode</a>. So, let's try an innerHTML implementation:</p>
+
+<pre name="code" class="js">
+
+ function populate() {
+
+     var tableHtmlArr = ["&lt;TABLE&gt;"];
+     for (var row = 0; row &lt; MAX_ROWS; row++) {
+         tableHtmlArr.push("&lt;TR&gt;");
+         for (var col = 0; col &lt; MAX_COLS; col++)
+             tableHtmlArr.push("&lt;TD&gt;" + row + ":" + col + "&lt;/TD&gt;");
+         tableHtmlArr.push("&lt;/TR&gt;");
+     }
+     tableHtmlArr.push("&lt;/TABLE&gt;");
+     $("grid").innerHTML = tableHtmlArr.join("");
+ }
+
+</pre>
+
+Results:
+
+<ul>
+  <li>Firefox - 315ms</li>
+  <li>Chrome - 108ms</li>
+  <li>IE7  - 360ms</li>
+</ul>
+
+<p>So far so good. IE7 is actually pretty fast at concatenating all this HTML and displaying it. IE8beta2 is even better. So, why is this post titled "Ajax grid performance in <i>IE</i>"?</p>
+
+<p>Let's try one more test. What if we insert more layout elements into the grid? In this implementation, I have just wrapped each cell in five nested DIVs. (This is an extreme example, but it's not hard to imagine some rich formatting in those cells.)</p>
+
+<pre name="code" class="js">
+
+          for (var col = 0; col &lt; MAX_COLS; col++)
+              tableHtmlArr.push("&lt;TD&gt;&lt;DIV&gt;&lt;/DIV&gt;&lt;/DIV&gt;&lt;/DIV&gt;&lt;/DIV&gt;" + row + ":" + col + "&lt;/DIV&gt;&lt;/DIV&gt;&lt;/DIV&gt;&lt;/DIV&gt;&lt;/DIV&gt;&lt;/TD&gt;");
+
+</pre>
+
+Results:
+
+<ul>
+  <li>Firefox - 540ms</li>
+  <li>Chrome - 272ms</li>
+  <li>IE7 - 2734ms</li>
+</ul>
+
+<img src="http://spreadsheets.google.com/pub?key=puWyFEiJ_0iA6ADIJhaSNaw&oid=1&output=image" style="float: right; margin: 20px;"/>
+
+<p>As you can see, the performance in IE7 degrades dramatically as the complexity of the HTML increases. If you put a timer before the innerHTML setter, you will see that the time increase to that point is negligible. It's actually not a javascript performance problem at all; it's DOM insertion performance!</p>
+
+<p>The IE8 team has actually <a href="http://blogs.msdn.com/ie/archive/2008/08/26/ie8-performance.aspx">blogged about this</a>. They estimate that fully 70% of the browser cycles are dedicated to either "Layout" or "Rendering" on real world applications.</p>
+
+<p>Even worse, it's not getting better on IE8. This test actually gets slower on IE8beta2. My hypothesis is that all the work they are doing to increase their Acid2 score (while maintaining a backwards compatibility mode) is actually slowing down their rendering performance.</p>
+
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/performance">performance</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/javascript">javascript</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Python Mock Cookbook</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2015/06/25/python-mocking-cookbook.html" />
+
+        <meta property="og:title" content="Python Mock Cookbook"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2015/06/25/python-mocking-cookbook.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Python Mock Cookbook
+                            
+                                <span class="post-date subtitle">25 Jun 2015</span>
+                            
+                        </h1>
+                    
+                    <p>The python <a href="https://pypi.python.org/pypi/mock">mock</a> library is one of the awesome things about working in Python. No matter what code you&#39;re unit testing, it&#39;s possible to mock out various pieces with very little test code. That being said, it&#39;s sometimes difficult to figure out the exact syntax for your situation. I attribute this to the nature of how you apply the mocks. Sometimes it feel like you&#39;re shooting in the dark.</p>
+
+<p>The <a href="https://docs.python.org/3/library/unittest.mock.html">official documentation</a> is comprehensive, but I find it somewhat hard to locate what you&#39;re looking for. I recommend their <a href="http://www.voidspace.org.uk/python/mock/examples.html">examples doc</a>.</p>
+
+<p>This post is a write-up of my own personal usage.</p>
+
+<h1>Big Upfront Caveat</h1>
+
+<p>The biggest mistake people make is mocking something out in the wrong place. <em>You always need to mock the thing where it&#39;s imported TO, not where it&#39;s imported FROM.</em> Translation: if you&#39;re importing <code>from foo import bar</code> into a package <code>bat.baz</code>, you need to mock it as <code>@mock.patch(&#39;bat.baz.bar&#39;)</code>. This can be confusing if you think you should be mocking it where it&#39;s defined, not where it&#39;s used.</p>
+
+<h1>Setup</h1>
+
+<p>For all these sections, assume we&#39;re in a package called <code>myapp</code>. The code you&#39;re testing is in a module at <code>myapp.app</code> and the definition of the objects that you&#39;re mocking is imported there from <code>myapp.lib</code>.</p>
+
+<p>Want to see the full code? I have an repository on git with these examples called <a href="https://github.com/chase-seibert/python-mocking">python-mocking</a>.</p>
+
+<h1>Constants</h1>
+
+<p>The easiest things to mock out are constants.</p>
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="nd">@mock.patch</span><span class="p">(</span><span class="s">&#39;myapp.app.MAX_ITEMS&#39;</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">test_constant</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="o">...</span>
+</code></pre></div>
+<h1>Functions</h1>
+
+<p>For functions, you will commonly need to specify a return value, check if they were called, and with what values.</p>
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="nd">@mock.patch</span><span class="p">(</span><span class="s">&#39;myapp.app.get_first_name&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">test_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mock_get_first_name</span><span class="p">):</span>
+    <span class="n">mock_get_first_name</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="s">&#39;Bat&#39;</span>
+    <span class="o">...</span>
+    <span class="n">mock_get_first_name</span><span class="o">.</span><span class="n">assert_called</span><span class="p">()</span>
+    <span class="n">mock_get_first_name</span><span class="o">.</span><span class="n">assert_called_once_with</span><span class="p">(</span><span class="s">&#39;baz&#39;</span><span class="p">)</span>
+</code></pre></div>
+<h1>Methods</h1>
+
+<p>Mocking a method on a class is just like mocking a function, you just reference it through the class name.</p>
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="nd">@mock.patch</span><span class="p">(</span><span class="s">&#39;myapp.app.Car.get_make&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">test_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mock_get_make</span><span class="p">):</span>
+    <span class="n">mock_get_make</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="s">&#39;Ford&#39;</span>
+    <span class="o">...</span>
+    <span class="n">mock_get_make</span><span class="o">.</span><span class="n">assert_called</span><span class="p">()</span>
+</code></pre></div>
+<h1>Properties</h1>
+
+<p>These are just special methods on a class with the <code>@property</code> decorator. Now we&#39;re starting to get tricky.</p>
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="nd">@mock.patch</span><span class="p">(</span><span class="s">&#39;myapp.app.Car.wheels&#39;</span><span class="p">,</span> <span class="n">new_callable</span><span class="o">=</span><span class="n">mock</span><span class="o">.</span><span class="n">PropertyMock</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">test_property</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mock_wheels</span><span class="p">):</span>
+    <span class="n">mock_wheels</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="o">...</span>
+</code></pre></div>
+<h1>Entire classes</h1>
+
+<p>What if you want to swap out an entire class implementation? No problem! The key is that the <code>return_value</code> should be a new instance of the class.</p>
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="nd">@mock.patch</span><span class="p">(</span><span class="s">&#39;myapp.app.Car&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">test_class</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mock_car</span><span class="p">):</span>
+
+    <span class="k">class</span> <span class="nc">NewCar</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+        <span class="k">def</span> <span class="nf">get_make</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">return</span> <span class="s">&#39;Audi&#39;</span>
+
+        <span class="nd">@property</span>
+        <span class="k">def</span> <span class="nf">wheels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">return</span> <span class="mi">6</span>
+
+    <span class="n">mock_car</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="n">NewCar</span><span class="p">()</span>
+    <span class="o">...</span>
+</code></pre></div>
+<h1>Class Methods</h1>
+
+<p>What about a <code>@classmethod</code> on a class? It&#39;s the same as a method.</p>
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="nd">@mock.patch</span><span class="p">(</span><span class="s">&#39;myapp.app.Car.for_make&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">test_classmethod</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mock_for_make</span><span class="p">):</span>
+    <span class="n">new_car</span> <span class="o">=</span> <span class="n">Car</span><span class="p">()</span>
+    <span class="n">new_car</span><span class="o">.</span><span class="n">make</span> <span class="o">=</span> <span class="s">&#39;Chevy&#39;</span>
+    <span class="n">mock_for_make</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="n">new_car</span>
+    <span class="o">...</span>
+</code></pre></div>
+<h1>Static Methods</h1>
+
+<p>Static methods are the same as class methods.</p>
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="nd">@mock.patch</span><span class="p">(</span><span class="s">&#39;myapp.app.Car.roll_call&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">test_classmethod</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mock_get_roll_call</span><span class="p">):</span>
+    <span class="n">mock_get_roll_call</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="p">[</span><span class="n">Car</span><span class="p">(</span><span class="s">&#39;Ford&#39;</span><span class="p">),</span> <span class="p">]</span>
+    <span class="o">...</span>
+</code></pre></div>
+<h1>Decorators &amp; Context Managers</h1>
+
+<p>Decorators are a tough one. They are defined at import time, and are thus diffucult to re-define as a mock. Your best bet is to create a function for the body of the decorator, and mock that.</p>
+
+<p>Context managers are more do-able, but tricky.</p>
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="nd">@mock.patch</span><span class="p">(</span><span class="s">&#39;myapp.app.open_car&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">test_context_manager</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mock_open_car</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">enter_car</span><span class="p">(</span><span class="n">car</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="n">mock_open_car</span><span class="o">.</span><span class="n">return_value</span><span class="o">.</span><span class="n">__enter__</span> <span class="o">=</span> <span class="n">enter_car</span>
+
+    <span class="o">...</span>
+</code></pre></div>
+<h1>Bonus - Mocking All Tests in a Suite</h1>
+
+<p>San you have a certain mock that you want to apply to all tests in a TestCase class. You have two options. You can apply the patch in the <code>setUp</code> and un-apply the patch in <code>tearDown</code>, or you can over-ride <code>run</code>.</p>
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">with</span> <span class="n">mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s">&#39;myapp.app.foo&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">foo</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">foo</span> <span class="o">=</span> <span class="n">foo</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">MyTestCase</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</code></pre></div>
+<p>Alternatively, you can mock out something in <code>setUp</code>:</p>
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">patcher</span> <span class="o">=</span> <span class="n">mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s">&#39;myapp.app.foo&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mock_foo</span> <span class="o">=</span> <span class="n">patcher</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">addCleanup</span><span class="p">(</span><span class="n">patcher</span><span class="o">.</span><span class="n">stop</span><span class="p">)</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">NWApiTestCase</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
+</code></pre></div>
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/python,">python,</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/testing">testing</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

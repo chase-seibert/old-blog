@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Limiting Project Scope and Optimizing for Shipability</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2014/02/09/limiting-scope-and-optimizing-for-shipability.html" />
+
+        <meta property="og:title" content="Limiting Project Scope and Optimizing for Shipability"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2014/02/09/limiting-scope-and-optimizing-for-shipability.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Limiting Project Scope and Optimizing for Shipability
+                            
+                                <span class="post-date subtitle">09 Feb 2014</span>
+                            
+                        </h1>
+                    
+                    <blockquote>
+<p>Observe that for the programmer, as for the chef, the urgency of the patron may govern the scheduled completion of the task, but it cannot govern the actual completion. An omelette, promised in two minutes, may appear to be progressing nicely. But when it has not set in two minutes, the customer has two choices--wait or eat it raw. Software customers have had the same choices. - The Mythical Man-Month</p>
+</blockquote>
+
+<p>Too often software engineers find themselves 1:50 into this process thinking, &quot;Oh god, I hope this omelet sets in the next ten seconds&quot;. You probably know this feeling. In the kitchen, it&#39;s called &quot;being in the weeds&quot;. In a software project, it&#39;s the begrudged natural state for pretty much all project time outside the initial few week &quot;honeymoon&quot; phase.</p>
+
+<p>This should scare the shit out of you.</p>
+
+<p>Instead, I see most engineers take it in stride. Their attitude is, &quot;This is the inevitable nature of software projects&quot;. Never mind that at any decent company, the engineers themselves came up with the schedule. They blame unrealistic requirements, never mind that they knew the requirements going into it. What they should be thinking is, &quot;Damn, all these variables were in my control and we&#39;re still going to be late&quot;.</p>
+
+<p>The variable that many engineers ignore is scope. When asked to make a 6 egg omelet that may not set in time, start thinking about how to make a one egg omelet that will definitely set quickly. That&#39;s your minimum viable breakfast, aka a <em>potentially shippable</em> omelet, and it&#39;s your golden ticket.</p>
+
+<h1>Moving past breakfast</h1>
+
+<p>OK, the cooking analogy is breaking down. An omelet with six eggs that set at six different times is going to be totally gross. But that&#39;s not true of software. Your stake holders only care about scope (does it have mushrooms?), cost (why is this omelet $18.50?) and time (is it done yet?). Cost depends on headcount, and is usually not under your control. Scope should be something that you control, and you should seek to reduce the scope you are <em>committing</em> to as much as possible, putting most features in the &quot;maybe&quot; pile. Time is seen as knob to turn only in so far as you are willing to work harder, i.e. the overtime death march. But it&#39;s actually much more of a function of priorities.</p>
+
+<p>Your top priority should be to get your new thing into a shippable state. As soon as possible.</p>
+
+<p>Most engineers want to start with a refactoring task of unknown length, or maybe a research project with a nebulous goal. Those are fun. By doing them first, you are treating them as your top priority. While I agree that they do need to happen as part of a healthy project life cycle, they rarely need to happen first. You may be thinking of a particular project, and saying, &quot;But those were the <em>necessary</em> pieces of the project. Nothing else would have worked without them. That was the whole point!&quot;</p>
+
+<p>But that&#39;s just it. Those items are <em>not</em> the point. The point of the entire exercise is to deliver customer value. I assure you they don&#39;t give a shit about refactoring or wiz-bang internals. What they care about is the functionality. And I bet if you put shipability first, you will see that there is likely a way to get to a shippable state with much less effort. In many cases, almost immediately.</p>
+
+<h1>Born on third base</h1>
+
+<p>The empowering bit is that once you reach a shippable state, you&#39;re virtually assured of hitting your project timeline. In the remaining 80% of the time, go ahead and do whatever refactoring and prototyping you were planning on. Tack on every feature you have time to get to. Just keep bringing the project back to shippable at short intervals, like a week or two.</p>
+
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/process">process</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/reading-list">reading-list</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

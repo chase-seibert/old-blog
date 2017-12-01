@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Django/Heroku quickstart for existing applications</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2012/04/13/djangoheroku-quickstart-for-existing-applications.html" />
+
+        <meta property="og:title" content="Django/Heroku quickstart for existing applications"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2012/04/13/djangoheroku-quickstart-for-existing-applications.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Django/Heroku quickstart for existing applications
+                            
+                                <span class="post-date subtitle">13 Apr 2012</span>
+                            
+                        </h1>
+                    
+                    <p>
+Getting a brand new Django application running on Heroku is fairly simple. There is a great tutorial for it on <a href="https://devcenter.heroku.com/articles/django">devcenter.heroku.com</a>. I would recommend going through that, and getting it working. Here is my short version of their getting started notes, without the <a href="http://pypi.python.org/pypi/virtualenv">virtualenv</a> and <a href="https://docs.djangoproject.com/en/dev/ref/django-admin/?from=olddocs">Django command</a> stuff you probably already know.
+</p>
+
+<pre name="code" class="bash">
+wget -qO- https://toolbelt.heroku.com/install.sh | sh
+heroku login
+heroku create --stack cedar
+echo 'web: python manage.py runserver 0:$PORT' > Procfile
+heroku addons:add shared-database
+git push heroku master  # if you're in a branch locally, you can git push -f heroku localbranch:refs/heads/master
+heroku run python manage.py syncdb
+heroku ps:scale web=1
+heroku ps
+heroku logs
+</pre>
+
+<p>
+That should be enough to get a brand new Django app running. If you have an existing Django application, however, their documentation doesn't provide much guidance on common pitfalls.
+</p>
+
+<p>
+First of all, you may need a mechanism to over-ride settings.py on the production Heroku instance. First, you can add an environment variable:
+</p>
+
+<pre name="code" class="bash">
+heroku config:add ENVIRONMENT=production
+</pre>
+
+<p>
+With that variable, you can easily create an over-ride for settings.py called settings_production.py:
+</p>
+
+<pre name="code" class="python">
+# at the END of settings.py:
+import os
+ENVIRONMENT = os.environ.get('ENVIRONMENT', 'dev')  # dev, production, qa, etc
+exec('from settings_%s import *' % ENVIRONMENT)
+</pre>
+
+<p>
+Heroku gives you a shared database for free. You can see the connect string on it with the heroku config command:
+</p>
+
+<pre name="code" class="bash">
+...
+DATABASE_URL => postgres://foobar:password@ec2-ip-address.amazonaws.com/instance
+...
+</pre>
+
+<p>
+This would translate into the following in settings_production.py
+</p>
+
+<pre name="code" class="bash">
+DATABASES = {
+    'default': {
+        'ENGINE': 'postgresql_psycopg2',
+        'NAME': 'instance',
+        'USER': 'foobar',
+        'PASSWORD': 'password',
+        'HOST': 'ec2-ip-address.amazonaws.com',
+        'PORT': '',  # leave blank
+    }
+}
+</pre>
+
+<p>
+The Heroku directions for switching from Django's development web server to gunicorn don't work for Django 1.3, where there is no WSGI file. After adding gunicorn to requirements.txt, and 'gunicorn' to INSTALLED_APPS, I changed Procfile to the following:
+</p>
+
+<pre name="code" class="bash">
+web: python manage.py run_gunicorn -b 0.0.0.0:$PORT
+</pre>
+
+<p>
+Getting Django's <a href="https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/">staticfiles</a> feature working was a little trickier. Heroku gives you a "ephemeral" file system, meaning that any changes you write to disk will not survive the next deploy, and may not even survive between heroku command-line sessions. This means that collectstatic must be run as part of the deploy, which you can also do in Profile:
+</p>
+
+<pre name="code" class="bash">
+web: python manage.py collectstatic --noinput; python manage.py run_gunicorn -b 0.0.0.0:$PORT
+</pre>
+
+<p>
+Lastly, I wanted gunicorn to (at least temporarily) serve up the static resources itself. To do that, you will need to add the following to your urls.py:
+</p>
+
+<pre name="code" class="python">
+urlpatterns += patterns('',
+    (r'^static/(?P&lt;path&gt;.*)$', 'django.views.static.serve', {'document_root': settings.STATIC_ROOT}),
+)
+</pre>
+
+<p>
+Heroku gives you SSL for free, at least when you're on *.herokuapp.com. The only tricky bit is that you need to tell Django which header to look at to determine if the original request was in SSL (Heroku will only speak plain HTTP to Django). Without this, any redirect from an HTTPS URL will direct the user back to HTTP. Just put the following in settings.py:
+</p>
+
+<pre name="code" class="python">
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+</pre>
+
+<p>
+Finally, I had to migrate my old data. If you're going from Postgres -> Postres, or MySQL -> MySQL, just use the herokup database restore tools. If you need to migrate from one to the other, things get a lot trickier. In my case, I ended up exporting to a JSON file, and re-importing. This was very buggy; I would not recommend it.
+</p>
+
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/django">django</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/heroku">heroku</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

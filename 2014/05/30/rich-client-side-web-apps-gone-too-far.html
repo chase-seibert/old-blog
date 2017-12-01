@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Rich client side web apps gone too far!</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2014/05/30/rich-client-side-web-apps-gone-too-far.html" />
+
+        <meta property="og:title" content="Rich client side web apps gone too far!"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2014/05/30/rich-client-side-web-apps-gone-too-far.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Rich client side web apps gone too far!
+                            
+                                <span class="post-date subtitle">30 May 2014</span>
+                            
+                        </h1>
+                    
+                    <h2>I have seen some Javascript in my time...</h2>
+
+<p>I&#39;ve been getting paid to write web apps using Javascript for about 12 years. I
+wrote a single page web based email client in 2003, years before the launch of
+Gmail. I wrote a javascript instant message client for IE 5.5. I wrote a full
+window manager inside the browser, complete with a dock, using IFRAMEs.</p>
+
+<p>All of that stuff was extremely painful to get working back in the dark ages
+before prototype and jQuery. One browser in particular absolutely sucked to write
+Javascript for. Never mind debug tools, we didn&#39;t even have stack traces! About a
+dozen times a day you would get an error that would just say &quot;Object doesn&#39;t
+support this property or method&quot;. That was literally it - no line number or
+anything.</p>
+
+<p>All this is to say that Javascript got a bad reputation. A lot of that was not
+due to the language, but the platform. In recent years, the platform has gotten
+a lot of love as we realized we are going to be stuck with this language. Tooling
+has smoothed out remaining browser inconsistencies. But don&#39;t fool yourself; the
+language still sucks.</p>
+
+<h2>... and I don&#39;t like what I see</h2>
+
+<p>It&#39;s just not a well designed language. Basic object comparison frequently results
+in <a href="http://wtfjs.com/">mind-blowing violations of the principle of least astonishment</a>.
+We have piled dozens of different and mutually exclusive hacks on top of the
+language to support name spacing. To this day, I still stumble over the fact that
+<code>this</code> will frequently not be pointing to what you think it is.</p>
+
+<p>Which is why it is so unfortunate that this is the defacto language of the future.
+It&#39;s the only option for cross browser client side code. Literally every other
+option does not work with all browsers or is basically a language that&#39;s compiled
+down to Javascript. Good luck debugging that.</p>
+
+<p>To add insult to injury, web development has become more and more dominated by
+rich client side work over the last 5 years. Javascript used to be a tool that
+you used as sparingly as possible, sprinkling in just the barest hint of dynamic
+behavior where it was absolutely necessary. Now it&#39;s common to start a new project
+and assume that 50% or more of the code will be Javascript.</p>
+
+<h2>At least make your fancy app act like a web page</h2>
+
+<p>Of course, everyone wants web apps that are responsive and interactive. For apps
+like the aforementioned instant messenger and email clients, that makes total
+sense. But 90% of the stuff out there does not fall under the same use case. Most
+apps that are heavily Javascript based are just doing it wrong, in my opinion.
+That&#39;s not how a web browser is <em>supposed</em> to work, a distinction obviously lost on
+the authors of these applications when they continually break basic functionality
+that we used to be able to take for granted.</p>
+
+<p>I&#39;m sure you&#39;ve seen sites that refuse to record their state in the URL. Oh thanks,
+I didn&#39;t want to bookmark this anyway. Too often these days I can&#39;t even tab through
+form fields. If for some bat-shit crazy reason you find yourself using editable
+<code>DIV</code> elements instead of actual form inputs, please at least remember to provide
+the functionality we have been using since the &#39;80s.</p>
+
+<p>Then there are willful substitutions of the developer&#39;s judgement for that of the user.
+I have never actually wanted a modal window to appear. Every time I see one, I just think
+&quot;well, fuck you too&quot;. Maybe you have alt-clicked on a link somewhere
+only to have the link open in the current tab instead - or perhaps not open at all.
+Presumably there was a good reason to re-implement the wheel by creating your own
+special thing that&#39;s text you can click on, but that is not a real <code>A</code> element. NOT!</p>
+
+<p>The 10th circle of hell should be for web developers who break the back button.</p>
+
+<h2>How we ended up here</h2>
+
+<p>My pet theory is that the rise of dominance of rich client side apps is actually
+mostly an accident of history. Right around 2005, with the launch of Rails and Django,
+we had finally come up with ways to write server-side web apps that were not like
+sticking a fork in your eye. We finally had separation of controller and view, along
+with features like flash messages, session variables, and form validation, which
+made it easy to implement a rich interaction with state persisted between server
+side renders. On broadband, the server round-trips were so fast it felt like you
+were serving up these dynamic pages from your local machine.</p>
+
+<p>But at the same time, mobile was just starting to come on. All these pages we were
+writing that rendered quickly on broadband absolutely sucked on mobile. No matter
+how fast your server was, latency was killing you on these shit early wireless
+networks. But we had a few years of AJAX under our belts, so we knew we could
+deliver the illusion of responsiveness by simply not reloading the page.</p>
+
+<p>I remember trying to write an app for IE7 that was 100% rendered on the client
+side from a pure JSON server backend. That shit was ridiculously slow back in the
+day on a broadband connected PC simply because IE7 could not render a decently
+complicated HTML chunk into a previously rendered DOM without going out to lunch
+for several hundred milliseconds doing god knows what - while at the same time
+completely locking the UI of the browser.</p>
+
+<p>But it was actually <em>better</em> on mobile. The latency was such a killer that even
+though phones were even slower at rendering Ajax responses, the over-all UX felt
+more responsive. So we started boldly going into the future of 100% javascript
+apps.</p>
+
+<p>Then a funny thing happened. Mobile users roundly rejected web apps. These days,
+you are an absolute second class citizen on mobile if you don&#39;t have a native app.
+Even Apple got this wrong. Their initial plan for the iPhone was to only have web
+apps at the platform for third-party developers. IMO, for all our progress in
+the last 5 years, wireless networks and phones are still shit, at least compared
+to where we hope they will be in 10 years. Maybe then we will finally be able to
+deliver write once run anywhere mobile web apps.</p>
+
+<h2>Back to the future</h2>
+
+<p>The latest generation of developers don&#39;t even realize there is another way to
+write web apps. Instead of writing just server side code, HTML and CSS, it&#39;s accepted
+that we also need to write a JSON REST API, client side templates, duplicate client
+side models and a whole mess of Javascript view code, hopefully on some kind of
+sane framework.</p>
+
+<p>I&#39;m here to tell you that you&#39;re doing a lot more work this way. Most apps can
+provide the same experience with about 5% of the client side code. Plus, you&#39;re
+slowing down your development team throughput significantly. All that extra
+complexity is not free. All of a sudden you have to hire people who specialize
+in front-end and people who specialize in back-end. It used to be that virtually
+all web devs could do both well.</p>
+
+<p>The key to delivering awesome client server HTML page render apps is graceful
+degradation, also called <a href="http://en.wikipedia.org/wiki/Progressive_enhancement">progressive enhancement</a>.
+The basic idea is that your app should be fully functional even if Javascript is
+disabled. This also is the thing that saves your ass when your giant blob of
+minified JS is totally broken; at least the app still works.</p>
+
+<p>Now if you deliver apps this way, it is absolutely critical that you serve
+page renders fast. With client-side apps this is not as critical, which means
+people have been getting lazy on this.</p>
+
+<p>Besides development speed, you get a host of other benefits. Code is less
+complicated. I have seen over and over again in my work that UI event code tends
+to be the hardest to write and maintain. If it&#39;s not total spaghetti, you&#39;re doing
+pretty well. Don&#39;t write that category of code if you don&#39;t have to. Your app
+will be easier to debug; no more hunting down what view is calling what API to
+deliver what data to your browser in a given HTML chunk. <em>Side note: for the love
+of god put model IDs and other human-readable attributes in your client-side
+generated DOM if you value your sanity</em>. You also reduce the compatibility
+issues between browsers to relatively simple CSS differences.</p>
+
+<p>Now get off my lawn!</p>
+
+<p>&gt; END RANT &lt;</p>
+
+<p><em>Edit:</em> This just got posted to Hacker News. Thanks! I guess this hit a minor chord.
+If you want to hear more, I&#39;m going to do a whole episode on it on my new podcast,
+the <a href="http://t.co/jqnKhxF1K8">Software Engineering Fireside Chat</a>. Look for it next Friday.</p>
+
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/web">web</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/reading-list">reading-list</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/newboss">newboss</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

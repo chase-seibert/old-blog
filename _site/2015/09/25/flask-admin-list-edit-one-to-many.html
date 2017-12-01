@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Flask-Admin Edit One To Many Fields from the List View</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2015/09/25/flask-admin-list-edit-one-to-many.html" />
+
+        <meta property="og:title" content="Flask-Admin Edit One To Many Fields from the List View"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2015/09/25/flask-admin-list-edit-one-to-many.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Flask-Admin Edit One To Many Fields from the List View
+                            
+                                <span class="post-date subtitle">25 Sep 2015</span>
+                            
+                        </h1>
+                    
+                    <p>I got to play with <a href="https://flask-admin.readthedocs.org/en/latest/">Flask-Admin</a> for the first time
+this week. Compared with Django admin, it&#39;s very extensible, though the default UI is pretty ugly.
+In any case, I ran into one particular challenge that took a good deal longer to figure out than
+it should have. Specifically, making a one to many relationship editable from the list view.</p>
+
+<p>on the <code>ModelView</code>. 
+You can easily expose editable fields from the list view using <code>column_editable_list</code>. See
+<a href="https://flask-admin.readthedocs.org/en/latest/api/mod_model/#flask_admin.model.BaseModelView.column_editable_list">the documentation</a>
+for more.</p>
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="k">class</span> <span class="nc">MyModelView</span><span class="p">(</span><span class="n">BaseModelView</span><span class="p">):</span>
+    <span class="n">column_editable_list</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;question&#39;</span><span class="p">,</span> <span class="s">&#39;details&#39;</span><span class="p">,</span> <span class="s">&#39;status&#39;</span><span class="p">)</span>
+</code></pre></div>
+<p>This ends up looking like this:</p>
+
+<p><img src="/blog/images/column_editable_list.png" alt="column_editable_list"></p>
+
+<p>This works for most <code>db.Model</code> column types I tried. For <code>String</code>, <code>Text</code> and <code>Integer</code>, you get a 
+simple <code>input</code> HTML element. For basic many to one relationships, you get a <code>select</code> HTML element.
+But when I tried to make a one to many relationship editable, I got a stack trace:</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">Traceback <span class="o">(</span>most recent call last<span class="o">)</span>:
+  File <span class="s2">&quot;/srv/nerdwallet/myproject/venv/lib/python2.7/site-packages/flask/app.py&quot;</span>, line 1836, in __call__
+    <span class="k">return</span> self.wsgi_app<span class="o">(</span>environ, start_response<span class="o">)</span>
+  ...
+  File <span class="s2">&quot;/srv/nerdwallet/myproject/venv/lib/python2.7/site-packages/wtforms/fields/core.py&quot;</span>, line 149, in __call__
+    <span class="k">return</span> self.meta.render_field<span class="o">(</span>self, kwargs<span class="o">)</span>
+  File <span class="s2">&quot;/srv/nerdwallet/myproject/venv/lib/python2.7/site-packages/wtforms/meta.py&quot;</span>, line 53, in render_field
+    <span class="k">return</span> field.widget<span class="o">(</span>field, **render_kw<span class="o">)</span>
+  File <span class="s2">&quot;/srv/nerdwallet/myproject/venv/lib/python2.7/site-packages/flask_admin/model/widgets.py&quot;</span>, line 93, in __call__
+    <span class="nv">kwargs</span> <span class="o">=</span> self.get_kwargs<span class="o">(</span>subfield, kwargs<span class="o">)</span>
+  File <span class="s2">&quot;/srv/nerdwallet/myproject/venv/lib/python2.7/site-packages/flask_admin/model/widgets.py&quot;</span>, line 148, in get_kwargs
+    raise Exception<span class="o">(</span><span class="s1">&#39;Unsupported field type: %s&#39;</span> % <span class="o">(</span><span class="nb">type</span><span class="o">(</span>subfield<span class="o">)</span>,<span class="o">))</span>
+Exception: Unsupported field <span class="nb">type</span>: &lt;class <span class="s1">&#39;flask_admin.contrib.sqla.fields.QuerySelectMultipleField&#39;</span>&gt;
+</code></pre></div>
+<p>The model column definition in question was a simple relationship with a join table:</p>
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="k">class</span> <span class="nc">MyModel</span><span class="p">(</span><span class="n">AAAModel</span><span class="p">):</span>
+    <span class="o">...</span>
+    <span class="c"># uselist=True means you can have more than one child MyChildModel per MyModel</span>
+    <span class="n">children</span> <span class="o">=</span> <span class="n">relationship</span><span class="p">(</span><span class="s">&#39;MyChildModel&#39;</span><span class="p">,</span> <span class="n">secondary</span><span class="o">=</span><span class="s">&#39;model_children_join&#39;</span><span class="p">,</span> <span class="n">uselist</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</code></pre></div>
+<p>Looking into the <a href="https://github.com/flask-admin/flask-admin/blob/master/flask_admin/model/widgets.py#L100">Flask-Admin code</a>, 
+they actually support a number of other fields types such as <code>Boolean</code>, <code>DateTime</code>, <code>Float</code>, etc. But
+no select multiple. Here is the <code>Flask-Admin</code> code block that I was looking at:</p>
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="k">class</span> <span class="nc">XEditableWidget</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        WTForms widget that provides in-line editing for the list view.</span>
+
+<span class="sd">        Determines how to display the x-editable/ajax form based on the</span>
+<span class="sd">        field inside of the FieldList (StringField, IntegerField, etc).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s">&#39;data-value&#39;</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;value&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">))</span>
+
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s">&#39;data-role&#39;</span><span class="p">,</span> <span class="s">&#39;x-editable&#39;</span><span class="p">)</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s">&#39;data-url&#39;</span><span class="p">,</span> <span class="s">&#39;./ajax/update/&#39;</span><span class="p">)</span>
+
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s">&#39;id&#39;</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s">&#39;href&#39;</span><span class="p">,</span> <span class="s">&#39;#&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;pk&#39;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;pk required&#39;</span><span class="p">)</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;data-pk&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&quot;pk&quot;</span><span class="p">))</span>
+
+        <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;data-csrf&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&quot;csrf&quot;</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">)</span>
+
+        <span class="c"># subfield is the first entry (subfield) from FieldList (field)</span>
+        <span class="n">subfield</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">entries</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_kwargs</span><span class="p">(</span><span class="n">subfield</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">HTMLString</span><span class="p">(</span>
+            <span class="s">&#39;&lt;a </span><span class="si">%s</span><span class="s">&gt;</span><span class="si">%s</span><span class="s">&lt;/a&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">html_params</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">),</span>
+                              <span class="n">escape</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;data-value&#39;</span><span class="p">]))</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_kwargs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subfield</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Return extra kwargs based on the subfield type.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">subfield</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s">&#39;StringField&#39;</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;data-type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;text&#39;</span>
+        <span class="k">elif</span> <span class="n">subfield</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s">&#39;TextAreaField&#39;</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;data-type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;textarea&#39;</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;data-rows&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;5&#39;</span>
+        <span class="k">elif</span> <span class="n">subfield</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s">&#39;BooleanField&#39;</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;data-type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;select&#39;</span>
+            <span class="c"># data-source = dropdown options</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;data-source&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;&#39;</span><span class="p">:</span> <span class="s">&#39;False&#39;</span><span class="p">,</span> <span class="s">&#39;1&#39;</span><span class="p">:</span> <span class="s">&#39;True&#39;</span><span class="p">}</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;data-role&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;x-editable-boolean&#39;</span>
+        <span class="k">elif</span> <span class="n">subfield</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s">&#39;Select2Field&#39;</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;data-type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;select&#39;</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;data-source&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">subfield</span><span class="o">.</span><span class="n">choices</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">subfield</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s">&#39;DateField&#39;</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;data-type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;combodate&#39;</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;data-format&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;YYYY-MM-DD&#39;</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;data-template&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;YYYY-MM-DD&#39;</span>
+        <span class="k">elif</span> <span class="n">subfield</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s">&#39;DateTimeField&#39;</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;data-type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;combodate&#39;</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;data-format&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;YYYY-MM-DD HH:mm:ss&#39;</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;data-template&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;YYYY-MM-DD  HH:mm:ss&#39;</span>
+            <span class="c"># x-editable-combodate uses 1 minute increments</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;data-role&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;x-editable-combodate&#39;</span>
+        <span class="k">elif</span> <span class="n">subfield</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s">&#39;TimeField&#39;</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;data-type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;combodate&#39;</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;data-format&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;HH:mm:ss&#39;</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;data-template&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;HH:mm:ss&#39;</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;data-role&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;x-editable-combodate&#39;</span>
+        <span class="k">elif</span> <span class="n">subfield</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s">&#39;IntegerField&#39;</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;data-type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;number&#39;</span>
+        <span class="k">elif</span> <span class="n">subfield</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;FloatField&#39;</span><span class="p">,</span> <span class="s">&#39;DecimalField&#39;</span><span class="p">]:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;data-type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;number&#39;</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;data-step&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;any&#39;</span>
+        <span class="k">elif</span> <span class="n">subfield</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;QuerySelectField&#39;</span><span class="p">,</span> <span class="s">&#39;ModelSelectField&#39;</span><span class="p">]:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;data-type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;select&#39;</span>
+
+            <span class="n">choices</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">choice</span> <span class="ow">in</span> <span class="n">subfield</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">choices</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">choice</span><span class="o">.</span><span class="n">_value</span><span class="p">())]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">choice</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+                    <span class="n">choices</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">choice</span><span class="o">.</span><span class="n">_value</span><span class="p">())]</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;data-source&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">choices</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;Unsupported field type: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">subfield</span><span class="p">),))</span>
+
+        <span class="c"># for Select2, QuerySelectField, and ModelSelectField</span>
+        <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">subfield</span><span class="p">,</span> <span class="s">&#39;allow_blank&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">):</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;data-source&#39;</span><span class="p">][</span><span class="s">&#39;__None&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">kwargs</span>
+</code></pre></div>
+<p>Basically, it&#39;s generating some HTML from a <code>kwargs</code> dict based on the field type. These are 
+<a href="https://wtforms.readthedocs.org/en/latest/">WTForms</a> types from the 
+<a href="https://wtforms.readthedocs.org/en/latest/ext.html?highlight=queryselectfield#module-wtforms.ext.sqlalchemy">SQLAlchemy WTForm extension</a>. 
+But the <code>data-type</code> types are actually from a Javascript library called <a href="https://vitalets.github.io/x-editable/docs.html">x-editable</a>, which is
+doing the actual UI and Ajax call for the update. </p>
+
+<p>It turns out that <code>x-editable</code> doesn&#39;t support a <code>select multiple</code> element, but they do have a <a href="https://vitalets.github.io/x-editable/docs.html#checklist">checklist</a>
+type, which is just as good (at least for a small number of choices). Hacking this into the 
+<code>ModelView</code> was pretty simple.</p>
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">flask.ext.admin.model.widgets</span> <span class="kn">import</span> <span class="n">XEditableWidget</span>
+
+
+<span class="k">class</span> <span class="nc">CustomWidget</span><span class="p">(</span><span class="n">XEditableWidget</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">get_kwargs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subfield</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">subfield</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s">&#39;QuerySelectMultipleField&#39;</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;data-type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;checklist&#39;</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;data-placement&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;left&#39;</span>
+            <span class="c"># copied from flask_admin/model/widgets.py</span>
+            <span class="n">choices</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">choice</span> <span class="ow">in</span> <span class="n">subfield</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">choices</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">choice</span><span class="o">.</span><span class="n">_value</span><span class="p">())]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">choice</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+                    <span class="n">choices</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">choice</span><span class="o">.</span><span class="n">_value</span><span class="p">())]</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;data-source&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">choices</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">super</span><span class="p">(</span><span class="n">CustomWidget</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">get_kwargs</span><span class="p">(</span><span class="n">subfield</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">kwargs</span>
+
+
+<span class="k">class</span> <span class="nc">CustomFieldList</span><span class="p">(</span><span class="n">ListEditableFieldList</span><span class="p">):</span>
+    <span class="n">widget</span> <span class="o">=</span> <span class="n">CustomWidget</span><span class="p">()</span>
+
+<span class="k">class</span> <span class="nc">MyModelView</span><span class="p">(</span><span class="n">BaseModelView</span><span class="p">):</span>
+    <span class="n">column_editable_list</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;question&#39;</span><span class="p">,</span> <span class="s">&#39;details&#39;</span><span class="p">,</span> <span class="s">&#39;slug&#39;</span><span class="p">,</span> <span class="s">&#39;status&#39;</span><span class="p">,</span> <span class="s">&#39;children&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_list_form</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaffold_list_form</span><span class="p">(</span><span class="n">CustomFieldList</span><span class="p">)</span>
+</code></pre></div>
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/python">python</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/flask">flask</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>MS SMTP Pickup Doesn't Strip BCC</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2009/03/13/ms-smtp-pickup-doesnt-strip-bcc.html" />
+
+        <meta property="og:title" content="MS SMTP Pickup Doesn't Strip BCC"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2009/03/13/ms-smtp-pickup-doesnt-strip-bcc.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            MS SMTP Pickup Doesn't Strip BCC
+                            
+                                <span class="post-date subtitle">13 Mar 2009</span>
+                            
+                        </h1>
+                    
+                    <blockquote>
+...when a message containing a "Bcc:" field is prepared to be sent, the "Bcc:" line is removed even though all of the recipients (including those specified in the "Bcc:" field) are sent a copy of the message. <a href="http://www.faqs.org/rfcs/rfc2822.html">[RFC2822]</a>
+</blockquote>
+
+<p>
+When I first started at my current job in 2003, the email system was in a dire state. My first six months were spent reinventing how we handled email with our web application, both inbound and outbound. Since that time, we have scaled up from handling less than 50,000 messages a day, to over three million.
+</p>
+
+<p>
+A few years later, Gmail was really starting to take off. Once they gained a foothold in the business world, a fairly egregious problem came to my attention. It seemed that every email that was BCCed from our system into Gmail was actually showing the BCC recipients in Gmail. Basically, this turned BCC into an unwitting CC. Customers were generally bemused, but it was actually a rather large security issue.
+</p>
+
+<p> 
+It turns out that the problem wasn't specifically related to Gmail. A little investigation revealed that email was actually leaving our system with the BCC header on it. Virtually any email client allows you to view email headers, and so the BCC info was just a click away. Gmail just happened to show those values on their regular UI, while most clients didn't. 
+</p>
+
+<p>
+What's SUPPOSED to happen is that the sending email server strips the BCC info from the header as it's sending it out. How does it deliver it to the BCCed recipients, then? It all has to do with the difference between the <a href="http://www.freesoft.org/CIE/RFC/1123/86.htm">message envelope</a> and the message header.
+</p>
+
+<p>
+People typically think of an email as having numerous parts. You have your from, to, subject and body. You also have attachments. What's actually going on behind the scenes is that there is an email header that contains all the required stuff (from, to, subject, etc). There is also the body, which contains the text/html of the message, as well as encoded attachments. A typical email header looks like:
+</p>
+
+<pre name="code" class="html">
+Return-Path: [fake@address.com]
+Received: from server.mymailhost.com (mail.mymailhost.com [126.43.75.123])
+        by pilot01.cl.msu.edu (8.10.2/8.10.2) with ESMTP id NAA23597;
+        Fri, 12 Jul 2002 16:11:20 -0400 (EDT)
+Received: from aol.com (127-34-56-98.dsl.mybigisp.com [127.34.56.98])
+        by server.mymailhost.com; Fri, 12 Jul 2002 13:09:38 -0700 (PDT)
+Date: Fri, 12 Jul 2002 13:09:38 -0700 (PDT)
+From: Hot Summer Deals &lt;hot_deals@aol.com&gt;
+To: My.Friends@pilot.msu.edu
+Subject: Just what you've been waiting for!!
+</pre>
+
+<p>
+There is actually a third part of an email, called the SMTP envelope. This is comprised of meta-data that the SMTP servers exchange <span style="font-style:italic;">before</span> they hand off the actual message. This includes the message recipients. Someone confusingly, this recipient list doesn't necessarily need to match what's in the header. In fact, this is exactly how BCC works; the servers talk to each other about the "real" recipients, but the message they deliver to you only shows the ones the sender wants you to see.
+</p>
+
+<p>
+In our implementation, the sending sever is MS-SMTP, the basic server that ships with Windows. More specifically, we're using the Pickup directory method of handing messages off to the server, which involves simply writing the EML file to a local directory. It's actually a fully supported transport mechanism and <a href="http://www.singular.co.nz/blog/archive/2007/11/28/using-an-smtp-pickup-directory-delivery-method-for-asp-net-development.aspx">rather popular</a>. Even <a href="http://technet.microsoft.com/en-us/library/bb124549.aspx">Exchange</a> implements it.
+</p>
+
+<p>
+The problem arises because MS-SMTP typically does BCC stripping when the message is handed to it, <span style="font-weight:bold;">over SMTP</span>. During its receiving SMTP conversation, it records the BCC addresses you want to deliver to, and then strips them. When you use the Pickup directly, you are skipping this step.
+</p>
+
+<p>
+You can solve this problem by using SMTP for the initial hand-off. However, many shops would prefer to use the Pickup instead, especially if they are generating many thousands of messages at once, and want to reduce overhead. In that case, you can use a work-around:
+</p>
+
+<pre>
+From: Hot Summer Deals &lt;hot_deals@aol.com&gt;
+To: My.Friends@pilot.msu.edu
+<b>X-Receiver: someguy@gmail.com</b>
+Subject: Just what you've been waiting for!!
+</pre>
+
+<p>
+This is basically an alias for BCC. While MS-SMTP won't strip that either, Gmail won't display it in the front-end. <span style="font-style:italic;">Note: this <a href="http://stackoverflow.com/questions/631799/bcc-never-sent-from-exchange-2007-using-specifiedpickupdirectory/633019#633019">may no longer</a> work on Exchange 2007.</span>
+</p>
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Reduce javascript UI code with Django forms</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2011/10/21/reduce-javascript-ui-code-with-django-forms.html" />
+
+        <meta property="og:title" content="Reduce javascript UI code with Django forms"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2011/10/21/reduce-javascript-ui-code-with-django-forms.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Reduce javascript UI code with Django forms
+                            
+                                <span class="post-date subtitle">21 Oct 2011</span>
+                            
+                        </h1>
+                    
+                    <p>
+Typically, I try to implement a dynamic UI feature without javascript on the first pass. Then, I layer in a little javascript goodness to make it more responsive. Whenever I stray from this practice, I inevitably end up re-discovering why I started doing this in the first place. At some point, I become horrified at the amount of javascript I have written, and disheartened at how long it's taking to modify. In short, things have gotten complicated.
+</p>
+
+<blockquote>
+Everything should be made as simple as possible, but no simpler. - <a href="http://en.wikiquote.org/wiki/Albert_Einstein">Albert Einstein</a>
+</blockquote>
+
+<p>
+Here is an example from just the other day. The requirements specified a form behavior that we didn't have already on the site. On a list of job records, there should be a close job link. Clicking the link reveals a new form that must be filled out successfully before the job is actually closed. When the form is successfully posted, hide the form and grey out the row. Here is the workflow:
+</p>
+
+<img src='http://lh4.googleusercontent.com/-lRGfcTgteRs/TqG6VGi-T6I/AAAAAAAALhk/TL5j8Y3b-JU/w545-h158-k/close_job1.png'>
+
+<p>
+Clicking close job actually just reveals the real form.
+</p>
+
+<img src='http://lh5.googleusercontent.com/-Skmw31d1HY8/TqG6UzBwPMI/AAAAAAAALhk/XFSjL5cRnE4/w545-h158-k/close_job2.png'>
+
+<img src='http://lh4.googleusercontent.com/-Iw0wFSXn4n0/TqG6U6FDLsI/AAAAAAAALhk/Qlj1h6DjetA/w544-h158-n-k/close_job3.png'>
+
+<p>
+Attempting to post that form may throw validation exceptions.
+</p>
+
+<img src='http://lh3.googleusercontent.com/-CccK2SHiVT8/TqG6VaegA3I/AAAAAAAALhk/EhsF8xDAfV0/w544-h158-n-k/close_job4.png'>
+
+<p>
+When the form is successfully posted, it goes away and the row gets grayed out.
+</p>
+
+<p>
+Of course, this is not an overly complicated example, but there are a few moving pieces. Nevertheless, I ended up with almost 100 lines of javascript code, even with the validation logic for the inner form being server side.
+</p>
+
+<pre name="code" class="javascript">
+$(document).ready(function() {
+
+ // hitting the initial close link, GETs the form from the back-end and shows it
+ $(&quot;.jobs-record-list a.toggle-job-close&quot;).click(function (){
+
+  var link = $(this);
+  var record = link.parents(&quot;.record&quot;);
+  var form_box = record.find(&quot;.job-close-form-box&quot;);
+  var job_link = record.find(&quot;.title a&quot;);
+
+  $.ajax({
+   url: link.attr(&quot;href&quot;) + &quot;?ajax&quot;,
+   type: &quot;GET&quot;,
+   success: function (data) {
+    form_box.html(data);
+    bind_job_close_form(form_box);
+   },
+   error: function (jqXHR, textStatus, errorThrown) {
+    // fallback to closing the job from the job overview page
+    window.location = form.attr(job_link.attr(&quot;href&quot;));
+   }
+  });
+
+  link.remove();
+  return false;
+ });
+
+ // process the inner form submit to actually close the job, then put the open link back on the page
+ function bind_job_close_form(form_box) {
+
+  var form = form_box.find(&quot;form&quot;);
+  var parentRow = form.parents(&quot;.record&quot;);
+
+  form.submit(function () {
+
+   $.ajax({
+    url: form.attr(&quot;action&quot;) + &quot;?ajax&quot;,
+    type: &quot;POST&quot;,
+    data: form.serialize(),
+    success: function (data) {
+     form_box.hide();
+     parentRow.find(&quot;.content&quot;).toggleClass(&quot;record-disabled&quot;);
+     parentRow.find(&quot;.block&quot;).toggleClass(&quot;record-disabled&quot;);
+     var link = form.find(&quot;a&quot;);
+     link.text(link.text() == &quot;close job&quot; ? &quot;open job&quot; : &quot;close job&quot;);
+    },
+    error: function (jqXHR, textStatus, errorThrown) {
+     form_box.html(jqXHR.response);
+     bind_job_close_form(form_box); // rebind event handler
+    }
+   });
+
+   return false;
+  });
+ }
+
+        // if the page is refresh after the inner form is shown, re-show it
+ $(&quot;form.toggle-job-open-closed&quot;).submit(function () {
+  var form = $(this);
+  var questions = form.find(&quot;.questions&quot;);
+  if (questions.is(&quot;:hidden&quot;)) {
+   questions.show();
+   return false;
+  }
+  return true;
+ });
+
+ // re-opening a job, POST to the server then gray out the row
+ $(&quot;a.toggle-job-open&quot;).submit(function () {
+
+  var form = $(this);
+  var parentRow = form.parents(&quot;.record&quot;);
+
+  $.ajax({
+   url: form.attr(&quot;action&quot;) + &quot;?ajax&quot;,
+   data: form.serialize(),
+   type: form.attr(&quot;method&quot;),
+   success: function (data) {
+    parentRow.find(&quot;.content&quot;).toggleClass(&quot;record-disabled&quot;);
+    parentRow.find(&quot;.block&quot;).toggleClass(&quot;record-disabled&quot;);
+   }
+  });
+
+  return false;
+ });
+});
+</pre>
+
+<p>
+At this stage, my form is rather simple, but I have a view that's trying to do a lot; processing both the Ajax and non-javascript versions of requests this page. I'm also doing some craziness to pass the current form around in the session scope. This is so that if the user refreshes, the form is still in the same state. Here is just the form:
+</p>
+
+<pre name="code" class="python">
+class OpenCloseJobForm(Html5Form):
+
+    candidate = forms.ChoiceField(required=True)
+
+    def __init__(self, *args, **kwargs):
+
+        kwargs = helpers.copy_to_self(self, &quot;job&quot;, kwargs)
+        super(OpenCloseJobForm, self).__init__(*args, **kwargs)
+
+        self.fields[&quot;candidate&quot;].label = &quot;Who did you hire for this job?&quot;
+        self.fields[&quot;candidate&quot;].required = False
+        self.fields[&quot;candidate&quot;].choices = [(&quot;&quot;, &quot;-------------&quot;)]
+        candidates = Candidate.objects.filter(job=self.job)
+        self.fields[&quot;candidate&quot;].choices += [(&quot;Candidates&quot;, [(c.id, c) for c in candidates] + [(&quot;other&quot;, &quot;Someone else&quot; if candidates else &quot;Candidate not in %s&quot; % settings.SITE_NAME)])]
+        self.fields[&quot;candidate&quot;].choices += [(&quot;none&quot;, &quot;No hire made&quot;)]
+
+    def clean_candidate(self):
+        candidate = self.cleaned_data.get(&quot;candidate&quot;)
+        if not candidate:
+            raise forms.ValidationError(&quot;This field is required.&quot;)
+        return candidate
+
+    def save(self):
+
+        choice = self.data.get(&quot;candidate&quot;)
+
+        if not choice:
+            return None
+
+        Hire.objects.filter(job=self.job).delete()
+
+        if choice == &quot;none&quot;:
+            return None
+
+        candidate_id = choice
+        candidate = None if choice == &quot;other&quot; else Candidate.objects.get(id=candidate_id)
+
+        hire = Hire(job=self.job, candidate=candidate)
+        hire.save()
+        return hire
+</pre>
+
+<p>
+At this point, I decide to refactor to move as much of the UI logic as possible into the form itself, and reduce the amount of javsacript. I end up with a widget and a form that implements the show/hide inner form behavior. That part grows from 40 lines to 90 lines.
+</p>
+
+<pre name="code" class="python">
+class ToggleLinkWidget(widgets.HiddenInput):
+
+    button_value = None
+
+    def __init__(self, attrs=None, check_test=bool, button_value=&quot;toggle&quot;):
+        super(ToggleLinkWidget, self).__init__(attrs)
+        self.button_value = button_value
+
+    def render(self, name, value, attrs=None):
+        html = super(ToggleLinkWidget, self).render(name, value, attrs)
+        link = &quot;&quot;
+        if not value:
+            button_value = self.button_value
+            return &quot;&lt;input class='button-link' type='submit' name='%(name)s' value='%(button_value)s'&gt;&quot; % locals()
+        return html
+
+class OpenCloseJobForm(Html5Form):
+
+    job_id = fields.CharField(required=True, widget=widgets.HiddenInput())
+    expanded = fields.BooleanField(required=False, initial=False, widget=ToggleLinkWidget(button_value=&quot;close&quot;))
+    candidate = fields.ChoiceField(required=True)
+
+    def __init__(self, *args, **kwargs):
+
+        super(OpenCloseJobForm, self).__init__(*args, **kwargs)
+        self.job = Job.objects.get(id=self.data.get(&quot;job_id&quot;))
+
+        self.fields[&quot;candidate&quot;].label = &quot;Who did you hire for this job?&quot;
+        self.fields[&quot;candidate&quot;].required = False
+        self.fields[&quot;candidate&quot;].choices = [(&quot;&quot;, &quot;-------------&quot;)]
+        candidates = Candidate.objects.filter(job=self.job)
+        self.fields[&quot;candidate&quot;].choices += [(&quot;Candidates&quot;, [(c.id, c) for c in candidates] + [(&quot;other&quot;, &quot;Someone else&quot; if candidates else &quot;Candidate not in %s&quot; % settings.SITE_NAME)])]
+        self.fields[&quot;candidate&quot;].choices += [(&quot;none&quot;, &quot;No hire made&quot;)]
+
+        # the close button is NOT toggled on; hide thother fields
+        if not self.is_expanded():
+            del self.fields[&quot;candidate&quot;]
+
+        # don't show validation errors when first expanding the form
+        if not self.data.get(&quot;inner-submit&quot;):
+            self._errors = {}
+
+    def is_valid(self):
+        if self.data.get(&quot;inner-submit&quot;):
+            return super(OpenCloseJobForm, self).is_valid()
+        return False
+
+    def is_expanded(self):
+        return self.data and self.data.get(&quot;expanded&quot;) == &quot;close&quot;
+
+    def as_ul(self):
+        html = super(OpenCloseJobForm, self).as_ul()
+        if self.is_expanded():
+            button = &quot;&lt;input type='submit' name='inner-submit' value='Close Job'&gt;&quot;
+            return mark_safe(&quot;&lt;div class='expanded-box'&gt;%(html)s %(button)s&lt;/div&gt;&quot; % locals())
+        return html
+
+    def clean_candidate(self):
+        candidate = self.cleaned_data.get(&quot;candidate&quot;)
+        if not candidate:
+            raise forms.ValidationError(&quot;This field is required.&quot;)
+        return candidate
+
+    def save(self, request):
+
+        self.job.is_open = not self.job.is_open
+
+        if self.job.is_open:
+            Hire.objects.filter(job=self.job).delete()
+            messages.success(request, &quot;%s was set to open and is publicly available.&quot; % self.job)
+        else:
+            messages.success(request, &quot;%s was closed and is no longer available publicly.&quot; % self.job)
+
+        self.job.save()
+
+        choice = self.data.get(&quot;candidate&quot;)
+
+        if not choice:
+            return None
+
+        Hire.objects.filter(job=self.job).delete()
+
+        if choice == &quot;none&quot;:
+            return None
+
+        candidate_id = choice
+        candidate = None if choice == &quot;other&quot; else Candidate.objects.get(id=candidate_id)
+
+        hire = Hire(job=self.job, candidate=candidate)
+        hire.save()
+        return hire
+</pre>
+
+<p>
+But look at the javascript, which has shrunk from 90 lines to 40.
+</p>
+
+<pre name="code" class="javascript">
+$(document).ready(function() {
+
+ function submit_handler() {
+
+  var button = $(this);
+  var record = button.parents(&quot;.record&quot;);
+  var form = record.find(&quot;.job-prompt-hire-form&quot;);
+  var form_box = form.parents(&quot;.form-box&quot;);
+  var job_link = record.find(&quot;.title a&quot;);
+
+  var form_data = form.serialize();
+  // also record which input button was pressed
+  if (button.is(&quot;.button-link&quot;)) {
+   form_data = form_data += &quot;&amp;expanded=close&quot;;
+  } else {
+   form_data = form_data += &quot;&amp;inner-submit=Close Job&quot;;
+  }
+
+  $.ajax({
+   url: form.attr(&quot;action&quot;) + &quot;?ajax&quot;,
+   data: form_data,
+   type: form.attr(&quot;method&quot;),
+   success: function (data) {
+    form_box.html(data);
+    if (!data) {
+     record.find(&quot;.content&quot;).toggleClass(&quot;record-disabled&quot;);
+     record.find(&quot;.block&quot;).toggleClass(&quot;record-disabled&quot;);
+    }
+   },
+   error: function (jqXHR, textStatus, errorThrown) {
+    // fallback to closing the job from the job overview page
+    window.location = form.attr(job_link.attr(&quot;href&quot;));
+   }
+  });
+
+  return false;
+ }
+
+ // jQuery does not support live submit handling in IE
+ // also, need to record actual pressed element
+ $(&quot;.jobs-record-list .job-prompt-hire-form .button-link&quot;).live(&quot;click&quot;, submit_handler);
+ $(&quot;.jobs-record-list .job-prompt-hire-form input[type=submit]&quot;).live(&quot;click&quot;, submit_handler);
+
+});
+</pre>
+
+<p>
+Interestingly, the total line count has remained around the same. This suggests that for my style, the code density of python and jQuery is about the same. Personally, I find the python code to be more maintainable. In particular, I very much like that I'm minimizing the number of times jQuery is changing the DOM, and rebinding events. All of the state transitions are happening in the form. As a side effect, the show/hide behavior is totally functional without javascript enabled.
+</p>
+
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/javascript">javascript</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/django">django</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/unobtrusive">unobtrusive</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

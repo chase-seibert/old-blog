@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>pydev colorscheme for gvim</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2012/07/13/pydev-colorscheme-for-gvim.html" />
+
+        <meta property="og:title" content="pydev colorscheme for gvim"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2012/07/13/pydev-colorscheme-for-gvim.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            pydev colorscheme for gvim
+                            
+                                <span class="post-date subtitle">13 Jul 2012</span>
+                            
+                        </h1>
+                    
+                    <p>
+I'm trying to make the switch from Eclipse to vim. I've started compiling a <a href="https://github.com/chase-seibert/chase-vimrc">vimrc github project</a>. So far, the only customization I had to implement myself was making the color scheme look like PyDev. 
+</p>
+
+<p>
+Just stick <a href="https://raw.github.com/chase-seibert/chase-vimrc/master/bundle/extra-colors/colors/pydev.vim">pydev.vim</a> in your colors directory.
+</p>
+
+<pre name="code" class="bash">
+set background=light
+highlight clear
+if exists("syntax_on")
+    syntax reset
+endif
+
+" Syntax group
+highlight Comment    gui=none guifg=#C0C0C0 guibg=bg      ctermfg=2
+highlight Constant   gui=none guifg=#00884c guibg=bg      ctermfg=White
+highlight Error      gui=none guifg=#f8f8f8 guibg=#4040ff term=reverse        ctermbg=Red    ctermfg=White
+highlight Identifier gui=bold guifg=#000000 guibg=bg      ctermfg=Green
+highlight Ignore     gui=none guifg=bg      guibg=bg      ctermfg=black
+highlight PreProc    gui=none guifg=#0000FF guibg=bg      ctermfg=Green
+highlight Special    gui=none guifg=#00AA00 guibg=bg      ctermfg=DarkMagenta
+highlight Statement  gui=none guifg=#0000FF guibg=bg      ctermfg=White
+highlight Todo       gui=none guifg=#ff5050 guibg=white   term=standout       ctermbg=Yellow ctermfg=Black
+highlight Type       gui=none guifg=#000000 guibg=bg      ctermfg=LightGreen
+highlight Underlined gui=none guifg=blue    guibg=bg
+highlight String     gui=none guifg=#00AA00 guibg=bg      ctermfg=Yellow
+highlight Number     gui=none guifg=#800000 guibg=bg      ctermfg=White
+
+if !has("gui_running")
+    hi link Float          Number
+    hi link Conditional    Repeat
+    hi link Include        PreProc
+    hi link Macro          PreProc
+    hi link PreCondit      PreProc
+    hi link StorageClass   Type
+    hi link Structure      Type
+    hi link Typedef        Type
+    hi link Tag            Special
+    hi link Delimiter      Normal
+    hi link SpecialComment Special
+    hi link Debug          Special
+endif
+</pre>
+
+<p>
+Eclipse:
+</p>
+
+<img src="https://lh5.googleusercontent.com/-CvWpcCDc9RI/UABhgs0mSEI/AAAAAAAALvI/E1Y8_eJGay0/s938/2012071317.png">
+
+<p>
+gvim:
+</p>
+
+<img src="https://lh5.googleusercontent.com/-k1xgG6QMc8k/UABhgkNyI0I/AAAAAAAALvI/BzYRSbZJKJ0/s1012/2012071347.png">
+
+<p>
+See how those None values are bolded? You can fix that, plus a few other syntax quirky, with a <a href="http://www.vim.org/scripts/script.php?script_id=790">customized python syntax file</a>.
+</p>
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/vim">vim</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Designing for the Mental Model</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2016/04/15/mental-models.html" />
+
+        <meta property="og:title" content="Designing for the Mental Model"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2016/04/15/mental-models.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Designing for the Mental Model
+                            
+                                <span class="post-date subtitle">15 Apr 2016</span>
+                            
+                        </h1>
+                    
+                    <p>Software is typically more complicated under the hood than it looks on the surface. A good product presents a simple and consistent user interface. Ideally, the implementation is also simple and consistent with the story the UI is telling. But that&#39;s often not possible. If the implementation is complex, if and when that complexity leaks through to the user experience, it will violate the user&#39;s expectations and provide a bad experience.</p>
+
+<h1>Mental Models</h1>
+
+<p>This user expectation is what I will call their mental model of your product. A good example of a simple mental model, and one that is never violated, is iOS.</p>
+
+<p><img src="/blog/images/ios_home.png" alt="ios home"></p>
+
+<p>Under the hood, there is a more or less traditional operating system with a file system, a multi-tasking process scheduler, even a <a href="http://www.iphonefaq.org/archives/971616">command line</a>. But you <em>never</em> see these things. Do you even know what a file path on iOS looks like? You don&#39;t, and that&#39;s because the user interface model is inviolate - it never breaks down.</p>
+
+<p>Even when things are not working, the user model holds. You never crash to a command line, or see an error dialog with a file path in it. A task running in the background never crashes and throws an alert on top of your current app.</p>
+
+<p>These behaviors enforce the mental model that there IS nothing underlying the iOS home screen. In some sense, that is the lowest level the user is aware of.</p>
+
+<p>Apple has a history of inviolate mental models. When I started on Macs, the GUI was already the only thing that existed. There was no &quot;there&quot; underneath.</p>
+
+<p><img src="/blog/images/system6.jpg" alt="system 6"></p>
+
+<p>Applications were icons; there was nothing else. You installed and uninstalled them by moving the icon around, or to the trash. There was no other way to make an action happen than to navigate to a menu item; that&#39;s where the platonic form of that action &quot;lived&quot;.</p>
+
+<h1>Mental Model Breakdowns</h1>
+
+<p>When the user&#39;s mental model is violated, it&#39;s a poor user experience. This often happens with new products especially.</p>
+
+<p>In recent versions of OS X, the Notes app has become a cloud synced system. Apple kind of sucks at cloud stuff; their v1 products especially rarely work smoothly. Yet, they did not go out of their way to prevent the inevitable errors from breaking the user&#39;s mental model.</p>
+
+<p>When you create a note on your Mac, it&#39;s supposed to show up on your phone. What if it does not show up? You don&#39;t know why. Maybe the internet is slow. Most likely it&#39;s an obscure iCloud permissions issues; more and more, &quot;sign out of iCloud and sign back in&quot; is becoming the &quot;did you try rebooting?&quot; of the Mac experience.</p>
+
+<p>In any case, there is no feedback that something went wrong. No status message, no errors, not even a counter of items still being synced. Nothing. When &quot;just works&quot; doesn&#39;t actually work, you have no recourse.</p>
+
+<p>I&#39;m sure some designer somewhere thought this was a great design. Why burden the user with what&#39;s happening behind the scenes? I can just here them saying that this is a bug on the backend, and once that&#39;s fixed their perfect design will once again result in a perfect product. Newsflash - to the user, your design sucks. They are not making the distinction between interface design and implementation. To them, the design is what failed.</p>
+
+<p>The same issues plagued the new photos app on release. You drag photos into a folder. Nothing happens. Did it get my pictures? Not sure. You drag them again. Nothing. Five minutes later, iCloud syncs and you have two copies of your images in the folder. Why isn&#39;t there a status bar or a count of how many items are pending - SOME user feedback when the user makes this fundamental action? Probably because the status bar would be &quot;ugly&quot;. More and more, Apple&#39;s ideal UI is an empty white box.</p>
+
+<h1>Now, You Try</h1>
+
+<p>If you&#39;re working on products, especially early products, plan to not violate the user&#39;s mental model. Plan for things not working perfectly all the time. When errors do happen, you have two choices:</p>
+
+<ul>
+<li>Make the internals visible</li>
+<li>Generic/unhelpful error/status messages</li>
+</ul>
+
+<p>Assuming perfect implementation is a bad design - or at least the user would say it&#39;s bad design. Which is a better user experience?</p>
+
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

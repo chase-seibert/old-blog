@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Getting Started with AWS Device Farm and Python Appium</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2017/03/14/getting-started-aws-device-farm-appium-python.html" />
+
+        <meta property="og:title" content="Getting Started with AWS Device Farm and Python Appium"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2017/03/14/getting-started-aws-device-farm-appium-python.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Getting Started with AWS Device Farm and Python Appium
+                            
+                                <span class="post-date subtitle">14 Mar 2017</span>
+                            
+                        </h1>
+                    
+                    <p><a href="https://aws.amazon.com/device-farm">AWS Device Farm</a> is a service for running
+mobile app integration tests against a suite of physical devices. The
+Amazon <a href="http://boto3.readthedocs.io/en/latest/reference/services/devicefarm.html">documentation</a>
+is exhaustive, and they support many different API clients.
+However, the documentation does not have a quick start example for thing most
+people are going to want to do first: run a test. Here is some working code
+using the Python <code>boto3</code> client.</p>
+
+<h1>Setup</h1>
+
+<p>First, you will want to create a Python virtual environment for this and install
+some dependencies. Feel free to omit the versions numbers, but I&#39;ve tested the
+script against these versions.</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">virtualenv venv
+. venv/bin/activate
+pip install <span class="nv">boto3</span><span class="o">==</span>1.4.4 <span class="nv">requests</span><span class="o">==</span>2.13.0
+</code></pre></div>
+<h1>Pre-requisites</h1>
+
+<p>This script assumes you have already built an APK file for your mobile
+app, and that you have bundled your Appium Python tests in a zip file as
+per the <a href="http://docs.aws.amazon.com/devicefarm/latest/developerguide/test-types-android-appium-python.html">Amazon Appium Python documentation</a>.</p>
+
+<p>Need to write your first tests? I have a <a href="http://chase-seibert.github.io/blog/2017/01/06/appium-react-native-quickstart.html">Appium Python Quickstart</a>,
+too.</p>
+
+<p><em>Note: for the bundled Appium tests, make sure to do the wheel step on a Linux
+ x86_64 vm.</em></p>
+
+<p>Also, you need to be authenticated to AWS. The easiest method is to generate an
+API key and secret for your user in the AWS web console, and run <code>aws configure</code>
+via the AWS <a href="http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html">Command line interface</a>.</p>
+
+<h1>Running the Test Suite</h1>
+
+<p>The script bellow will do the following:</p>
+
+<ol>
+<li>Find the ID your AWS device farm project by name.</li>
+<li>Find the ID of the pool of devices you want to use to test by name.</li>
+<li>Upload a local Android APK file to AWS.</li>
+<li>Upload a local zip file of your tests, requirements.txt and wheelhouse.</li>
+<li>Start a test run.</li>
+<li>Poll until the test run is completed.</li>
+</ol>
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="c">#!/usr/bin/env python</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">pprint</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="kn">import</span> <span class="nn">boto3</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+
+
+<span class="n">REGION</span> <span class="o">=</span> <span class="s">&#39;us-west-2&#39;</span>
+<span class="n">PROJECT_NAME</span> <span class="o">=</span> <span class="s">&#39;My Mobile App&#39;</span>
+<span class="n">DEVICE_POOL_NAME</span> <span class="o">=</span> <span class="s">&#39;Top Devices&#39;</span>  <span class="c"># this is a default pool</span>
+<span class="n">RUN_TIMEOUT_SECONDS</span> <span class="o">=</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">20</span>
+<span class="n">WEB_URL_TEMPLATE</span> <span class="o">=</span> <span class="s">&#39;https://us-west-2.console.aws.amazon.com/devicefarm/home#/projects/</span><span class="si">%s</span><span class="s">/runs/</span><span class="si">%s</span><span class="s">&#39;</span>
+
+
+<span class="n">device_farm</span> <span class="o">=</span> <span class="n">boto3</span><span class="o">.</span><span class="n">client</span><span class="p">(</span><span class="s">&#39;devicefarm&#39;</span><span class="p">,</span> <span class="n">region_name</span><span class="o">=</span><span class="n">REGION</span><span class="p">)</span>
+<span class="n">s3</span> <span class="o">=</span> <span class="n">boto3</span><span class="o">.</span><span class="n">client</span><span class="p">(</span><span class="s">&#39;s3&#39;</span><span class="p">,</span> <span class="n">region_name</span><span class="o">=</span><span class="n">REGION</span><span class="p">)</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">get_project_arn</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">project</span> <span class="ow">in</span> <span class="n">device_farm</span><span class="o">.</span><span class="n">list_projects</span><span class="p">()[</span><span class="s">&#39;projects&#39;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">project</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">project</span><span class="p">[</span><span class="s">&#39;arn&#39;</span><span class="p">]</span>
+    <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s">&#39;Could not find project </span><span class="si">%r</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">get_device_pool</span><span class="p">(</span><span class="n">project_arn</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">device_pool</span> <span class="ow">in</span> <span class="n">device_farm</span><span class="o">.</span><span class="n">list_device_pools</span><span class="p">(</span><span class="n">arn</span><span class="o">=</span><span class="n">project_arn</span><span class="p">)[</span><span class="s">&#39;devicePools&#39;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">device_pool</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">device_pool</span><span class="p">[</span><span class="s">&#39;arn&#39;</span><span class="p">]</span>
+    <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s">&#39;Could not find device pool </span><span class="si">%r</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_upload_presigned_url</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">file_path</span><span class="p">):</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;content-type&#39;</span><span class="p">:</span> <span class="s">&#39;application/octet-stream&#39;</span><span class="p">})</span>
+        <span class="k">assert</span> <span class="n">result</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span>
+
+
+<span class="k">def</span> <span class="nf">create_upload</span><span class="p">(</span><span class="n">project_arn</span><span class="p">,</span> <span class="n">upload_type</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">file_path</span><span class="p">):</span>
+    <span class="c"># name needs to be a file name like app-releaseProduction.apk, not &quot;Android App&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Uploading </span><span class="si">%s</span><span class="s"> </span><span class="si">%r</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">upload_type</span><span class="p">,</span> <span class="n">file_path</span><span class="p">))</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">device_farm</span><span class="o">.</span><span class="n">create_upload</span><span class="p">(</span>
+        <span class="n">projectArn</span><span class="o">=</span><span class="n">project_arn</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="n">upload_type</span><span class="p">,</span>
+        <span class="n">contentType</span><span class="o">=</span><span class="s">&#39;application/octet-stream&#39;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">upload</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s">&#39;upload&#39;</span><span class="p">]</span>
+    <span class="n">_upload_presigned_url</span><span class="p">(</span><span class="n">upload</span><span class="p">[</span><span class="s">&#39;url&#39;</span><span class="p">],</span> <span class="n">file_path</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">upload</span><span class="p">[</span><span class="s">&#39;arn&#39;</span><span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">schedule_run</span><span class="p">(</span><span class="n">project_arn</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">device_pool_arn</span><span class="p">,</span> <span class="n">app_arn</span><span class="p">,</span> <span class="n">test_package_arn</span><span class="p">):</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Scheduling test run </span><span class="si">%r</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">device_farm</span><span class="o">.</span><span class="n">schedule_run</span><span class="p">(</span>
+        <span class="n">projectArn</span><span class="o">=</span><span class="n">project_arn</span><span class="p">,</span>
+        <span class="n">appArn</span><span class="o">=</span><span class="n">app_arn</span><span class="p">,</span>
+        <span class="n">devicePoolArn</span><span class="o">=</span><span class="n">device_pool_arn</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+        <span class="n">test</span><span class="o">=</span><span class="p">{</span>
+            <span class="s">&#39;type&#39;</span><span class="p">:</span> <span class="s">&#39;APPIUM_PYTHON&#39;</span><span class="p">,</span>
+            <span class="s">&#39;testPackageArn&#39;</span><span class="p">:</span> <span class="n">test_package_arn</span><span class="p">,</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+    <span class="n">run</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s">&#39;run&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">run</span><span class="p">[</span><span class="s">&#39;arn&#39;</span><span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">_poll_until</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">arn</span><span class="p">,</span> <span class="n">get_status_callable</span><span class="p">,</span> <span class="n">success_statuses</span><span class="p">,</span> <span class="n">timeout_seconds</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+    <span class="n">check_every_seconds</span> <span class="o">=</span> <span class="mi">10</span> <span class="k">if</span> <span class="n">timeout_seconds</span> <span class="o">==</span> <span class="n">RUN_TIMEOUT_SECONDS</span> <span class="k">else</span> <span class="mi">1</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">method</span><span class="p">(</span><span class="n">arn</span><span class="o">=</span><span class="n">arn</span><span class="p">)</span>
+        <span class="n">current_status</span> <span class="o">=</span> <span class="n">get_status_callable</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">current_status</span> <span class="ow">in</span> <span class="n">success_statuses</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">result</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Waiting for </span><span class="si">%r</span><span class="s"> status </span><span class="si">%r</span><span class="s"> to be in </span><span class="si">%r</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">arn</span><span class="p">,</span> <span class="n">current_status</span><span class="p">,</span> <span class="n">success_statuses</span><span class="p">))</span>
+        <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">now</span> <span class="o">-</span> <span class="n">start</span> <span class="o">&gt;</span> <span class="n">timeout_seconds</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">StopIteration</span><span class="p">(</span><span class="s">&#39;Time out waiting for </span><span class="si">%r</span><span class="s"> to be done&#39;</span> <span class="o">%</span> <span class="n">arn</span><span class="p">)</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">check_every_seconds</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">wait_for_upload</span><span class="p">(</span><span class="n">arn</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">_poll_until</span><span class="p">(</span>
+        <span class="n">device_farm</span><span class="o">.</span><span class="n">get_upload</span><span class="p">,</span>
+        <span class="n">arn</span><span class="p">,</span>
+        <span class="n">get_status_callable</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s">&#39;upload&#39;</span><span class="p">][</span><span class="s">&#39;status&#39;</span><span class="p">],</span>
+        <span class="n">success_statuses</span><span class="o">=</span><span class="p">(</span><span class="s">&#39;SUCCEEDED&#39;</span><span class="p">,</span> <span class="p">),</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">wait_for_run</span><span class="p">(</span><span class="n">test_package_arn</span><span class="p">):</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">_poll_until</span><span class="p">(</span>
+        <span class="n">device_farm</span><span class="o">.</span><span class="n">get_run</span><span class="p">,</span>
+        <span class="n">test_package_arn</span><span class="p">,</span>
+        <span class="n">get_status_callable</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s">&#39;run&#39;</span><span class="p">][</span><span class="s">&#39;status&#39;</span><span class="p">],</span>
+        <span class="n">success_statuses</span><span class="o">=</span><span class="p">(</span><span class="s">&#39;COMPLETED&#39;</span><span class="p">,</span> <span class="p">),</span>
+        <span class="n">timeout_seconds</span><span class="o">=</span><span class="n">RUN_TIMEOUT_SECONDS</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">final_run</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s">&#39;run&#39;</span><span class="p">]</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Final run counts: </span><span class="si">%(counters)s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">final_run</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">final_run</span><span class="p">[</span><span class="s">&#39;result&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;PASSED&#39;</span>
+
+
+<span class="k">def</span> <span class="nf">get_run_web_url</span><span class="p">(</span><span class="n">project_arn</span><span class="p">,</span> <span class="n">test_run_arn</span><span class="p">):</span>
+    <span class="c"># project_arn = arn:aws:devicefarm:us-west-2:foo:project:NEW-ARN-HERE</span>
+    <span class="c"># test_run_arn = arn:aws:devicefarm:us-west-2:foo:run:project-arn/NEW-ARN-HERE</span>
+    <span class="n">project_arn_id</span> <span class="o">=</span> <span class="n">project_arn</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;:&#39;</span><span class="p">)[</span><span class="mi">6</span><span class="p">]</span>
+    <span class="n">test_run_arid</span> <span class="o">=</span> <span class="n">test_run_arn</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">WEB_URL_TEMPLATE</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">project_arn_id</span><span class="p">,</span>
+        <span class="n">test_run_arid</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">format</span><span class="o">=</span><span class="s">&#39;</span><span class="si">%(message)s</span><span class="s">&#39;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+    <span class="n">project_arn</span> <span class="o">=</span> <span class="n">get_project_arn</span><span class="p">(</span><span class="n">PROJECT_NAME</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Project: </span><span class="si">%r</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">project_arn</span><span class="p">)</span>
+    <span class="n">device_pool_arn</span> <span class="o">=</span> <span class="n">get_device_pool</span><span class="p">(</span><span class="n">project_arn</span><span class="p">,</span> <span class="n">DEVICE_POOL_NAME</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Device pool: </span><span class="si">%r</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">device_pool_arn</span><span class="p">)</span>
+    <span class="n">app_arn</span> <span class="o">=</span> <span class="n">create_upload</span><span class="p">(</span>
+        <span class="n">project_arn</span><span class="p">,</span>
+        <span class="s">&#39;ANDROID_APP&#39;</span><span class="p">,</span>
+        <span class="s">&#39;my-app.apk&#39;</span><span class="p">,</span>
+        <span class="s">&#39;/tmp/my-app.apk&#39;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">wait_for_upload</span><span class="p">(</span><span class="n">app_arn</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;App: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">app_arn</span><span class="p">)</span>
+    <span class="n">test_package_arn</span> <span class="o">=</span> <span class="n">create_upload</span><span class="p">(</span>
+        <span class="n">project_arn</span><span class="p">,</span>
+        <span class="s">&#39;APPIUM_PYTHON_TEST_PACKAGE&#39;</span><span class="p">,</span>
+        <span class="s">&#39;test_bundle.zip&#39;</span><span class="p">,</span>
+        <span class="s">&#39;/tmp/test_bundle.zip&#39;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">wait_for_upload</span><span class="p">(</span><span class="n">test_package_arn</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Test package: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">test_package_arn</span><span class="p">)</span>
+    <span class="n">test_run_arn</span> <span class="o">=</span> <span class="n">schedule_run</span><span class="p">(</span>
+        <span class="n">project_arn</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s">&#39;Test Run 1&#39;</span><span class="p">,</span>
+        <span class="n">device_pool_arn</span><span class="o">=</span><span class="n">device_pool_arn</span><span class="p">,</span>
+        <span class="n">app_arn</span><span class="o">=</span><span class="n">app_arn</span><span class="p">,</span>
+        <span class="n">test_package_arn</span><span class="o">=</span><span class="n">test_package_arn</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Scheduled test run </span><span class="si">%r</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">test_run_arn</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;View scheduled run at </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">get_run_web_url</span><span class="p">(</span><span class="n">project_arn</span><span class="p">,</span> <span class="n">test_run_arn</span><span class="p">))</span>
+    <span class="n">success</span> <span class="o">=</span> <span class="n">wait_for_run</span><span class="p">(</span><span class="n">test_run_arn</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Success&#39;</span><span class="p">)</span>
+</code></pre></div>
+<p>The only tricky parts here are using the pre-signed URLs from the <code>create_upload</code>
+step to make a subsequent <code>PUT</code> call with the file contents, and setting the
+<code>ContentType</code> correctly for that to work. Also, we need to poll for both uploads
+to be processed before we kick off the test run.</p>
+
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

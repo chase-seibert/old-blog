@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>getResource() resource patterns</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2009/01/13/getresource-resource-patterns.html" />
+
+        <meta property="og:title" content="getResource() resource patterns"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2009/01/13/getresource-resource-patterns.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            getResource() resource patterns
+                            
+                                <span class="post-date subtitle">13 Jan 2009</span>
+                            
+                        </h1>
+                    
+                    <p>The Java <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/lang/ClassLoader.html">class loader</a> contains a convenience method <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/lang/ClassLoader.html#getResource(java.lang.String)">getResource()</a>, which is great for externalizing some static content from your code. In the past, I've used it almost exclusively with .properties files. Could there be a more ideal candidate for data that should be outside the code?</p>
+
+<p>Recently, I wanted to leverage this concept to load text and html data. I needed to generate a email based on a static template. In order to support rich html email clients as well as plain text clients, it's necessary to send a MultiPart MIME email with both versions. My options were to hard-code the HTML/text templates in the Java code, or externalize them as files. I had a utility method lying around that would make this easy:</p>
+
+<pre name="code" class="java">
+    private static String txtTemplate, htmlTemplate;
+
+    private static final String EMAIL_TEMPLATE_TXT = &quot;LegacyAppointmentEmail.txt&quot;;
+    private static final String EMAIL_TEMPLATE_HTML = &quot;LegacyAppointmentEmail.html&quot;;
+ 
+ static {
+        try {
+            txtTemplate = readFile(EMAIL_TEMPLATE_TXT);
+            htmlTemplate = readFile(EMAIL_TEMPLATE_HTML);
+        } catch (IOException e) {
+            LOG.error(e);
+        }
+    }
+ 
+    private static String readFile(String fileName) throws IOException {
+
+        InputStream stream = LegacyAppointmentEmail.class.getResourceAsStream(fileName);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+        StringBuilder builder = new StringBuilder();
+
+        String line;
+        while ((line = reader.readLine()) != null)
+            builder.append(line).append(&quot;\n&quot;);
+
+        reader.close();
+        return builder.toString();        
+    } 
+</pre>
+
+<p>My first unit test failed on the line where the first file was loaded. Initially, I thought the path must be wrong. I played with various combinations, such as moving the file to the root, putting the full scope into the file path, etc. Eventually, I went back and looked at some working code I had written in the past. The only difference I could see was that is was a .properties file, not a .txt file. I renamed the file, and it worked!</p>
+
+<p>I knew that <a href="http://www.java2s.com/Code/Java/Development-Class/Loadresourcefilerelativetotheclasslocation.htm">wasn't right</a>, but I put it aside and continued on. When I came back to it, I tried to come up with the smallest reproducible case I could. I thought that if I was still stumped, at least I could post it on <a href="http://stackoverflow.com/">stackoverflow</a>.</p>
+
+<pre name="code" class="java">
+    public class Test {
+
+        public static void main(String[] args) {
+
+            assert Test.class.getResource(&quot;file.properties&quot;) != null;
+            assert Test.class.getResource(&quot;file.txt&quot;) != null;
+        }
+    }
+</pre>
+
+<p><i>Note: file.properties and file.txt should both be blank files in the same directory as Test.java.</i></p>
+
+<p>This test was still failing on the txt file, <b>in IntelliJ</b>. In order to get the cleanest repo possible, I saved Test.java to a new directory, and compiled and ran it from the command line using just the "javac" and "java" JDK command-line tools. Immediately, it started working.</p>
+
+<p>Having isolated the issue to IntelliJ, I did a little digging. Even when I took all the classpath and "java" command arguments from IntelliJ and ran them manually, it still worked. Having eliminated runtime issues, I went into the IntelliJ compiler settings. The very first window shows the following option:</p>
+
+<img src="http://lh5.ggpht.com/_EE2zVzGv1Ds/SWzVaCeIsUI/AAAAAAAAH4s/N2t-8mVJUeM/s800/IntelliJResourcePatterns.gif" />
+
+<p><i>***Shakes fist at IntelliJ***</i> Oh well, it was a learning experience.</p>
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

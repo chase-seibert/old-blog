@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Docker/OSX Quickstart (not grokking docker yet? start here)</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2015/04/11/docker-osx-quickstart.html" />
+
+        <meta property="og:title" content="Docker/OSX Quickstart (not grokking docker yet? start here)"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2015/04/11/docker-osx-quickstart.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Docker/OSX Quickstart (not grokking docker yet? start here)
+                            
+                                <span class="post-date subtitle">11 Apr 2015</span>
+                            
+                        </h1>
+                    
+                    <p>Docker has only been around since 2013, but it seems like it&#39;s all over my Twitter feed and RSS reader. I&#39;ve gone trough the &quot;Hello world&quot; example in the past, but never felt like I really understood either the value proposition, or exactly how it works. This week, I had some time to sit down and give it more of my attention. What I found was that it was neither as mysterious or as complicated as I anticipated.</p>
+
+<h2>Installing on a Mac</h2>
+
+<p>Docker was born on Linux and uses Linux internals like <a href="https://linuxcontainers.org/">LXC</a> to work its magic. There is a Windows native version in the works (not that anyone cares). But given that software engineering in the Bay Area is dominated by Macs, let&#39;s start by looking at how to get this installed and running on OSX.</p>
+
+<p>First off, don&#39;t try to install it via <code>brew</code>, or any other package manager. Docker is written in Go, which has the advantage of compiling down to dependency-less binaries. Plus, the project is moving so fast that the versions in package managers are out of date. So, suck it up and install it manually by <a href="https://github.com/boot2docker/osx-installer/releases/tag/v1.5.0">downloading the binary</a>.</p>
+
+<p>If you can open a terminal and run <code>docker --version</code>, you&#39;re good to go. This tutorial is for version 1.5.0.</p>
+
+<h2>Boot2Docker</h2>
+
+<p>If you try to run a docker image now, you will get an cryptic error like <code>docker max dial unix /var/run/docker.sock: no such file or directory</code>. This is because the Docker daemon process is not running. Actually, it cannot run on a Mac! Instead, you <em>must</em> use <a href="http://boot2docker.io/">boot2docker</a>, which is a tiny virtual machine that runs in VirtualBox and has the Docker daemon. Again, use the binary installer (sorry!).</p>
+
+<p>To get up and running, open a terminal the run the following.</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">boot2docker init
+boot2docker up
+<span class="nb">eval</span> <span class="s2">&quot;$(boot2docker shellinit)&quot;</span>
+docker run ubuntu:14.04 /bin/echo <span class="s1">&#39;Hello world&#39;</span>
+</code></pre></div>
+<p>That&#39;s your hello world example. Let&#39;s breakdown what&#39;s happening here. <code>boot2docker init</code> creates a new virtual machine in VirtualBox.</p>
+
+<p><img src="/blog/images/boot2docker.png" alt="boot2docker"></p>
+
+<p>The next step, <code>boot2docker up</code> runs the virtual machine. The <code>eval &quot;$(boot2docker shellinit)&quot;</code> step is setting some environment variables that tell Docker what container context you are currently in. If you run just <code>boot2docker shellinit</code> by itself, you can see the raw output:</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">Writing /Users/chase/.boot2docker/certs/boot2docker-vm/ca.pem
+Writing /Users/chase/.boot2docker/certs/boot2docker-vm/cert.pem
+Writing /Users/chase/.boot2docker/certs/boot2docker-vm/key.pem
+<span class="nb">export </span><span class="nv">DOCKER_HOST</span><span class="o">=</span>tcp://192.168.59.104:2376
+<span class="nb">export </span><span class="nv">DOCKER_CERT_PATH</span><span class="o">=</span>/Users/chase/.boot2docker/certs/boot2docker-vm
+<span class="nb">export </span><span class="nv">DOCKER_TLS_VERIFY</span><span class="o">=</span>1
+</code></pre></div>
+<p>The first three lines are just informational, only the last three lines are printed to stdout.</p>
+
+<p>The last line, <code>docker run ubuntu:14.04 /bin/echo &#39;Hello world&#39;</code> actually instantiates a new Docker container (using Ubuntu 14.04), and runs a single command inside it.</p>
+
+<h3>A Note about Containers</h3>
+
+<p>Containers are little sandboxed Linux instances. Images are the serialized file definition that containers are spun up from. The magic of Docker is that the images are completely portable. This concept escaped me at first. I was under the impression that you needed to build an image on your Mac to run it there, and then build a separate image on Amazon EC2 to run the same thing there.</p>
+
+<p>In fact, you can build an image on your Mac, and then essentially <code>scp</code> that file up to AWS and run it. In reality, you don&#39;t even need to copy it manually, that&#39;s what Docker Hub is for.</p>
+
+<p>Also, the Linux distribution used inside your Docker container does NOT have to match the distribution of the host operating system. You can run Ubuntu inside a CentOS host, and visa-versa.</p>
+
+<p>Finally, images have a built-in <a href="https://docs.docker.com/terms/layer/">layering mechanism</a>. Essentially, you can have a base image and then any number of small layers of diffs on top of that. This is a powerful optimization and abstraction, which we will talk about later.</p>
+
+<h2>Example Python Flask App</h2>
+
+<p>This is the canonical tutorial for Python folks getting started with Docker, and yet I could not complete is successfully with any of the documentation I found. Here is my own special snowflake version.</p>
+
+<p>First, create a new directory called <code>flask</code>. Inside, you are going to create three files.</p>
+
+<p>The first file is called <code>app.py</code>, which is just a simple hello world Flask app.</p>
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">hello</span><span class="p">():</span>
+    <span class="k">return</span> <span class="s">&#39;Hello World!&#39;</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s">&quot;0.0.0.0&quot;</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</code></pre></div>
+<p>Then, create a <code>requirements.txt</code> file to list Flask as a dependency:</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">Flask</span><span class="o">==</span>0.10.1
+</code></pre></div>
+<p>Finally, create your <code>Dockerfile</code>:</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">FROM python:2.7
+ADD . /code
+WORKDIR /code
+RUN pip install -r requirements.txt
+EXPOSE 5000
+CMD python app.py
+</code></pre></div>
+<p>Let&#39;s take a moment and breakdown this last file. The <code>FROM</code> line tells Docker to base this container off of a named image in the public repository called <code>python</code>, and to use the named tag of that image (kind of like a version) of <code>2.7</code>.</p>
+
+<p>The <code>ADD</code> line copies your code from the current directory <code>.</code> to <code>/code</code> inside the Docker container Linux instance. <code>WORKDIR</code> settings the working directory there as well.</p>
+
+<p><code>RUN</code> can be specified multiple times. It tells Docker to run these commands when building the container for the first time. Run steps are actually cached; changing one of them later will only result in that one being run again. This is possible due to the container layering we talked about earlier.</p>
+
+<p><code>EXPOSE</code> tells Docker that the container will be serving port 5000 externally. This is the port we will run the flask app on.</p>
+
+<p>Finally, the <code>CMD</code> line specifies the command that will run inside the container as your main daemon process. If you need multiple daemons, look into <a href="https://docs.docker.com/compose/">docker-compose</a>.</p>
+
+<h3>Run it</h3>
+
+<p>To run the example, execute the following commands:</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">open <span class="s2">&quot;http://$(boot2docker ip):5000&quot;</span>
+docker build -t flask-example .
+docker run -it -p 5000:5000 -v <span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>:/code:ro flask-example
+</code></pre></div>
+<p>This should have opened a browser tab before spawning flask. That likely came up with a &quot;This webpage is not available&quot; error page, but if you refresh it now, you should see your &quot;Hello World!&quot; text.</p>
+
+<p>What you have done is create a named image called <code>flask-example</code> and run it. You can even edit the code on your local file system and it will sync over to Docker (thanks to <code>-v</code>) and flask will restart.</p>
+
+<h2>Running the same container on AWS</h2>
+
+<p>Now, let&#39;s look at how to run that same container on AWS. First, go sign up for <a href="https://hub.docker.com/">Docker Hub</a>. It&#39;s free.</p>
+
+<p>Let&#39;s assume your Docker Hub username is <code>foobar</code>. First, re-build and publish your image:</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">docker build -t foobar/flask-example .
+docker login
+docker push foobar/flask-example
+</code></pre></div>
+<p>Now, create a new EC2 instance. Make sure to use the &quot;Amazon Linux&quot; base image, which will make installing Docker easier. SSH into your instance and run the docker container:</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">sudo yum install -y docker<span class="p">;</span> sudo service docker start
+sudo docker run -it -p 8000:5000 foobar/flask-example
+</code></pre></div>
+<p>The first line simply installs Docker and starts it. The second line pulls down your image from Docker Hub (note: no need to authenticate!), runs it in an interactive shell, and maps the external port 8000 on the host EC2 instance to port 5000 inside the container.</p>
+
+<p>If you have your security group setup to expose port <code>8000</code>, you should be able to open this EC2 public host name on port 8000 in a web browser.</p>
+
+<h1>More Stuff</h1>
+
+<p>When I was getting started with this, I made the mistake of reading about and trying to leverage <code>docker-compose</code> and <code>docker-machine</code> right away. These are official plugins, which ease the configuration of multi-service and multi-machine capabilities in Docker, respectively. I suggest NOT starting in with those until you have the above basics buttoned down. I found that they clouded my understanding of what was happening at first.</p>
+
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/docker">docker</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

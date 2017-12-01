@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Unit testing Django with doctest</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2009/10/14/unit-testing-django-with-doctest.html" />
+
+        <meta property="og:title" content="Unit testing Django with doctest"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2009/10/14/unit-testing-django-with-doctest.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Unit testing Django with doctest
+                            
+                                <span class="post-date subtitle">14 Oct 2009</span>
+                            
+                        </h1>
+                    
+                    <p>
+There are two main ways to write <a href="http://docs.djangoproject.com/en/dev/topics/testing/">tests in Django</a>; doctests and unit tests. Units tests will be familiar to you if you're coming from Java. You basically write new Python code to setup and execute your tests. Doctests are a combination of documentation and unit testing. You actually write executable tests in your comments.
+</p>
+
+<p>
+Why is this is a good idea? Well, for one thing, they make sure your comments are accurate. If you change how a function behaves, your doctests will let you know if you forget to update the comments. But I mainly appreciate them because of their brevity.
+</p>
+
+<pre name="code" class="python">
+def _lucene_location(job):
+    """Formats a Lucene query for searching by city/state
+
+    Values must be double-quoted in case there are spaces
+    &gt;&gt;&gt; _lucene_location(Job(city="Fort Worth", state="TX"))
+    ' +JOBCITY:"Fort Worth" +JOBSTATE:"TX"'
+
+    Need to escape quotes in the city/state values
+    &gt;&gt;&gt; _lucene_location(Job(city='"Bad" City', state="MA"))
+    ' +JOBCITY:"%22Bad%22 City" +JOBSTATE:"MA"'
+
+    """
+    return "".join([
+        ' +%s:"%s"' % (field_solr[attr], urllib.quote(getattr(job, attr), " "))
+        for attr in  ["city", "state"]
+        ])
+</pre>
+
+<p>
+Here we have a function that takes a Job model object and formats a Lucene search string for city and state. The primary edge case, which we are testing for, is that the city name can contain a space, so it needs to be in double-quotes. But what if the name itself has a double-quote character? Then it needs to be encoded.
+</p>
+
+<p>
+These conditions are covered by doctests, where ">>>" denotes a statement to be run in a Python interactive session, and where the following line is the expected result. I can't think of a way to express these tests with less code.
+</p>
+
+<p>
+Doctests have some downsides. They are not as flexible as unit tests. If your tests require a complicated setup procedure, that's probably better done as a unit test. The other downside I encounted was documentation. The Django website simply tells you to place your doctests in a file called tests.py. But of course, most developers will want to execute doctests that are in-line with functions in other .py files.
+</p>
+
+<p>
+The solution is easy, but was not readily apparent to me from the documentation. Simply put this in your tests.py file:
+</p>
+
+<pre name="code" class="python">
+from search.models import Job
+from search.placement import _lucene_location, _lucene_query, _fuzzy_titles
+
+__test__ = {
+    "_lucene_location": _lucene_location,
+    "_lucene_query": _lucene_query,
+    "_fuzzy_titles": _fuzzy_titles
+}
+</pre>
+
+<p>
+Here, I am importing anything my doctests might need, such as the Job model. Otherwise, I would have to clutter my doctests themselves with those imports. This would be a good place to do some setup common to the doctests, as well. __test__ is an undocumented dictionary that maps test name to callable object.
+</p>
+
+<p>
+To run the tests, just execute the following command-line:
+</p>
+
+<pre>
+&gt;python manage.py test
+Creating test database...
+...
+Creating table search_job
+...
+Installing json fixture 'initial_data' from '../powerfill/search/fixtures'.
+Installed 48 object(s) from 1 fixture(s)
+...................
+----------------------------------------------------------------------
+Ran 19 tests in 2.285s
+
+OK
+</pre>
+
+<p>
+As opposed to vanilla Python doctests, Django is actually spinning up a clean database, and populating your default fixture data. This is a great way to avoid having to mock models. Your continuous integration server could even run these tests without having a real database, by using sql lite.
+</p>
+
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/django">django</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/python">python</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

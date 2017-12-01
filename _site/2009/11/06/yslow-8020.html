@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>YSlow 80/20</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2009/11/06/yslow-8020.html" />
+
+        <meta property="og:title" content="YSlow 80/20"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2009/11/06/yslow-8020.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            YSlow 80/20
+                            
+                                <span class="post-date subtitle">06 Nov 2009</span>
+                            
+                        </h1>
+                    
+                    <p>
+I spent some time this week optimising a new site, specifically looking at some of the <a href="http://developer.yahoo.com/yslow/">YSlow</a> recommendations.
+</p>
+
+<p>
+For a smaller, low traffic site, some of the recommendations are over-kill. I'm not paying for a CDN. But I did find some of the tidbits valuable, specifically around what Apache does not do by default.
+</p>
+
+<p>
+First of all, Apache2 out of the box has gzip enabled, but CSS and Javascript files are not in the list the zippable MIME types. Adding them is easy. Just edit /etc/apache2/mods-available/deflate.conf:
+</p>
+
+<pre name="code" class="xml">
+&lt;IfModule mod_deflate.c&gt;
+      AddOutputFilterByType DEFLATE text/html text/plain text/xml application/x-javascript text/javascript text/css application/javascript
+&lt;/IfModule&gt;
+</pre>
+
+<p>
+The larger win was the Expires HTTP header, which lets the browser know that it shouldn't even attempt to see if a CSS, Javascript or image has been updated until such and such a date. By default, Apache2 deploys with Expires disabled.
+</p>
+
+<p>
+Yahoo! recommends setting this to a "far future" value, like 10 years from now, and then managing this by changing the URLs for CSS, Javascript or images every time they actually change on the server. Implementing that is a PITA because you need a tool that can auto-rewrite the image URLs in the CSS, and the script URLs in your HTML.
+</p>
+
+<p>
+This may make sense for a large site, where you are concerned with minimising bandwidth. But on a smaller site like mine, I'm more concerned with minimising the number of HTTP connections when the user is rapidlly clicking between pages. I don't care if they have to hit the server again per resource every once in a while, just as long as in the average case they are only loading one HTML page per request.
+</p>
+
+<p>
+I picked an Expire window of just 12 hours. This is long enough so that during a single session, the user will only request each resource once. But it's short enough that if I push an actual change at night, everyone will get it in the morning.
+</p>
+
+<p>
+To make the actual change, you need to enable the expire_mod, and then set the actual Expires value per MIME type.
+</p>
+
+<pre>
+&gt;cd /etc/apache2
+&gt;sudo ln -s ../mods-available/expires.load mods-enabled/expires.load
+</pre>
+
+<pre name="code" class="bash">
+# edit /etc/apache2/sites-available/default
+ExpiresActive On
+ExpiresByType text/css "access plus 12 hours"
+ExpiresByType application/javascript "access plus 12 hours"
+ExpiresByType image/png "access plus 12 hours"
+ExpiresByType image/gif "access plus 12 hours"
+</pre>
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

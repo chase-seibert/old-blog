@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>RPC/Encoded web services on Java 1.6</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2008/12/09/rpcencoded-web-services-on-java-16.html" />
+
+        <meta property="og:title" content="RPC/Encoded web services on Java 1.6"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2008/12/09/rpcencoded-web-services-on-java-16.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            RPC/Encoded web services on Java 1.6
+                            
+                                <span class="post-date subtitle">09 Dec 2008</span>
+                            
+                        </h1>
+                    
+                    <p>Usually, when I want to call a remote web-service in Java, I would generate stub proxy classes at the command line with:</p>
+
+<pre name="code" class="xml">
+wsimport http://someurl?WSDL
+</pre>
+
+<p>On a recent project, this command resulted in the error message:</p>
+
+<pre name="code" class="xml">
+parsing WSDL...
+
+[ERROR] rpc/encoded wsdls are not supported in JAXWS 2.0.
+  line 56 of http://someurl?WSDL
+</pre>
+
+<p>The line in question is the start of a binding, which contains an elements definition that looks like:</p>
+
+<pre name="code" class="xml">
+        &lt;soap:body use=&quot;encoded&quot; encodingStyle=&quot;http://schemas.xmlsoap.org/soap/encoding/&quot; namespace=&quot;urn:SimpleRexServiceIntf-ISimpleRexService&quot;/&gt;
+</pre>
+
+<p>Doing some research, it seems that this is one of the earlier SOAP variants. None of the modern web service APIs support it. From <a href="http://msdn.microsoft.com/en-us/magazine/cc164152.aspx">msdn</a>:</p>
+
+<blockquote>
+<p>RPC (Remote Procedure Call) style, on the other hand, indicates that the SOAP body contains an XML representation of a method call such as the traditional distributed component technologies of DCOM, Corba, and others. RPC style uses the names of the method and its parameters to generate structures that represent a method's call stack (see section 7 of the SOAP 1.1 specification at http://www.w3c.org/TR/SOAP). These structures can then be serialized into the SOAP message according to a set of encoding rules. The SOAP specification defines a standard set of encoding rules for this purpose (see section 5 of the SOAP 1.1 spec) that codify how to map the most common programmatic data structures, such as structs and arrays, into an XML 1.0 format. Since RPC is traditionally used in conjunction with the SOAP encoding rules, the combination is referred to as rpc/encoded.
+</p>
+<p>
+The document/literal approach is more straightforward and easier for toolkits to get right because it simply relies on XML Schema to describe exactly what the message looks like on the wire. SOAP, however, was created before XML Schema existed. And back then they were focused primarily on objects (hence the O in SOAP), which led to the rpc/encoded way of doing things. Since universal description languages such as XML Schema or Web Services Description Language (WSDL) weren't available back then, the rpc/encoded style had to assume that additional metadata would be available for describing the method call (such as a type library, Microsoft .NET Framework assembly, or Java class file).</p>
+</blockquote>
+
+<p>However, Apache Axis v1 does still seem to work in Java 1.6. All I did was download axis-1.4.jar, and run the following command:</p>
+
+<pre name="code" class="xml">
+java -cp axis-1.4.jar;commons-logging-1.1.jar;commons-discovery-0.2.jar;jaxrpc-1.1.jar;saaj-1.1.jar;wsdl4j-1.4.jar;activation-1.1.jar;mail-1.4.jar org.apache.axis.wsdl.WSDL2Java http://someurl?WSDL
+</pre>
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/java">java</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Debugging an IE7 browser crash (manual git bisect)</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2014/06/20/debugging-ie7-crashes.html" />
+
+        <meta property="og:title" content="Debugging an IE7 browser crash (manual git bisect)"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2014/06/20/debugging-ie7-crashes.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Debugging an IE7 browser crash (manual git bisect)
+                            
+                                <span class="post-date subtitle">20 Jun 2014</span>
+                            
+                        </h1>
+                    
+                    <p>Every once in a while, you have to put in a heroic effort to diagnose a bug. When
+you finally figure it out, you want to run around the office singing &quot;We are the
+champions&quot;, even if it turns out to be a trivial issue. Because that doesn&#39;t mean
+it took a trivial amount of effort.</p>
+
+<p>Recently I had a bug report cross my desk that our web app was crashing IE7.
+Luckily IE7 is only about 3% of our overall userbase. As of May 2014, it&#39;s only
+<a href="http://www.w3schools.com/browsers/browsers_explorer.asp">about .2% of global browser market share</a>,
+but we have a lot of enterprise customers who are slower to upgrade. Regardless,
+definitely a high severity bug.</p>
+
+<p>As an aside, I find browser crashes to be ridiculous. I know this browser was
+written back in the dark ages of 2005, but still. If you&#39;re implementing a browser,
+you know you are basically going to be taking random markup and javascript from
+essentially an untrusted user. You would think you would be as meticulous as
+possible to trap every conceivable exception.</p>
+
+<p>But no. In the case of a browser crash, you don&#39;t get a stack trace. You don&#39;t even
+get the dreaded &quot;Object Expected&quot; error (the single most useless error of all time).
+What puny developer tools that Microsoft deigned to provide back in 2005 are of
+absolutely no use. Instead, all you see is a white screen and the following:</p>
+
+<p><img src="/blog/images/ie7_not_responding.png" alt="ie7 not responding"></p>
+
+<p>So it begins. In this case, I assume that we were not crashing IE7 at some point in
+the recent past. Otherwise, we would have presumably received this bug report
+earlier.</p>
+
+<p>The first step is always to get a reproducible. I can reproduce using my trusty
+IE7 VirtualBox image provisioned from <a href="https://github.com/xdissent/ievms">xdissent/ievms</a>.
+Knowing I&#39;m in for a long haul, I also make some effort to get my reproducible steps
+down to the smallest quickest nugget I can. First, I create a shortcut on my Windows
+desktop called &quot;clear cache&quot;, with the following Target: <code>RunDll32.exe InetCpl.cpl,ClearMyTracksByProcess 255</code>.
+I know from experience that if you don&#39;t clear your cache between tests, you will be
+hunting phantom cached files for hours. I make another shortcut with a direct link
+to the page that crashes on my dev box.</p>
+
+<p>I proceed to spend about an hour deleting random chunks of suspect code to see if I
+can get it to stop crashing. If I&#39;m successful, I start putting some of the deleted
+code back in until it crashes again. This is a slow process. Sometimes it helps to
+go old school and put actual <code>alert()</code> calls in between suspect lines. I finally
+narrow it down to a require.js call to import a completely different file. Basically,
+I have to start over on a new file.</p>
+
+<p>So I change tactics and start what is essentially a binary search through our git
+history to locate the exact commit where this occurs. <em>Note: if you can repo your
+issue purely on the command line, you should use git bisect for this</em>.  I start
+rolling back 10, 100, 1000 commits until I get a working build. I have to manually
+refresh a browser each time.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">git checkout upstream/master~10
+git checkout upstream/master~100
+git checkout upstream/master~1000</code></pre></figure>
+
+<p>At 1,000 commits, I get a working build again. So I try 500 commits ago. Not working.
+750 commits. Working. 625 commits, etc... After a surprisingly few iterations, I&#39;m
+left with a small set of potential breaking commits, which I manually browse through until
+I see this:</p>
+
+<p><img src="/blog/images/ie7_extra_comma.png" alt="ie7 extra comma"></p>
+
+<p>From experience, I suspected all along that this was likely either an unclosed HTML
+tag in a javascript template, or an extra comma. I have seen both <a href="http://blog.bottomlessinc.com/2010/01/ie-bug-dont-put-extra-commas-in-your-js-arrays/">crash old versions</a>
+of IE. What&#39;s super-frustrating is that this is actually something that our automation
+catches:</p>
+
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="o">&gt;</span><span class="nx">jshint</span> <span class="nx">bad_file</span><span class="p">.</span><span class="nx">js</span>
+<span class="kr">static</span><span class="o">/</span><span class="nx">js</span><span class="o">/</span><span class="nx">bad_file</span><span class="p">.</span><span class="nx">js</span><span class="o">:</span> <span class="nx">line</span> <span class="mi">611</span><span class="p">,</span> <span class="nx">col</span> <span class="mi">45</span><span class="p">,</span> <span class="nx">Extra</span> <span class="nx">comma</span><span class="p">.</span> <span class="p">(</span><span class="nx">it</span> <span class="nx">breaks</span> <span class="nx">older</span> <span class="nx">versions</span> <span class="nx">of</span> <span class="nx">IE</span><span class="p">)</span></code></pre></figure>
+
+<p>But we rely on individual engineers to install the automation and run it, which they
+can also opt-out on for individual commits and files. In any case, it turned out to be
+a one character fix after about 3 hours of work. In the future, I would save some
+time by just running jshint on the entire repo.</p>
+
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/ie7">ie7</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/javascript">javascript</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/git">git</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

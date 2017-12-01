@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Introducing Django Migratron</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2013/03/01/introducing-django-migratron.html" />
+
+        <meta property="og:title" content="Introducing Django Migratron"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2013/03/01/introducing-django-migratron.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Introducing Django Migratron
+                            
+                                <span class="post-date subtitle">01 Mar 2013</span>
+                            
+                        </h1>
+                    
+                    <p><a href="https://github.com/chase-seibert/django-migratron">Django Migratron</a> is a schema migration tool for Django. Why write another schema migration tool? Here is how we stack up against other tools.</p>
+
+<h3>Similarities</h3>
+
+<ul>
+<li>Migrations are defined as scripts in a configurable directory</li>
+<li>There are commands to list, run and fake one or more migrations</li>
+<li>Migrations side effects can include schema changes, data updates or anything you can do from python script</li>
+<li>Migration history is stored in the same database that the migrations are run against</li>
+</ul>
+
+<h3>Differences</h3>
+
+<ul>
+<li>Migrations can be either python or sql files</li>
+<li>Migrations can be placed in a sub directory by type, and you can run/list a single type at a time</li>
+<li>Migrations are not ordered</li>
+<li>Schema migrations cannot be automatically generated</li>
+<li>Schema updates are only as database-independent as you make them</li>
+<li>Migration history includes who ran the migration, when it was run, who authored the script, and any notes either person has entered.</li>
+</ul>
+
+<h1>Install</h1>
+
+<p>Just run <code>pip install pytz PyYAML django-yamlfield termcolor django-migratron</code>.</p>
+
+<h3>Add to INSTALLED_APPS</h3>
+
+<p>In your <code>settings.py</code>, add <code>migratron</code> to the INSTALLED_APPS setting:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">INSTALLED_APPS</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="o">...</span>
+    <span class="s">&#39;migratron&#39;</span><span class="p">,</span>
+    <span class="p">)</span></code></pre></figure>
+
+<h3>Create database tables</h3>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">./manage.py syncdb</code></pre></figure>
+
+<h3>Settings</h3>
+
+<p>You can configure the following settings in your <code>settings.py</code>. All of these are optional, if you don&#39;t specify them, they will use defaults.</p>
+
+<ul>
+<li><code>MIGRATIONS_DIR</code> - The directory where migrations will be stored either at the top level, or in top-level directories corresponding to migration types.</li>
+</ul>
+
+<p>Different migration types might be things like &quot;pre&quot;, &quot;post&quot;, &quot;delayed&quot;, etc.</p>
+
+<p>You can use an absolute path, or build one dynamically like so:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">os</span>
+<span class="n">MIGRATIONS_DIR</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">),</span> <span class="s">&#39;migrations&#39;</span><span class="p">)</span></code></pre></figure>
+
+<ul>
+<li><code>MIGRATIONS_ALLOWED_TYPES</code> - A tuple of allowed migration types. If not specified, any type is allowed, including no type.
+To explicitly allow no type (ie, migrations in the root directory), add None to the tuple.</li>
+</ul>
+
+<p>Example:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">MIGRATIONS_ALLOWED_TYPES</span> <span class="o">=</span> <span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="s">&#39;pre&#39;</span><span class="p">,</span> <span class="s">&#39;post&#39;</span><span class="p">)</span></code></pre></figure>
+
+<ul>
+<li><code>MIGRATIONS_SCRIPT_AUTHOR_LINK_FUNCTION</code> - The function to run on a file path to get the script commit link (ie, github, bitbucket, etc).</li>
+</ul>
+
+<p>Example:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">migratron.authors</span> <span class="kn">import</span> <span class="n">get_git_script_author_link</span>
+<span class="n">MIGRATIONS_SCRIPT_AUTHOR_LINK_FUNCTION</span> <span class="o">=</span> <span class="n">get_git_script_author_link</span></code></pre></figure>
+
+<ul>
+<li><code>MIGRATIONS_TIMEZONE</code> - The timezone used to calculate the display value of the script run datetimes in --list.</li>
+</ul>
+
+<p>Example:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">MIGRATIONS_TIMEZONE</span> <span class="o">=</span> <span class="s">&#39;US/Pacific&#39;</span></code></pre></figure>
+
+<ul>
+<li><code>MIGRATIONS_DBSHELL_CMD</code> - The command to run to exclude <code>dbshell</code>. Typically <code>manage.py dbshell</code>, but you may use an
+alternate shell, or an alternate python intepreter.</li>
+</ul>
+
+<h1>Usage</h1>
+
+<h3>Creating Migrations</h3>
+
+<p>Migrations are created based on python/sql templates. The body of the script must be implemented manually. The templates have standard meta-data slots in them, in the form of a leading comment block.</p>
+
+<ul>
+<li><code>./manage.py createmigration &quot;Add date_added and user columns to the Foobar model</code> - Create a new python migration</li>
+<li><code>./manage.py createmigration --type pre &quot;Add date_added and user columns to the Foobar model</code> - Create a new python migration of type &quot;pre&quot;</li>
+<li><code>./manage.py createmigration --template sql &quot;Add date_added and user columns to the Foobar model</code> - Create a new sql migration</li>
+</ul>
+
+<h3>Listing and Running Migrations</h3>
+
+<ul>
+<li><code>./manage.py migrate --list</code> - List the migrations under the root <code>MIGRATIONS_DIR</code>.</li>
+</ul>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">Migrations</span><span class="p">:</span>
+<span class="mi">2012</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">24</span> <span class="mi">18</span><span class="p">:</span><span class="mo">06</span> <span class="p">(</span><span class="o">*</span><span class="p">)</span> <span class="n">test</span><span class="o">.</span><span class="n">sql</span>
+<span class="mi">2012</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">25</span> <span class="mi">11</span><span class="p">:</span><span class="mi">31</span> <span class="p">(</span><span class="o">*</span><span class="p">)</span> <span class="n">dedupe_sso</span><span class="o">.</span><span class="n">py</span>
+<span class="mi">2012</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">25</span> <span class="mi">12</span><span class="p">:</span><span class="mi">47</span> <span class="p">(</span><span class="o">*</span><span class="p">)</span> <span class="n">run_jsunit</span><span class="o">.</span><span class="n">py</span>
+<span class="mi">2012</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">25</span> <span class="mi">13</span><span class="p">:</span><span class="mi">43</span> <span class="p">(</span><span class="o">*</span><span class="p">)</span> <span class="n">suggestions_add_org_backfill_cleanup</span><span class="o">.</span><span class="n">sql</span>
+<span class="mi">2012</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">25</span> <span class="mi">18</span><span class="p">:</span><span class="mi">41</span> <span class="p">(</span><span class="o">*</span><span class="p">)</span> <span class="n">mail_message_allow_null</span><span class="o">.</span><span class="n">sql</span>
+<span class="mi">2012</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">25</span> <span class="mi">19</span><span class="p">:</span><span class="mo">02</span> <span class="p">(</span><span class="o">*</span><span class="p">)</span> <span class="n">test</span><span class="o">.</span><span class="n">py</span>
+                 <span class="p">(</span> <span class="p">)</span> <span class="n">activities_slave_index</span><span class="o">.</span><span class="n">sql</span>
+                 <span class="p">(</span> <span class="p">)</span> <span class="n">add_group_is_corporate_column</span><span class="o">.</span><span class="n">sql</span>
+                 <span class="p">(</span> <span class="p">)</span> <span class="n">add_org_sharing_preferences_column</span><span class="o">.</span><span class="n">sql</span>
+                 <span class="p">(</span> <span class="p">)</span> <span class="n">add_org_to_subscription</span><span class="o">.</span><span class="n">sql</span></code></pre></figure>
+
+<ul>
+<li><code>./manage.py migrate --type pre --list</code> - List the migrations under the <code>MIGRATIONS_DIR/pre</code>.</li>
+<li><code>./manage.py migrate foobar.py</code> - Run the migration <code>MIGRATIONS_DIR/foobar.py</code>.</li>
+<li><code>./manage.py migrate --type pre foobar.py</code> - Run the migration <code>MIGRATIONS_DIR/pre/foobar.py</code>.</li>
+<li><code>./manage.py migrate --all</code> - Run ALL migrations in <code>MIGRATIONS_DIR</code>.</li>
+<li><code>./manage.py migrate foobar.py --log-only</code> - Don&#39;t really run the migration, but add it to the migration history as successfully run</li>
+<li><code>./manage.py migrate foobar.py --delete-log</code> - Delete the migration history for this file</li>
+<li><code>./manage.py migrate foobar.py --pending</code> - Exit with status code 1 if there are pending migrations</li>
+<li><code>./manage.py migrate foobar.py --info</code> - Print all meta-data, migration history and notes for a migration.</li>
+<li><code>./manage.py migrate foobar.py --notes</code> - Create or edit the migration runner&#39;s note for the latest migration using $EDITOR.</li>
+<li><code>./manage.py migrate --list --verbose</code> - List migrations with extra meta-data, like runner&#39;s notes.</li>
+<li><code>./manage.py migrate test.py --flag &quot;Need to run this again after the next deploy&quot;</code> - Flag a migration as needing further attention, with an optional note.</li>
+<li><code>./manage.py migrate test.py --flag</code> - Toggle the flag on an existing migration.</li>
+<li><code>./manage.py migrate test.py --clear</code> - Delete all migration history from the database.</li>
+</ul>
+
+<h3>Migration History</h3>
+
+<p>If you need to play back sql migrations run on one database against another one, you may find it useful to list migrations in the order they were actually run, optionally with runner comments. For history commands, types do not matter; all run migrations are output.</p>
+
+<ul>
+<li><code>./manage.py migrate --history</code> - List just the file names in the order they were run.</li>
+<li><code>./manage.py migrate --history --verbose</code> - List file names and runner comments.</li>
+</ul>
+
+<h2>Confirmation Inside Migrations</h2>
+
+<p>If you want to require manual confirmation for a particular migration, just make sure you exit
+with an error code, or raise an exception, if the script does not run. That way, the script will
+not be marked as having run successfully.</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">char</span> <span class="o">=</span> <span class="nb">raw_input</span><span class="p">(</span><span class="s">&#39;Nuke all the things? (Y/N): &#39;</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">char</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;Y&#39;</span><span class="p">:</span>
+    <span class="k">print</span> <span class="s">&quot;Nuking!&quot;</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></code></pre></figure>
+
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/python">python</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/django">django</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

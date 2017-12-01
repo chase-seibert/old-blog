@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Fixing styling incompatibility with Google Charts and Twitter Bootstrap</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2013/06/28/Google-charts-bars-with-bootstrap.html" />
+
+        <meta property="og:title" content="Fixing styling incompatibility with Google Charts and Twitter Bootstrap"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2013/06/28/Google-charts-bars-with-bootstrap.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Fixing styling incompatibility with Google Charts and Twitter Bootstrap
+                            
+                                <span class="post-date subtitle">28 Jun 2013</span>
+                            
+                        </h1>
+                    
+                    <p>Ran into a vexing issue this week when we upgraded to using <a href="http://twitter.github.io/bootstrap/">Twitter Bootstrap</a>. Some of our analytics graphs using <a href="https://developers.google.com/chart/interactive/docs/index">Google Charts</a> were suddenly broken in IE 7/8/9. Instead of the expected 100px wide bar graphs, they were just a few pixels wide.</p>
+
+<p><img src="/blog/images/google_chart_bars_bad.png" alt="google charts bad"></p>
+
+<p>Normally Google Charts produces the following DOM for their bar graphs.</p>
+
+<figure class="highlight"><pre><code class="language-html" data-lang="html"><span class="nt">&lt;span</span> <span class="na">style=</span><span class="s">&quot;padding: 0; float: left; white-space: nowrap;&quot;</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;img</span> <span class="na">style=</span><span class="s">&quot;padding: 0px;&quot;</span> <span class="na">src=</span><span class="s">&quot;/images/bar_s.png&quot;</span> <span class="na">height=</span><span class="s">&quot;12&quot;</span> <span class="na">width=</span><span class="s">&quot;1&quot;</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;img</span> <span class="na">style=</span><span class="s">&quot;padding: 0px;&quot;</span> <span class="na">src=</span><span class="s">&quot;/images/bar_b.png&quot;</span> <span class="na">height=</span><span class="s">&quot;12&quot;</span> <span class="na">width=</span><span class="s">&quot;16&quot;</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;img</span> <span class="na">style=</span><span class="s">&quot;padding: 0px;&quot;</span> <span class="na">src=</span><span class="s">&quot;/images/bar_w.png&quot;</span> <span class="na">height=</span><span class="s">&quot;12&quot;</span> <span class="na">width=</span><span class="s">&quot;34&quot;</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;img</span> <span class="na">style=</span><span class="s">&quot;padding: 0px;&quot;</span> <span class="na">src=</span><span class="s">&quot;/images/bar_s.png&quot;</span> <span class="na">height=</span><span class="s">&quot;12&quot;</span> <span class="na">width=</span><span class="s">&quot;1&quot;</span><span class="nt">&gt;</span>
+    <span class="ni">&amp;nbsp;</span>1.6
+<span class="nt">&lt;/span&gt;</span></code></pre></figure>
+
+<p>It turns out that the issue is with Bootstrap&#39;s CSS for responsive images, and in particular the <code>img { width: auto; }</code> declaration. It causes older versions if IE to ignore <code>height</code> and <code>width</code> attributes that are set directly on the DOM element. This issue has <a href="https://github.com/twitter/bootstrap/issues/1552">come</a> up <a href="https://github.com/twitter/bootstrap/pull/7369">before</a> in <a href="http://stackoverflow.com/questions/13694837/internet-explorer-img-width-not-taking-effect">other</a> contexts. Removing the offending CSS solves the issue, but I wanted to stick with vanilla Bootstrap so we could cleanly upgrade to new vesions. Likewise, you probably don&#39;t want to edit the Google Charts javascript.</p>
+
+<p>Instead, you can layer in some additional javascript, fired on the Google Charts <code>onReady</code> event, to add inline <code>width</code> declarations into the <code>style</code> attribute for the images. While IE 7/8/9 ignore width attributes when combined with <code>img { width: auto; }</code>, it <em>does</em> respect <code>style</code> attributes.</p>
+
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">function</span> <span class="nx">fixGoogleChartsBarsBootstrap</span><span class="p">()</span> <span class="p">{</span>
+    <span class="cm">/* Google charts uses &lt;img width=&quot;12px&quot;&gt;, which is incompatible with Twitter</span>
+<span class="cm">     * bootstrap in responsive mode, which inserts a css rule for: img { width: auto; }.</span>
+<span class="cm">     * On IE7/8/9, that causes the browser to ignore the width attribute, and</span>
+<span class="cm">     * the bars are collapsed to 1px each.</span>
+<span class="cm">     *</span>
+<span class="cm">     * The fix is to use inline style width attributes, ie &lt;img style=&quot;width: 12px;&quot;&gt;.</span>
+<span class="cm">     * BUT we can&#39;t change the way Google Charts renders its bars. Nor can we change</span>
+<span class="cm">     * the Twitter bootstrap CSS and remain future proof.</span>
+<span class="cm">     *</span>
+<span class="cm">     * Instead, this function can be called after a Google charts render to &quot;fix&quot; the</span>
+<span class="cm">     * issue by setting the style attributes dynamically.</span>
+<span class="cm">     */</span>
+    <span class="nx">$</span><span class="p">(</span><span class="s2">&quot;img[width]&quot;</span><span class="p">).</span><span class="nx">each</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">index</span><span class="p">,</span> <span class="nx">img</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">img</span><span class="p">.</span><span class="nx">css</span><span class="p">(</span><span class="s2">&quot;width&quot;</span><span class="p">,</span> <span class="nx">img</span><span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;width&quot;</span><span class="p">));</span>
+    <span class="p">});</span>
+<span class="p">};</span></code></pre></figure>
+
+<p><img src="/blog/images/google_chart_bars_good.png" alt="google charts bad"></p>
+
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/bootstrap">bootstrap</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/gcharts">gcharts</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

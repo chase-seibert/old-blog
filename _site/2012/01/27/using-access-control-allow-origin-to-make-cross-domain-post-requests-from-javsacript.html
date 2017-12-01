@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Using Access-Control-Allow-Origin to make cross domain POST requests from javsacript</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2012/01/27/using-access-control-allow-origin-to-make-cross-domain-post-requests-from-javsacript.html" />
+
+        <meta property="og:title" content="Using Access-Control-Allow-Origin to make cross domain POST requests from javsacript"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2012/01/27/using-access-control-allow-origin-to-make-cross-domain-post-requests-from-javsacript.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Using Access-Control-Allow-Origin to make cross domain POST requests from javsacript
+                            
+                                <span class="post-date subtitle">27 Jan 2012</span>
+                            
+                        </h1>
+                    
+                    <p>
+Making ajax calls from javascript, even without a framework like jQuery, is pretty trivial. However, once you try to make the same request cross-domain, it gets hard fast. This is due to the security model all modern browsers use, known as the <a href="http://en.wikipedia.org/wiki/Same_origin_policy">same origin policy</a>. This policy makes sense in a lot of ways, but it's also somewhat broken and antiquated on the web today.
+</p>
+
+<p>
+Why might you want to make cross domain requests? Just take a look at some examples:
+</p>
+
+<ul>
+<li>Google Analytics sends metrics from your page to their central servers.</li>
+<li><a href="http://www.housingmaps.com/">HousingMaps</a>, a mashup of craigslist and GoogleMaps.</li>
+<li>The <a href="http://www.instapaper.com/extras">Read Later</a> Instapaper bookmarklet.</li>
+</ul>
+
+<p>
+For cross domain ajax requests, the same origin policy is "broken" in the sense that there have been work-arounds available for a years. First there were <a href="http://ajaxpatterns.org/Cross-Domain_Proxy">proxy pages</a>, where you wrap a remote URL in a page being served by the site the user is actually on. The proxy requires that you be in control of the page the user is on. Then there was a <a href="http://softwareas.com/cross-domain-communication-with-iframes">dual IFRAME hack</a>, but that requires that you be in control of both ends.
+</p>
+
+<p>
+Recently, <a href="http://www.ibm.com/developerworks/library/wa-aj-jsonp1">JSONP</a> has emerged as a standard
+to allow cross domain requests. It's something of a hack that works by returning an executable javascript function from a script tag request. It also exposes you to potential javascript injection vulnerabilities if you are not in control of the remote host. On the plus side, it's provided seamlessly as a <a href="http://api.jquery.com/jQuery.getJSON/">feature in recent jQuery</a> versions.
+</p>
+
+<p>
+Luckily, there is a true standard emerging that's not built on top of a hack. In 2004, the W3C started work on a draft called Cross-Origin Resource Sharing (CORS). In 2009, <a href="https://developer.mozilla.org/En/HTTP_access_control">Mozilla</a> was the first browser to implement support for CORS. Currently Chrome also supports it. It allows a HTTP server to set some new headers that tell the browser to modify its same origin policy.
+</p>
+
+<p>
+For example, the following <a href="http://stackoverflow.com/questions/298745/how-do-i-send-a-cross-domain-post-request-via-javascript">Django code</a> with allow an ajax request from another domain to your server.
+</p>
+
+<pre name="code" class="python">
+def myview(_request):
+    response = HttpResponse(json.dumps({&quot;key&quot;: &quot;value&quot;, &quot;key2&quot;: &quot;value&quot;}))
+    response[&quot;Access-Control-Allow-Origin&quot;] = &quot;*&quot;
+    response[&quot;Access-Control-Allow-Methods&quot;] = &quot;POST, GET, OPTIONS&quot;
+    response[&quot;Access-Control-Max-Age&quot;] = &quot;1000&quot;
+    response[&quot;Access-Control-Allow-Headers&quot;] = &quot;*&quot;
+    return response
+</pre>
+
+<p>
+In typical fashion, Microsoft went ahead and implemented their own incompatible version of the same thing, which they call <a href="http://msdn.microsoft.com/en-us/library/ie/cc288060(v=vs.85).aspx">XDR</a>. If you're masochistic, you can try to use it. Otherwise, you can wait until IE10 when <a href="http://blogs.msdn.com/b/ie/archive/2011/11/29/html5-for-applications-the-fourth-ie10-platform-preview.aspx">they will support CORS</a>, too.
+</p>
+
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/javascript">javascript</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/django">django</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/security">security</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

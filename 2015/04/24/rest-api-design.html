@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>REST API Design</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2015/04/24/rest-api-design.html" />
+
+        <meta property="og:title" content="REST API Design"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2015/04/24/rest-api-design.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            REST API Design
+                            
+                                <span class="post-date subtitle">24 Apr 2015</span>
+                            
+                        </h1>
+                    
+                    <p><a href="http://en.wikipedia.org/wiki/Representational_state_transfer">REST</a> APIs operate over HTTP, use standard verbs like <code>GET</code> and <code>POST</code>, expose a common-sense URL structure and return resources in a well-defined format, typically JSON.</p>
+
+<p>In spite of that simple definition, there is a wide degree of latitude when designing a REST API to fuck it up. Don&#39;t do that! Follow the guiding principle of making things as easy as possible for the calling developers. Provide the correct level of granularity, reduce the number of calls they need to make, and document the heck out of it.</p>
+
+<p>In terms of granularity, I&#39;m referring to whether the API exposes individual database records directly, with a thin CRUD layer, versus composing those into higher level resources that represent the problem domain the way your users think of it. The CRUD model makes a lot of sense for internal low-level data APIs, whereas the higher level model makese more sense for exposing to the outside world, as well as internal front-end and mobile developers. Remember - your relational data model details almost never aligns with the user&#39;s mental model of how your application works.</p>
+
+<p>For the rest of this article, I&#39;m going to be talking primarily about higher level APIs, hereto referred to as an <a href="http://www.thoughtworks.com/insights/blog/rest-api-design-resource-modeling">Intent API</a>.</p>
+
+<h2>Resource Semantics</h2>
+
+<p>What&#39;s the difference between an Intent API and a CRUD API? The level of granularity. Instead of exposing implementation details of your actual database scheme (which may change), we instead expose higher order concepts of what the user intention is for your actual use cases.</p>
+
+<p>For example, in a CRUD API for a bank, you might expose <a href="http://restful-api-design.readthedocs.org/en/latest/resources.html">Resources</a> for Accounts, Account Holders and Transactions. You would allow callers to create an Accout record, and you would allow the creation of Transactions. A caller might implement a transfer between two accounts as two transactions; one debit from account A and one deposit to account B. Hopefully you can also make those two operations an atomic transaction somehow.</p>
+
+<p>With an Intent API, you would probably not allow Account or Account Holder creation at all. Those are likely off-line manual tasks that you want performed by actual humans, or at the very least your own internal services, which then use the private CRUD API. You also likely to not want to allow the creation of a Transaction directly. But maybe you expose a Transfer Resource, as well Purchase and ChargeBack Resources.</p>
+
+<p>What does this get you? By mapping to the intention of the user - what they are actually trying to accomplish - you have the opportunity to tailor an API endpoint to just the set of parameters that make sense for that operation. For a Transfer, you need two Account IDs. For Purchase, you need Vendor metadata. For a ChargeBack, you need a previous Transaction ID.</p>
+
+<p>You also have the ability to ensure that operations are atomic and leave the data in a valid state. If a Transfer fails the second part of a two-stage commit, you can roll the first part back. You do not have to rely on the caller to do that properly.</p>
+
+<p>What you have done is remove the burden of implementing business logic that&#39;s specific to your system from the callers, and placed it inside your system (where it belongs).</p>
+
+<p>It&#39;s true that this is not strictly RESTful; you&#39;re exposing verbs as your Resources. You are likely going to expose nouns as well (Account, Transaction, Vendor), but your any call that&#39;s not <a href="http://en.wikipedia.org/wiki/Idempotence">idempotent</a> should probably be a verb.</p>
+
+<p>For an example of this in action, see the <a href="https://developer.github.com/v3/repos/merging/">GitHub API</a>:</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">POST /repos/:owner/:repo/merges
+<span class="o">{</span>
+  <span class="s2">&quot;base&quot;</span>: <span class="s2">&quot;master&quot;</span>,
+  <span class="s2">&quot;head&quot;</span>: <span class="s2">&quot;cool_feature&quot;</span>,
+  <span class="s2">&quot;commit_message&quot;</span>: <span class="s2">&quot;Shipped cool_feature!&quot;</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>Notice that semantically speaking you&#39;re not creating a Commit Resource that actually represents the merging of two branches in git. Most users of git don&#39;t even understand what is actually happening to the data model for a merge; don&#39;t make your API callers have to understand it, either.</p>
+
+<p>How do you know which intents to model for? I would start by looking at your core user scenarios, and think about what Resources you would want to have for each one, keeping in mind that you want to minimize the number of API calls required to display the user interface. You have to balance that against the cohesion and separation of concerns  of each Resource.</p>
+
+<h2>URL Structure</h2>
+
+<p>On to implementation details! What should your URL structure look like? In general, you want to pick either plural or singular nouns and verbs and stick with that. I&#39;m going to be opinionated and say that you should use plural nouns and singular verbs. For example:</p>
+
+<ul>
+<li><code>/accounts</code> - list all Accounts</li>
+<li><code>/accounts/123</code> - get the Account with ID 123</li>
+<li><code>/accounts/123/transactions</code> - list Transactions associated with this Account</li>
+<li><code>/accounts/123/transactions/123</code> - get a particular Transaction inside an Account</li>
+<li><code>/transactions/123</code> - get the same Transaction outside the context of an Account</li>
+<li><code>/transfer</code> - Create a transfer between two accounts (POST)</li>
+</ul>
+
+<p><em>Note:</em> there is no problem with exposing the same Resource at multiple end points. This is not a DRY model; remember that our guiding principle is making things easy for the developers. Maybe they don&#39;t know what Account is associated with a given Transaction.</p>
+
+<p>Finally, you want to think about what content to display at the root endpoint of <code>/</code>. I have seen some APIs that use that endpoint as an opportunity to include likes to developer documentation and/or a list of all the endpoints in the system.</p>
+
+<h2>Requests</h2>
+
+<p>The biggest decision here is how to take data from the caller. Most REST APIs will support URL parameters for most use cases. If you&#39;re doing that, make sure to support form POST encoding as well, it should be no extra work. These work well for simple key/value parameters, and are easy to implement for the caller.</p>
+
+<p>For nested data, you have a choice of supporting JSON request bodies or using some type of prefix scheme in your key/value pairs. For example, you could represent the following JSON body:</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="o">{</span>
+    <span class="s2">&quot;user&quot;</span>: <span class="s2">&quot;Chase Seibert&quot;</span>,
+    <span class="s2">&quot;account&quot;</span>: <span class="o">{</span>
+        <span class="s2">&quot;id&quot;</span>: 1,
+        <span class="s2">&quot;name&quot;</span>: <span class="s2">&quot;foobar&quot;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>As the key/value pairs <code>?user=Chase Seibert&amp;account__id=1&amp;account__name=foobar</code>. Personally, I think that&#39;s both ugly and hard for the caller to implement in some cases.</p>
+
+<p>Whatever you choose, make sure to inspect and respect the callers content-type.</p>
+
+<h2>Metadata &amp; Responses</h2>
+
+<p>For each API response, you want to have a consistent set of metadata that the callers can rely on being there, as well as a consistent overall packet structure. For example, you likely want to have well defined fields for pagination, results and error messages. But you may also want to include less obvious items, like an echo of the parameters that the user passed to you. This can be useful as signal that you have unambiguously received the arguments, parsed them out correctly and that they are valid for this API call.</p>
+
+<p>Pagination is typically done by supporting something like <code>limit</code>, <code>offset</code> and <code>sortBy</code> as URL parameters. Then you include <code>nextPage</code> and <code>previousPage</code> fields in your response <em>which are absolute URLs</em> to those results in the API. <em>Note:</em> I&#39;m using <code>camelCase</code> here versus <code>snake_case</code>. Given that most API consumers these days are either Javascript apps or native mobile apps (objective-c or Java), it might make sense to use their conventions and go with camel case. Just be consistent.</p>
+
+<p>Error messages are great for developer sanity. Of course you want the primary signal of an error to be the proper HTTP status code for that error class.</p>
+
+<h2>Versioning</h2>
+
+<p>You probably want to think about an API versioning strategy up front. In its simplest form, this is just a prefix like <code>/v1</code> that you prepend to every API endpoint. The idea is to plan ahead for having multiple supported versions in flight at the same time, to give developers a gentle transition for breaking changes to the API.</p>
+
+<p>But how do you architect your code to be able to serve multiple versions? The heavy handed approach is to fork the code for each supported version. This is fairly simple, and has the advantage of being very predictably stable for older versions. A different approach might be to have the same codebase serve multiple versions. In that case, you will likely want to retain multiple versions of a subset of the unit tests, in addition.</p>
+
+<p>A third hybrid approach would be to fork either with source control branches, or with actual running VMs or containers with that code on it. This has the disadvantage of making the older versions difficult to patch, either for hotfixes or infrastructure changes.</p>
+
+<p>The most important thing is to have a plan up front. I would recommend launching with both a <code>/v1</code> and a <code>/v0</code> API that have some backwards incompatible difference, even if it&#39;s just a dummy endpoint that is removed in version 1.</p>
+
+<h2>Authentication</h2>
+
+<p>If you&#39;re producing a public facing API, you almost certainly want to use OAuth. Don&#39;t write your own, find a framework. Even if your API is restricted to internal use, you should think about including at least some kind of caller identifier mechanism. This can come in handy when you go to produce analytics on who is using the API, in addition to being a prerequisite for rate limiting per caller.</p>
+
+<p>Whichever auth mechanism you choose, you will want 100% of the API calls to be over HTTPS, so as not to leak those credentials. Don&#39;t even support a HTTP option.</p>
+
+<h2>Documentation &amp; Developers</h2>
+
+<p>Almost as important as the semantics of the API is having excellent, comprehensive documentation. Don&#39;t rely on automatically generated documentation here. Or, at least add a lof of explanatory detail about why the developer might want to use the API, and what each piece of the request and response mean. It&#39;s especially tricky to put yourself in the place of a person who doesn&#39;t know the intimate details of the models in your sytem. Run it by a third party for a sanity check.</p>
+
+<p>Along with the text documentation, you will want to supply full, untruncated examples for common requests and responses. Go ahead and make sure they are pretty printed and perhaps even syntax highlighted. I would also recommend that you pretty print the actual API responses from the server.</p>
+
+<p>A great way to expose examples is with interactive consoles. If you provide HTML documentation, you have even make the examples executable and tweakable in-line. The <a href="http://www.django-rest-framework.org/">Django REST Framework</a> is a great example of this.</p>
+
+<h2>Python Tooling</h2>
+
+<p>Here are some common frameworks for writing REST APIs in Python:</p>
+
+<ul>
+<li><a href="http://www.django-rest-framework.org/">Django REST Framework</a></li>
+<li><a href="https://flask-restful.readthedocs.org/en/0.3.2/">Flask RESTful</a></li>
+<li><a href="http://flask.pocoo.org/docs/0.10/api/">Flask API</a></li>
+</ul>
+
+<p>A good utility for working with REST APIs is <a href="https://github.com/dsc/bunch">Bunch</a>, which lets you easily translate between JSON API responses and Python objects. You can also go the other way, which may be useful for mapping your database objects to JSON.</p>
+
+<p>For versioning, check out <a href="http://flask.pocoo.org/docs/0.10/blueprints/#registering-blueprints">Flask blueprints</a>.</p>
+
+<p>Finally, depending on whether your API is internal or external, you can look into tools for creating API consoles:</p>
+
+<ul>
+<li><a href="http://apigee.com/about/">Apigee</a></li>
+<li><a href="https://www.hurl.it/">HurLit</a></li>
+<li><a href="http://raml.org/projects.html">RAML API Console</a> - <a href="https://anypoint.mulesoft.com/apiplatform/popular/#/portals/apis/6308/versions/6302/pages/31760">example</a></li>
+</ul>
+
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/api">api</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

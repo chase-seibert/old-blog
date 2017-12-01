@@ -1,0 +1,1087 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+    <title>Chase Seibert | blog</title>
+    <link href="http://chase-seibert.github.com/blog/atom.xml" rel="self"/>
+    <link href="http://chase-seibert.github.com/blog/" />
+    <updated>2017-12-01T09:00:18-08:00</updated>
+    <id>http://chase-seibert.github.com/blog/</id>
+    <author>
+        <name>Chase Seibert</name>
+        <email>chase.seibert+blog@gmail.com</email>
+    </author>
+
+    
+        <entry>
+            <title>Tracking Your Time</title>
+            <link href="/blog/2017/11/29/tracking-your-time.html"/>
+            <updated>2017-11-29T00:00:00-08:00</updated>
+            <id>http://chase-seibert.github.com/blog//2017/11/29/tracking-your-time</id>
+            <content type="html">&lt;p&gt;I&amp;#39;ve been using a time tracking tool pretty consistently for the last year to
+categorize all of my time spent at work. It started with wondering how much
+time I was spending in meetings. Eventually I found that it was easier to keep
+up with than I thought, so I just stuck with it. Looking back at the year, I
+can see some interesting data.&lt;/p&gt;
+
+&lt;h1&gt;Toggl&lt;/h1&gt;
+
+&lt;p&gt;The primary tool I&amp;#39;ve been using is &lt;a href=&quot;https://toggl.com/&quot;&gt;Toggl&lt;/a&gt;. It&amp;#39;s a simple app that sits in you status bar and prompts you to start a timer for what you&amp;#39;re currently working on,
+if there isn&amp;#39;t one running already.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/blog/images/toggl.png&quot; alt=&quot;img&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;I eventually settled on five primary &amp;quot;projects&amp;quot; that my time is categorized under:
+meetings, coding, 1:1s, writing and other. In the end, I did end up spending more
+time in meetings than doing anything else.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/blog/images/toggl_year.png&quot; alt=&quot;img&quot;&gt;&lt;/p&gt;
+
+&lt;h2&gt;Other/GTD time&lt;/h2&gt;
+
+&lt;p&gt;Other eventually became just &amp;quot;GTD&amp;quot; time, which is short for &lt;a href=&quot;https://en.wikipedia.org/wiki/Getting_Things_Done&quot;&gt;getting things done&lt;/a&gt;.
+It&amp;#39;s usually the first block of time in the morning, right after I grab coffee.
+It consists of processing all my todos and notes from the previous day. Some tasks
+I just categorize and set a due date for. Other tasks I complete right then, if
+they are quick. My time spent on this category over the course of the year was
+pretty constant.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/blog/images/toggl_other.png&quot; alt=&quot;img&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;I have a whole &lt;a href=&quot;http://chase-seibert.github.io/blog/2015/05/01/omnifocus.html&quot;&gt;separate blog post&lt;/a&gt; on GTD, if you want to learn more.&lt;/p&gt;
+
+&lt;h2&gt;Writing time&lt;/h2&gt;
+
+&lt;p&gt;The amount of time I spend writing wiki pages, blog posts and longer emails also
+stayed pretty constant over the year. If I had broken this down into blog time
+and everything else, I would imagine that blogging is at most two hours a month.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/blog/images/toggl_writing.png&quot; alt=&quot;img&quot;&gt;&lt;/p&gt;
+
+&lt;h2&gt;Coding time&lt;/h2&gt;
+
+&lt;p&gt;Coding is the area that I expected to tail off dramatically, and I was not
+disappointed. This year I went from managing a team of three and being very
+hands on coding, to three teams with 12 total people. In the past, I&amp;#39;ve noticed
+that right when you get to 5 or 6 people, you basically cannot write code
+anymore.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/blog/images/toggl_coding.png&quot; alt=&quot;img&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;April was a hackathon project that I spent way to much extra time on. October
+was a major release that was all hands on deck. I spent a bunch of time
+doing QA type stuff that I categorized as coding. Other than that, it&amp;#39;s been a
+very steady trend downwards.&lt;/p&gt;
+
+&lt;h2&gt;Meetings and 1:1s&lt;/h2&gt;
+
+&lt;p&gt;Meeting time was somewhat steady. I see a spike in March that was a bunch of
+interviews, including a potential aquihire. There is another big spike in
+September, which was getting a new boss, splitting up a team and also
+a bunch of late project schedule coordination meetings.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/blog/images/toggle_meetings.png&quot; alt=&quot;img&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;For one on ones, there was a steady increase as we added new team members, and
+then a big spike in August as we added a few new people all at once.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/blog/images/toggl_ones.png&quot; alt=&quot;img&quot;&gt;&lt;/p&gt;
+
+&lt;h1&gt;Timebox&lt;/h1&gt;
+
+&lt;p&gt;Remember that hackathon project? I also wrote a Slack bot to categorize
+meetings on my actual calendar, which is an interesting way of cross checking
+my manual tracking. It&amp;#39;s a little hard to parse, because the bot is designed
+to report on one or two weeks at time. But you can see that while overall
+meeting time has gone up, I&amp;#39;ve actually been pretty successful at maintaining
+and even increasing the amount of free time I have in blocks - time to actually
+work on something substantial without interruptions.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/blog/images/timebox_2017.jpeg&quot; alt=&quot;img&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;In fact, my time this year was 57% free time with 267 hours in blocks of at
+least 3 hours. Doesn&amp;#39;t sound too bad when you put it that way!&lt;/p&gt;
+
+&lt;h1&gt;RescueTime&lt;/h1&gt;
+
+&lt;p&gt;Finally, there is another fully automated time tracker that I started using
+more recently called &lt;a href=&quot;https://www.rescuetime.com&quot;&gt;RescueTime&lt;/a&gt;. It can give you
+a breakdown of time spent by app/website. I&amp;#39;m spending more time in Google
+Spreadsheets than in my terminal app and my code editor combined, which is
+definitely a strong signal.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/blog/images/rescue.png&quot; alt=&quot;img&quot;&gt;&lt;/p&gt;
+</content>
+        </entry>
+    
+        <entry>
+            <title>Two (more) Weeks in QA</title>
+            <link href="/blog/2017/10/06/two-more-weeks-in-qa.html"/>
+            <updated>2017-10-06T00:00:00-07:00</updated>
+            <id>http://chase-seibert.github.com/blog//2017/10/06/two-more-weeks-in-qa</id>
+            <content type="html">&lt;p&gt;Due to our regular QA engineer being out on vacation, I once again has the
+opportunity to do a tour of duty in QA. This time, for a big mobile release.
+I previously &lt;a href=&quot;http://chase-seibert.github.io/blog/2009/03/20/my-two-weeks-in-qa.html&quot;&gt;wrote about a similar experience&lt;/a&gt;
+ eight (!) years ago, so I thought I would once again write down some reflections.&lt;/p&gt;
+
+&lt;h1&gt;Web vs Mobile&lt;/h1&gt;
+
+&lt;p&gt;Last time, I was testing a web product. This time, it was a mobile app. That
+turned out to make a &lt;strong&gt;big difference&lt;/strong&gt;. For one thing, I spent a lot more time
+manually testing on various physical phones. Our app is on both Android and iOS,
+so that&amp;#39;s at least two devices for every test. But you also have to test on
+older slower phones, phones on older versions of the operating system, etc. Plus
+it&amp;#39;s all via touch interfaces. It ends up being more time than testing web
+features for a few browsers.&lt;/p&gt;
+
+&lt;h1&gt;More Documentation Time&lt;/h1&gt;
+
+&lt;p&gt;This time I spent a lot more time updating test plans. Because we have to test
+on so many phones, we have an outsourced QA team for even more manual testing
+horsepower. While I may test on five or six phones, I can send a test plan over
+to a remote team to run it on fifteen to twenty phones.&lt;/p&gt;
+
+&lt;p&gt;The existing documentation turned out to be very useful. Not only did it remind
+me about a bunch of test cases I would have forgotten about, but it had all kinds
+of hints about the most efficient way to test a specific case.&lt;/p&gt;
+
+&lt;h1&gt;Communication&lt;/h1&gt;
+
+&lt;p&gt;Because it was a big release, I spent a bunch of time coming up with daily
+reports of whether we were on track for launch. At a high level, I wanted to
+communicate how many bugs we had, new bugs we had discovered that day, any
+blockers for release and what step on our release schedule we were on.&lt;/p&gt;
+
+&lt;p&gt;But I also made some fun graphs!&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/blog/images/qa_time.png&quot; alt=&quot;img&quot;&gt;
+&lt;img src=&quot;/blog/images/qa_type.png&quot; alt=&quot;img&quot;&gt;&lt;/p&gt;
+
+&lt;h1&gt;Triage &amp;amp; Troubleshooting&lt;/h1&gt;
+
+&lt;p&gt;This time, I got more involved in triaging new bugs. Not just reproducing them
+and writing a good bug report, but also setting priority. This turned out to
+often involve discussions with both the product owner and the engineers. On more
+than a few bugs, we decided that while the severity of the bug was low to medium,
+we actually did not want to fix it now because we don&amp;#39;t have a good solution that
+doesn&amp;#39;t involve a medium sized refactor.&lt;/p&gt;
+
+&lt;p&gt;Similarly, we ended up having a lot of conversations about how to be more
+defensive in the code to prevent errors like the one in a particular bug report
+more generically. Some of these were also not feasible/wise to take on
+immediately. They went into the backlog.&lt;/p&gt;
+
+&lt;h1&gt;What Was the Same&lt;/h1&gt;
+
+&lt;p&gt;Once again, I was surprised my how many blocking issues I ran into just trying
+to get a build running well enough to test. We have most of the kinks worked
+out of our build pipeline, so there were not any problems getting a given
+build onto a phone. But I was blocked for days at a time on things like third
+party API integration staging environments being down. In one case, it took
+way too much time to discover that the breakage was related to a new network
+configuration in the office; we had forgotten to whitelist some IPs.&lt;/p&gt;
+</content>
+        </entry>
+    
+        <entry>
+            <title>Saying the Same Thing Multiple Times</title>
+            <link href="/blog/2017/09/11/say-it-multiple-times.html"/>
+            <updated>2017-09-11T00:00:00-07:00</updated>
+            <id>http://chase-seibert.github.com/blog//2017/09/11/say-it-multiple-times</id>
+            <content type="html">&lt;p&gt;To communicate something to an organization of people, you need to repeat
+yourself. The more people involved, the more you will need to repeat yourself
+if you want everyone to really hear it.&lt;/p&gt;
+
+&lt;p&gt;Why? Not everyone will see the communication. Even if they
+see it, it may not register with them. Even if it registers, they may
+not buy into it. In general, the more you repeat yourself, the more likely
+people are to hear it, internalize it, and buy into it.&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;&lt;br&gt;
+The 1st time people look at ad, they don’t see it.&lt;br&gt;
+The 2nd time, they don’t notice it.&lt;br&gt;
+he 3rd time, they are aware that it is there.&lt;br&gt;
+The 4th time, they have a fleeting sense that they’ve seen it before.&lt;br&gt;
+The 5th time, they actually read the ad.&lt;br&gt;
+The 6th time, they thumb their nose at it.&lt;br&gt;
+The 7th time, they get a little irritated with it.&lt;br&gt;
+The 8th time, they think, “Here’s that confounded ad again.”&lt;br&gt;
+The 9th time, they wonder if they’re missing out on something.&lt;br&gt;
+The 10th time, they ask their friends or neighbors if they’ve tried it.&lt;br&gt;
+The 11th time, they wonder how the company is paying for all these ads.&lt;br&gt;
+The 12th time, they start to think that it must be a good product.&lt;br&gt;
+The 13th time, they start to feel the product has value.&lt;br&gt;
+The 14th time, they start to feel like they’ve wanted a product like this.&lt;br&gt;
+The 15th time, they start to yearn for it because they can’t afford to buy it.&lt;br&gt;
+The 16th time, they accept the fact that they will buy it sometime in the future.&lt;br&gt;
+The 17th time, they make a commitment to buy the product.&lt;br&gt;
+The 18th time, they curse their poverty because they can’t buy this terrific product.&lt;br&gt;
+The 19th time, they count their money very carefully.&lt;br&gt;
+The 20th time prospects see the ad, they buy what it is offering.&lt;br&gt;
+  - &lt;a href=&quot;https://www.amazon.com/Successful-Advertising-Secrets-Explained-AnnuaL/dp/B00HERMNYS&quot;&gt;Thomas Smith, 1885, Successful Advertising&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h1&gt;Seven Corporate Communication Methods&lt;/h1&gt;
+
+&lt;p&gt;The seven most obvious mechanisms for communicating information inside an
+organization are:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Slack&lt;/li&gt;
+&lt;li&gt;Email&lt;/li&gt;
+&lt;li&gt;Wiki&lt;/li&gt;
+&lt;li&gt;One on ones&lt;/li&gt;
+&lt;li&gt;Small team meeting&lt;/li&gt;
+&lt;li&gt;Large cross team meeting&lt;/li&gt;
+&lt;li&gt;All hands meeting&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Notice that these methods start out targeting specific groups surgically,
+and get more general. That&amp;#39;s intentional; you want the most targeted audience
+to hear it the most often. Side benefit: by the time you are communicating in
+a larger group, you have a good chance of having the most effected sub-groups
+already nodding their heads.&lt;/p&gt;
+
+&lt;p&gt;For anything important that many people need to hear about, you should plan on
+going all the way up to #6 or #7 &lt;em&gt;and all the steps before that&lt;/em&gt;.&lt;/p&gt;
+
+&lt;h2&gt;Minor Communication Methods&lt;/h2&gt;
+
+&lt;p&gt;In addition, you can also communicate via one of the lesser methods:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Written status updates&lt;/li&gt;
+&lt;li&gt;Personal blog&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1&gt;Communication Anti-Patterns&lt;/h1&gt;
+
+&lt;p&gt;Don&amp;#39;t do these.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Email a bunch of people without any clear calls to action.&lt;/li&gt;
+&lt;li&gt;Write a book in an email.&lt;/li&gt;
+&lt;li&gt;Write multiple paragraphs without headings, lists or other structure conducive to
+skimming.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1&gt;Advanced Communication Tips&lt;/h1&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Include a &lt;code&gt;TL;DR&lt;/code&gt; section at the top of your email for the 75% of people who
+will not read the entire thing.&lt;/li&gt;
+&lt;li&gt;Make the email as short as possible to increase that percentage. Then make it
+even shorter.&lt;/li&gt;
+&lt;li&gt;Include a link to a wiki page or doc with more info.&lt;/li&gt;
+&lt;li&gt;Include a FAQ in the wiki page or doc.&lt;/li&gt;
+&lt;li&gt;Include a table of contents on that wiki or doc if it gets long enough.&lt;/li&gt;
+&lt;li&gt;Send a pre-read for any meeting communication.&lt;/li&gt;
+&lt;li&gt;On a wiki, assign TODO items right inside the wiki to ask people to certify
+that they read it.&lt;/li&gt;
+&lt;li&gt;Set a reminder to communication the same thing again in the future.&lt;/li&gt;
+&lt;/ul&gt;
+</content>
+        </entry>
+    
+        <entry>
+            <title>Estimating Epic Stories in Three Steps</title>
+            <link href="/blog/2017/08/28/epic-story-estimation.html"/>
+            <updated>2017-08-28T00:00:00-07:00</updated>
+            <id>http://chase-seibert.github.com/blog//2017/08/28/epic-story-estimation</id>
+            <content type="html">&lt;p&gt;In Agile, an Epic story is a potentially large placeholder story in the backlog.
+Typically they will be broken down into manageable stories during grooming
+before they are worked on. But if you need to estimate an Epic before breaking
+it down, how might you do that?&lt;/p&gt;
+
+&lt;h1&gt;Use Story Points&lt;/h1&gt;
+
+&lt;p&gt;In &lt;a href=&quot;https://www.mountaingoatsoftware.com/blog/in-defense-of-large-numbers&quot;&gt;Defense of Large Numbers&lt;/a&gt;,
+Mike Cohn talks about how removing the larger values from your estimation
+toolkit is like deciding to strike &amp;quot;millions&amp;quot; and &amp;quot;billions&amp;quot; from our vocabulary
+just because our bank balances are only in the thousands.&lt;/p&gt;
+
+&lt;h2&gt;#1 Show Historical Data&lt;/h2&gt;
+
+&lt;p&gt;Pull up a list of recently completed Epics, along with their final point value.
+For example, if you recently finished a &amp;quot;User Registration&amp;quot; Epic, tally up all
+the points from all the stories in that Epic.&lt;/p&gt;
+
+&lt;p&gt;You might end up with something like this:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Password Reset, 15 points&lt;/li&gt;
+&lt;li&gt;User Registration, 35 points&lt;/li&gt;
+&lt;li&gt;Admin Interface, 70 points&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;#2 Discussion of Mocks&lt;/h2&gt;
+
+&lt;p&gt;The next step is to view the mocks as a team. Yes, this means to need mocks.
+Go over every screen as a team.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Write down a high level set of features.&lt;/li&gt;
+&lt;li&gt;Write down how many pages/screens are involved.&lt;/li&gt;
+&lt;li&gt;Write down any complexity you see.&lt;/li&gt;
+&lt;li&gt;Think about any dependencies you may have.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;For Epic estimation, I like to cheat a little and ask the team to agree whether
+this story is the same size as another Epic on the board, or whether it&amp;#39;s
+between two of the epics. That will ground planning poker.&lt;/p&gt;
+
+&lt;h2&gt;#3 Relative Estimation&lt;/h2&gt;
+
+&lt;p&gt;You should be ready to play planning poker. Ask the team if they are ready to
+estimate. Tell them that we are going to continue to use the Fibonacci sequence.
+As a refresher, here are the larger Fibonacci numbers:&lt;/p&gt;
+
+&lt;p&gt;13, 21, 34, 55, 89, 144&lt;/p&gt;
+
+&lt;p&gt;Assign a number of fingers to each number. For example:&lt;/p&gt;
+
+&lt;p&gt;13 (1), 21 (2), 34 (3), 55 (4), 89 (5), 144 (6)&lt;/p&gt;
+
+&lt;p&gt;Now, it&amp;#39;s time to vote. On the count of three, every one holds up a number of
+fingers simultaneously. You would be surprised how often everyone in the room
+holds up the same number of fingers at this point. Congratulations; you have
+an Epic estimate.&lt;/p&gt;
+
+&lt;h1&gt;Bonus: Milestones&lt;/h1&gt;
+
+&lt;p&gt;Remember that high level set of features you wrote down during the discussion of
+the mocks? You have already done 90% of the work for milestone definition, might
+as well take it over the finish line to de-risk your project. Reminder: the goal
+of milestones is to deliver (usually three) potentially shippable product
+increments along the way to a finished product.&lt;/p&gt;
+
+&lt;p&gt;Just write down labels for milestone 1, 2 and 3 on the board. Start with
+the most critical features, and put them in the early milestones. You will
+likely run out of room and have to bump features to later milestones. That&amp;#39;s
+fine! The goal is to keep the product potentially shippable; be ruthless in
+prioritizing only features that would block a user from getting the primary
+user value.&lt;/p&gt;
+
+&lt;h1&gt;What about T-Shirt Sizing?&lt;/h1&gt;
+
+&lt;p&gt;On common method is to assign T-Shirt sizes to stories, such as Extra Small,
+Small, Large, Extra Large, etc. This method has the benefit of being in a
+non-numerical unit. It&amp;#39;s very hard to hold a team accountable to a deadline
+around an estimate of &amp;quot;Large&amp;quot;.&lt;/p&gt;
+
+&lt;p&gt;This method also lends itself to relational estimation, versus absolute
+estimation. But, you have to hold to that bar yourself. For example, you could
+identify one medium sized story in the batch and randomly call it a &amp;quot;Medium&amp;quot;.
+Then, you can relatively estimate from there. If you do T-Shirt sizing a lot,
+you should present the team with some of their previous complete stories, along
+with their original T-Shirt sizes, to ground the discussion.&lt;/p&gt;
+
+&lt;p&gt;However, what if you also need to estimate how long the Epic might take in terms
+of time? You might be tempted to equate T-Shirt sizes directly with a number of
+weeks or sprints. But that&amp;#39;s the same thing as equating story points to hours,
+which is a huge no-no.&lt;/p&gt;
+</content>
+        </entry>
+    
+        <entry>
+            <title>Trading off Value, Quality and Time</title>
+            <link href="/blog/2017/07/13/value-quality-time.html"/>
+            <updated>2017-07-13T00:00:00-07:00</updated>
+            <id>http://chase-seibert.github.com/blog//2017/07/13/value-quality-time</id>
+            <content type="html">&lt;p&gt;The traditional &lt;a href=&quot;https://en.wikipedia.org/wiki/Project_management_triangle&quot;&gt;Iron Triangle&lt;/a&gt;
+tries to explain in graphical form how software projects need to make hard
+tradeoffs between scope, schedule and resources.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/blog/images/ironTriangle.jpg&quot; alt=&quot;img&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;This is alternatively referred to as the Time-Cost-Quality Triangle,
+Triple Constraints, the Triangle of Balance, or the Iron Triangle.&lt;/p&gt;
+
+&lt;h1&gt;Many Triangles&lt;/h1&gt;
+
+&lt;p&gt;There are many variants. A common variant is phrase &amp;quot;Fast, Cheap or Good. Pick two.&amp;quot;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/blog/images/fast-cheap-good.png&quot; alt=&quot;img&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;A more nuanced version allows illustrates the nature of the tradeoffs that
+you&amp;#39;re making, an allows for a middle option where all three are in balance, but
+you&amp;#39;re not really optimizing any of them.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/blog/images/Project_Management_Triangle.jpg&quot; alt=&quot;img&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;Software engineers is all about managing tradeoffs. The highest level
+tradeoff is during planning and prioritization in the form of trading off
+value delivered, the quality level of that value and the time to deliver it.&lt;/p&gt;
+
+&lt;h1&gt;The Agile Triangle&lt;/h1&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;&amp;quot;If you&amp;#39;re a team that practices waterfall development or new to agile development, the important thing to remember is the difference between what is fixed and what is estimated. Unlike waterfall development, agile projects have a fixed schedule and resources while the scope varies.&amp;quot;
+&lt;a href=&quot;https://www.atlassian.com/agile/agile-iron-triangle&quot;&gt;https://www.atlassian.com/agile/agile-iron-triangle&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Agile methodology in particular uses fixed time periods and fixed resources. This
+is typical of a start up environment, where you need to ship quickly and do not
+have the resources to hire many engineers. You&amp;#39;re also typically building an
+MVP type product, trading off scope versus time. Scope can be further broken
+down into feature breadth and depth, and the quality of the whole experience.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/blog/images/agiletriangle.jpg&quot; alt=&quot;img&quot;&gt;&lt;/p&gt;
+
+&lt;h1&gt;My Agile MVP Triangle&lt;/h1&gt;
+
+&lt;p&gt;To simplify, my version of the Agile MVP triangle looks like this.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/blog/images/Value-Quality-Time.png&quot; alt=&quot;img&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;You can pick exactly one spot on this triangle for a given project. If you
+choose a spot close to the value point of the triangle, you are explicitly
+giving up some focus on a quality, polished experience. You&amp;#39;re also choosing to
+push out time to deliver somewhat to get more value in.&lt;/p&gt;
+
+&lt;p&gt;This is joking talked about as &amp;quot;Fast, Cheap or Good. Pick two. &lt;em&gt;No, not that one&lt;/em&gt;&amp;quot;.
+Alternatively describes as &amp;quot;Nine women cannot make a baby in one month&amp;quot;
+(&lt;a href=&quot;https://en.wikipedia.org/wiki/The_Mythical_Man-Month&quot;&gt;Mythical Man Month&lt;/a&gt;),
+meaning that even if you did add resources in the form of extra engineers,
+you can quickly get to a point of diminishing returns where adding people
+doesn&amp;#39;t actually speed up the delivery.&lt;/p&gt;
+
+&lt;p&gt;What do these points mean, exactly?&lt;/p&gt;
+
+&lt;h2&gt;Value&lt;/h2&gt;
+
+&lt;p&gt;This is basically scope. It could also be labeled &amp;quot;Features&amp;quot;, both in terms of
+breadth of different features, and the depth/scope of an individual feature. I
+thought about calling this &amp;quot;User Value&amp;quot;, but quality could also be considered to
+deliver user value. Likewise, scope could include quality/polish work. In the
+end, this isn&amp;#39;t a perfect term, but I basically mean user value excluding
+quality/polish.&lt;/p&gt;
+
+&lt;h2&gt;Quality&lt;/h2&gt;
+
+&lt;p&gt;Some examples of quality are high fidelity graphic style, UX optimizations
+based on feedback and performance tuning. This is often subjective, and can
+take a virtually unlimited amount of time as you polish on the far end of the
+diminishing returns curve. The trick is getting to 80% of max quality with 20%
+of the effort.&lt;/p&gt;
+
+&lt;h2&gt;Time&lt;/h2&gt;
+
+&lt;p&gt;This is simply the time to ship - to put the software in front of real users.&lt;/p&gt;
+</content>
+        </entry>
+    
+        <entry>
+            <title>React Native Six Months In</title>
+            <link href="/blog/2017/05/26/react-native-six-months-in.html"/>
+            <updated>2017-05-26T00:00:00-07:00</updated>
+            <id>http://chase-seibert.github.com/blog//2017/05/26/react-native-six-months-in</id>
+            <content type="html">&lt;p&gt;NerdWallet released our first cross platform mobile app at the start of 2017,
+about six months ago. We choose to use React Native, and we are still using
+99% of the same code base for the iOS and Android apps. What have we learned
+so far?&lt;/p&gt;
+
+&lt;h1&gt;Initial reasoning&lt;/h1&gt;
+
+&lt;p&gt;We initially chose React Native because it was the only way to hit our goals. We
+didn&amp;#39;t have any native mobile engineers, and we had been asked to deliver an
+iOS and Android app from scratch in just five weeks. We also happened to have
+very solid React experience on the team. Additionally, the app overlapped very
+nicely with some features we already had on the web, and we thought we could
+get some code re-use there.&lt;/p&gt;
+
+&lt;h1&gt;Code Reuse Deep Dive&lt;/h1&gt;
+
+&lt;p&gt;In our case, we started with an intuition that 50% of the mobile app codebase
+could actually be NPM modules re-used from our web stack. Plus, we got the
+obvious savings of 100% code re-use between the iOS and Android app code.&lt;/p&gt;
+
+&lt;p&gt;After 6 months, we can look at our actual code re-use to get a better sense of
+where we actually ended up. Our current app has 26,000 lines of JavaScript. The
+NPM modules that we include from our web app stack total 40,000 lines of
+JavaScript. In practice, the maintenance of that shared code is virtually 100%
+offloaded to other teams.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://docs.google.com/drawings/d/1-pqAgRwz9gh66290u3yJQ5Jfevn3hBEqzBFtORpQ9nE/pub?w=960&amp;amp;h=720&quot; alt=&quot;react&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;Here is what it might look like if we had two separate native app code bases.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://docs.google.com/drawings/d/1QWus2w-VxQRpIbR_y51DKukeGXIgYKGObWY5eJuQ8Pk/pub?w=480&amp;amp;h=360&quot; alt=&quot;native&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;If you think of an app codebase as 2 unit of library code and 1 unit UX code,
+our app is about 1.2 units of code that we actually maintain. Writing two
+native apps would be about 6 units. The most interesting learning for me was
+just how much logic in an app is not related directly to the UI, as well as
+how easy it is to re-purpose NPM modules targeted at web.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Note: if you&amp;#39;re interested in reading more about leveraging NPM modules in
+React Native, see &lt;a href=&quot;https://t.co/tM8CSoZvlk&quot;&gt;@parshap&amp;#39;s slides&lt;/a&gt;.&lt;/em&gt;&lt;/p&gt;
+
+&lt;h1&gt;Limitations&lt;/h1&gt;
+
+&lt;p&gt;We have run into a number of areas where we are making compromises on the user
+experience. It&amp;#39;s not totally clear yet which of these are legitimate things that
+React Native is not good at, and which are due to us as a team not having
+focused on them.&lt;/p&gt;
+
+&lt;h2&gt;Performance&lt;/h2&gt;
+
+&lt;p&gt;We have seen persistent issues with app performance, particularly around the
+time to switch between tabs in the navigation. That issue seems to be due to a
+bug in our navigation library, &lt;code&gt;react-native-router-flux&lt;/code&gt;. But it&amp;#39;s important
+to call out that performance is largely dependent on getting React basics right.
+Performance has been good enough that we have not dedicated time to look
+into it further. In general, we still don&amp;#39;t think there is anything that most
+apps need to do for which React Native will not perform well, except maybe
+custom animations.&lt;/p&gt;
+
+&lt;h2&gt;Animations&lt;/h2&gt;
+
+&lt;p&gt;Basic stock animations like screen transitions are available and perform well
+out of the box. For custom animations such as fading out a header as the user
+scrolls down on a list view, you need to write the animation yourself. We
+initially tried the naive solution where we control style properties from
+JavaScript. That did not perform well. But it was relatively easy to use the
+actual bridged animation primitives, at least for simple animations. We still
+don&amp;#39;t have a good sense of how difficult complex custom animations will be.&lt;/p&gt;
+
+&lt;h2&gt;Fonts&lt;/h2&gt;
+
+&lt;p&gt;Initially we did not use the correct default fonts for each platform. It turned
+out to be relatively simple to use either San Francisco or Roboto based on the
+platform. Some font variants that are normally available are not included. This
+ended up being something that probably took more time to get right than a native
+app would, but if you pay attention to it the first time it should be smooth.&lt;/p&gt;
+
+&lt;h1&gt;Biggest risks&lt;/h1&gt;
+
+&lt;p&gt;The largest risk with React Native is still the immaturity of the platform.
+Releases come every two weeks with potentially breaking changes. But the larger
+risk is more existential; even though it&amp;#39;s still building in popularity, there
+is a chance that React Native fades away in the coming years as the framework
+ecosystem &lt;a href=&quot;https://trends.google.com/trends/explore?q=react%20native,phonegap,cordova,Xamarin&quot;&gt;continues to evolve&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://dl.dropboxusercontent.com/spa/sffu0th1cc1sg9q/ellfigls.png&quot; alt=&quot;trends&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;The second largest risk I see is a little more insidious. As we have ramped up
+the team with engineers who have prior mobile experience, they have begun to
+point out areas where we are not following best UX practices. Some of these are
+intentional. It&amp;#39;s very tempting once you have a cross platform app to make UX
+decisions to optimize for code re-use, not the best user experience. Even more
+troubling is the times when the engineers themselves don&amp;#39;t realize that a
+particular design is not following best practice UX; typically due to many of
+them not having mobile experience.&lt;/p&gt;
+
+&lt;h1&gt;Question marks&lt;/h1&gt;
+
+&lt;p&gt;In my mind, the biggest open question is around how these mobile native
+platforms continue to evolve. Both Android and iOS have their developer
+conferences this time of year. Neither are expected to announce anything ground
+breaking in terms of how we build apps. This is a natural trend as the platforms
+mature; there is less interesting stuff to do. This happened to the PC operating
+system platforms over the last 30 years. 10 years into mobile, are we starting
+to see the same? This could be the time when putting an abstraction layer on top
+starts to make more sense, and actually becomes a winning strategy.&lt;/p&gt;
+</content>
+        </entry>
+    
+        <entry>
+            <title>Minimizing Impact of Interruptions on Engineers</title>
+            <link href="/blog/2017/04/14/engineering-meeting-strategies.html"/>
+            <updated>2017-04-14T00:00:00-07:00</updated>
+            <id>http://chase-seibert.github.com/blog//2017/04/14/engineering-meeting-strategies</id>
+            <content type="html">&lt;p&gt;Any software engineer knows the feeling of being &amp;quot;in the flow&amp;quot;, or
+&amp;quot;in the zone&amp;quot;. It&amp;#39;s when you get a large block of uninterrupted time to just
+code. These periods are rare, super productive and morale boosting.&lt;/p&gt;
+
+&lt;h1&gt;Importance of Flow&lt;/h1&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;During single-minded work time, people are ideally in a state that psychologists call flow. It is a condition of deep, nearly meditative involvement, a gentle sense of euphoria when one is largely unaware of the passage of time. For anyone involved in engineering, design, development, writing or similar tasks, flow is a must. These are high-momentum tasks that only go well when you’re in flow. Unfortunately, it can’t be turned on like a switch, it takes a slow descent into the subject, 15 minutes of more of concentration before the state is locked in. Each time you’re interrupted, you require an additional immersion period to get back into flow. &lt;a href=&quot;https://www.amazon.com/Peopleware-Productive-Projects-Teams-Second/dp/0932633439&quot;&gt;Peopleware&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Flow is critical to creative endeavors like coding. Our goal as engineers and
+managers should be to maximize this across our teams. Because interruptions can
+disrupt flow, they must be minimized. Beyond that, what should our goal be
+for flow time?&lt;/p&gt;
+
+&lt;h1&gt;Maximize Large Blocks of Flow Time&lt;/h1&gt;
+
+&lt;p&gt;The current state of the industry is that a programmer is likely to get just
+one two hour session of flow per day [&lt;a href=&quot;http://blog.ninlabs.com/2013/01/programmer-interrupted/&quot;&gt;Programmer Interrupted&lt;/a&gt;]. That
+should be our absolute floor. &lt;a href=&quot;http://www.paulgraham.com/makersschedule.html&quot;&gt;Paul Graham&lt;/a&gt; advocates for half day blocks (4 hours). For context, &lt;a href=&quot;https://www.quora.com/What-is-a-typical-shift-length-for-an-air-traffic-controller&quot;&gt;air traffic controllers
+are required to take a break every two hours&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;In the absence of any research on the maximum duration a software engineer can
+be in the flow, let&amp;#39;s say that our goal should be to maximize the number of
+two to four hour blocks of flow per week.&lt;/p&gt;
+
+&lt;p&gt;For a 40 hour week, we could theoretically schedule 10 four hour flow sessions
+or 20 two hour flow sessions. That&amp;#39;s assuming 100% capacity. Based on experience,
+Scrum best practice is to assume that engineers get about 5 &amp;quot;effective hours&amp;quot;
+ or &amp;quot;net work hours&amp;quot; a day. See: &lt;a href=&quot;https://www.leadingagile.com/2011/05/determining-how-many-task-hours-an-agile-team-can-accomplish/&quot;&gt;Determining How Many Task Hours an Agile Team Can Accomplish&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;That aligns with surveys which show that &lt;a href=&quot;http://www.infoworld.com/article/2613762/application-development/software-engineers-spend-lots-of-time-not-building-software.html&quot;&gt;50% of engineering time&lt;/a&gt; is taken by non-coding tasks.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://images.techhive.com/images/idge/imported/article/ifw/2013/04/08/elasticcloud_swengineer_hours-100422926-orig.png&quot; alt=&quot;img&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Note: taken together, this means that an engineer is on average getting about
+20 hours of coding time, but only 10 of those hours are &amp;quot;in the flow&amp;quot;.&lt;/em&gt;&lt;/p&gt;
+
+&lt;h1&gt;Strategies to Minimize Interruptions&lt;/h1&gt;
+
+&lt;p&gt;These are mostly common knowledge.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Put on headphones&lt;/li&gt;
+&lt;li&gt;Don&amp;#39;t answer email/Slack&lt;/li&gt;
+&lt;li&gt;Hold &amp;quot;office hours&amp;quot; to batch up Interruptions&lt;/li&gt;
+&lt;li&gt;Work from home&lt;/li&gt;
+&lt;li&gt;Go sit somewhere by yourself in the office&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Notice that these are entirely on the individual engineer to manage. What
+can we do as managers to help?&lt;/p&gt;
+
+&lt;h1&gt;Strategies to Maximize Flow Blocks&lt;/h1&gt;
+
+&lt;p&gt;As managers, the most effective way to maximize the number of blocks of flow
+our teams get is to clear the calendar. In this context, what types of calendar
+items constitute an interruption? Basically, anything. Regular meetings, 1:1s,
+interviews are all obvious interruptions.&lt;/p&gt;
+
+&lt;p&gt;Here are some common top down strategies to minimize interruptions. Again, our
+baseline is the industry average 2 flow hours a day, or 10 flow hours a week,
+and our goal is 20 flow hours per week.&lt;/p&gt;
+
+&lt;p&gt;Also, remember we are assuming a &lt;strong&gt;maximum of five effective hours per day.&lt;/strong&gt;&lt;/p&gt;
+
+&lt;h2&gt;No Meeting Days&lt;/h2&gt;
+
+&lt;p&gt;The most popular strategy is to have an entire day per week with no meetings,
+where everyone can be heads down. You might combine that with giving people
+permission to not answer email/Slack, or work from home.&lt;/p&gt;
+
+&lt;p&gt;The great advantage of this tactic is that it&amp;#39;s easy to communication and
+understand. It&amp;#39;s also relatively easy to get buy-in to delay a meeting by at
+most one day.&lt;/p&gt;
+
+&lt;p&gt;In the best case scenario, this translates to a 1 four hour block
+per week and 4 two hour blocks a week, for a total of 12 flow hours.&lt;/p&gt;
+
+&lt;h2&gt;Consolidating Meetings to One or Two days&lt;/h2&gt;
+
+&lt;p&gt;If you hold all meetings on one or two days a week, and leave the entire rest
+of the calendar free, you would have 3 or 4 four hour blocks per week. Assume
+that the one or two days you actually have meetings are complete write-offs.
+That results in a total of 12 to 15 flow hours.&lt;/p&gt;
+
+&lt;h2&gt;No Meeting Mornings/Afternoons&lt;/h2&gt;
+
+&lt;p&gt;You could block off 3-4 hours every day for interruption free working
+time. This could take the form of never scheduling meetings before lunch,
+or between 1pm and 5pm, etc. In practice, it would be important to align
+this with times people are actually in the office, if you allow flexible work
+hours.&lt;/p&gt;
+
+&lt;p&gt;This would result in 5 three or four hour blocks a week. Any non-free time
+can be assumed to involve interruptions. Let&amp;#39;s estimate 15 to 20 flow hours.&lt;/p&gt;
+
+&lt;h1&gt;Conclusion&lt;/h1&gt;
+
+&lt;p&gt;Given that engineers are going to get at most five effective hours a day, the
+ideal set up from a flow perspective is to get a 3-4 hour block of time blocked off
+every single day with no interruptions. Interestingly, this is 80% as effective
+as never having any interruptions at all - the equivalent of a 100% meeting
+free week. It&amp;#39;s also the same 20 hours of coding that engineers are typically
+getting, but a 100% increase in the number of coding hours &amp;quot;in the flow&amp;quot;.&lt;/p&gt;
+</content>
+        </entry>
+    
+        <entry>
+            <title>Best Practices for Meetings</title>
+            <link href="/blog/2017/03/31/meeting-best-practices.html"/>
+            <updated>2017-03-31T00:00:00-07:00</updated>
+            <id>http://chase-seibert.github.com/blog//2017/03/31/meeting-best-practices</id>
+            <content type="html">&lt;p&gt;Every team meeting needs a primary owner. If you are the owner of the meeting,
+it&amp;#39;s your responsibility to make sure that this is a great use of team time.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;This only applies to team meetings with 3+ people, not 1:1s.&lt;/em&gt;&lt;/p&gt;
+
+&lt;h1&gt;Before the Meeting&lt;/h1&gt;
+
+&lt;h2&gt;Make attendance optional&lt;/h2&gt;
+
+&lt;p&gt;Not everyone needs to go to every meeting. If you&amp;#39;re using Google Calendar,
+when you invite a team, expand the group into individuals and click on the
+person icon to the left of a name to mark that attendee optional.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/blog/images/meetings_optional.png&quot; alt=&quot;optional attendees&quot;&gt;&lt;/p&gt;
+
+&lt;h2&gt;Write an agenda&lt;/h2&gt;
+
+&lt;p&gt;Any meeting with more than a couple of people should have a written agenda on
+the calendar item itself. Have some standard meeting agendas that
+the team agreed on. Part of the agenda is how much time you want to allocate
+to each topic. The entire allotted time for agenda items should be at least
+5 minutes less than the block of time for the meeting. The written agenda
+should be on the meeting at least the day before.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;It&amp;#39;s perfectly reasonable to decline attending a meeting if you&amp;#39;ve asked for
+an agenda, and there is still not a written agenda.&lt;/em&gt;&lt;/p&gt;
+
+&lt;h2&gt;Share out pre-Reading&lt;/h2&gt;
+
+&lt;p&gt;As part of the agenda, share out and reading materials ahead of time.
+You should not spend a lot of time during a meeting reading slides; the meeting
+should be for getting feedback and discussion of the content.&lt;/p&gt;
+
+&lt;h2&gt;Setup remote access&lt;/h2&gt;
+
+&lt;p&gt;If you use Zoom.us for remote meeting access, meeting owners are responsible
+for setting up Zoom for all meetings. You never know when someone is going to
+be remote that day. You can use the &lt;a href=&quot;https://chrome.google.com/webstore/detail/zoom-scheduler/kgjfgplpablkjnlkjmjdecgdpfankdle?hl=en&quot;&gt;Zoom Chrome plugin&lt;/a&gt;
+to quickly create Zoom info. This will allow attendees to dial in before the
+meeting even starts.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/blog/images/meetings_zoom.png&quot; alt=&quot;zoom plugin&quot;&gt;&lt;/p&gt;
+
+&lt;h1&gt;During the Meeting&lt;/h1&gt;
+
+&lt;h2&gt;Get there early&lt;/h2&gt;
+
+&lt;p&gt;Meeting owners should get to the room a few minutes ahead of time to make
+sure that Zoom and screen sharing it setup and working. You should not be
+making attendees wait around for this to happen. This will sometimes
+necessitate that meeting owners leave a previous meeting 5 minutes early. If
+you own a meeting, that&amp;#39;s part of your responsibility.&lt;/p&gt;
+
+&lt;h2&gt;Start on time&lt;/h2&gt;
+
+&lt;p&gt;Start the meeting on time. Don&amp;#39;t wait for stragglers, get right into it. If
+people show up late, it&amp;#39;s their responsibility to try to catch up.&lt;/p&gt;
+
+&lt;h2&gt;Take notes&lt;/h2&gt;
+
+&lt;p&gt;Either the meeting owner or someone they delegate to should be taking notes
+for the meeting. These can be on a wiki, a Google doc, or directly in an email.&lt;/p&gt;
+
+&lt;h2&gt;Timebox discussions&lt;/h2&gt;
+
+&lt;p&gt;It&amp;#39;s the meeting owner&amp;#39;s responsibility to keep the meeting on track. If the
+amount of time you have allocated for a specific discussion is going over, you
+may have to cut it off.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Keep discussions on topic&lt;/li&gt;
+&lt;li&gt;Feel free to put items &amp;quot;in the parking lot&amp;quot; to discuss later/offline&lt;/li&gt;
+&lt;li&gt;Move on to the next agenda item when time is up&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;Follow the agenda&lt;/h2&gt;
+
+&lt;p&gt;Don&amp;#39;t get side tracked by discussion that was not on the agenda.
+Alternatively, you can edit the agenda in real time if you believe the new
+discussion is more valuable than an existing agenda item. But be conscious
+about which agenda items are being removed, and call that out in real time to the team.&lt;/p&gt;
+
+&lt;h2&gt;Ask for feedback&lt;/h2&gt;
+
+&lt;p&gt;Before the meeting ends, take 2 minutes to do a +/-/Delta exercise with the
+group.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Write +, - and Delta on the white board as categories&lt;/li&gt;
+&lt;li&gt;Ask the group what they liked about the meeting and put it under the + column&lt;/li&gt;
+&lt;li&gt;Ask the group what they did not like about the meeting and put it under the - column&lt;/li&gt;
+&lt;li&gt;Ask the group what they would change about the meeting and put it under the Delta column&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;End on time&lt;/h2&gt;
+
+&lt;p&gt;End meetings promptly. Give attendees 5 minutes to get to their next meeting.&lt;/p&gt;
+
+&lt;h1&gt;After the Meeting&lt;/h1&gt;
+
+&lt;h2&gt;Send action items&lt;/h2&gt;
+
+&lt;p&gt;Send both the meeting notes and the action items out to the attendees as an
+email. Action items have a specific person assigned to them, and detail the
+next action to take to make progress on that issue.&lt;/p&gt;
+</content>
+        </entry>
+    
+        <entry>
+            <title>Getting Started with AWS Device Farm and Python Appium</title>
+            <link href="/blog/2017/03/14/getting-started-aws-device-farm-appium-python.html"/>
+            <updated>2017-03-14T00:00:00-07:00</updated>
+            <id>http://chase-seibert.github.com/blog//2017/03/14/getting-started-aws-device-farm-appium-python</id>
+            <content type="html">&lt;p&gt;&lt;a href=&quot;https://aws.amazon.com/device-farm&quot;&gt;AWS Device Farm&lt;/a&gt; is a service for running
+mobile app integration tests against a suite of physical devices. The
+Amazon &lt;a href=&quot;http://boto3.readthedocs.io/en/latest/reference/services/devicefarm.html&quot;&gt;documentation&lt;/a&gt;
+is exhaustive, and they support many different API clients.
+However, the documentation does not have a quick start example for thing most
+people are going to want to do first: run a test. Here is some working code
+using the Python &lt;code&gt;boto3&lt;/code&gt; client.&lt;/p&gt;
+
+&lt;h1&gt;Setup&lt;/h1&gt;
+
+&lt;p&gt;First, you will want to create a Python virtual environment for this and install
+some dependencies. Feel free to omit the versions numbers, but I&amp;#39;ve tested the
+script against these versions.&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;virtualenv venv
+. venv/bin/activate
+pip install &lt;span class=&quot;nv&quot;&gt;boto3&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;==&lt;/span&gt;1.4.4 &lt;span class=&quot;nv&quot;&gt;requests&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;==&lt;/span&gt;2.13.0
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h1&gt;Pre-requisites&lt;/h1&gt;
+
+&lt;p&gt;This script assumes you have already built an APK file for your mobile
+app, and that you have bundled your Appium Python tests in a zip file as
+per the &lt;a href=&quot;http://docs.aws.amazon.com/devicefarm/latest/developerguide/test-types-android-appium-python.html&quot;&gt;Amazon Appium Python documentation&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Need to write your first tests? I have a &lt;a href=&quot;http://chase-seibert.github.io/blog/2017/01/06/appium-react-native-quickstart.html&quot;&gt;Appium Python Quickstart&lt;/a&gt;,
+too.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Note: for the bundled Appium tests, make sure to do the wheel step on a Linux
+ x86_64 vm.&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;Also, you need to be authenticated to AWS. The easiest method is to generate an
+API key and secret for your user in the AWS web console, and run &lt;code&gt;aws configure&lt;/code&gt;
+via the AWS &lt;a href=&quot;http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html&quot;&gt;Command line interface&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h1&gt;Running the Test Suite&lt;/h1&gt;
+
+&lt;p&gt;The script bellow will do the following:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Find the ID your AWS device farm project by name.&lt;/li&gt;
+&lt;li&gt;Find the ID of the pool of devices you want to use to test by name.&lt;/li&gt;
+&lt;li&gt;Upload a local Android APK file to AWS.&lt;/li&gt;
+&lt;li&gt;Upload a local zip file of your tests, requirements.txt and wheelhouse.&lt;/li&gt;
+&lt;li&gt;Start a test run.&lt;/li&gt;
+&lt;li&gt;Poll until the test run is completed.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;c&quot;&gt;#!/usr/bin/env python&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;logging&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;pprint&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;time&lt;/span&gt;
+
+&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;boto3&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;requests&lt;/span&gt;
+
+
+&lt;span class=&quot;n&quot;&gt;REGION&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;#39;us-west-2&amp;#39;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;PROJECT_NAME&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;#39;My Mobile App&amp;#39;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;DEVICE_POOL_NAME&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;#39;Top Devices&amp;#39;&lt;/span&gt;  &lt;span class=&quot;c&quot;&gt;# this is a default pool&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;RUN_TIMEOUT_SECONDS&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;60&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;20&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;WEB_URL_TEMPLATE&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;#39;https://us-west-2.console.aws.amazon.com/devicefarm/home#/projects/&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%s&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;/runs/&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%s&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;&lt;/span&gt;
+
+
+&lt;span class=&quot;n&quot;&gt;device_farm&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;boto3&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;client&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;devicefarm&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;region_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;REGION&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;s3&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;boto3&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;client&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;s3&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;region_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;REGION&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;logger&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;logging&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;getLogger&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;__name__&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+
+&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;get_project_arn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;project&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;device_farm&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;list_projects&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;projects&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]:&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;project&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;name&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;project&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;arn&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;raise&lt;/span&gt; &lt;span class=&quot;ne&quot;&gt;KeyError&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;Could not find project &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%r&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+
+&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;get_device_pool&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;project_arn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;device_pool&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;device_farm&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;list_device_pools&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;arn&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;project_arn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;devicePools&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]:&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;device_pool&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;name&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;device_pool&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;arn&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;raise&lt;/span&gt; &lt;span class=&quot;ne&quot;&gt;KeyError&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;Could not find device pool &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%r&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+
+&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;_upload_presigned_url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;file_path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;with&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;open&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;file_path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fp&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;read&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;result&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;requests&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;put&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;headers&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;content-type&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;#39;application/octet-stream&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;assert&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;result&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;status_code&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;200&lt;/span&gt;
+
+
+&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;create_upload&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;project_arn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;upload_type&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;file_path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;# name needs to be a file name like app-releaseProduction.apk, not &amp;quot;Android App&amp;quot;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;logger&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;info&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;Uploading &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%s&lt;/span&gt;&lt;span class=&quot;s&quot;&gt; &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%r&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;upload_type&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;file_path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;result&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;device_farm&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;create_upload&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;projectArn&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;project_arn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;nb&quot;&gt;type&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;upload_type&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;contentType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;application/octet-stream&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;upload&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;result&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;upload&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;_upload_presigned_url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;upload&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;url&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;file_path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;upload&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;arn&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+
+
+&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;schedule_run&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;project_arn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;device_pool_arn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;app_arn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;test_package_arn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;logger&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;info&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;Scheduling test run &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%r&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;result&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;device_farm&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;schedule_run&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;projectArn&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;project_arn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;appArn&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;app_arn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;devicePoolArn&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;device_pool_arn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;test&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;s&quot;&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;#39;APPIUM_PYTHON&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+            &lt;span class=&quot;s&quot;&gt;&amp;#39;testPackageArn&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;test_package_arn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;run&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;result&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;run&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;run&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;arn&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+
+
+&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;_poll_until&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;method&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;arn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;get_status_callable&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;success_statuses&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;timeout_seconds&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;check_every_seconds&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;timeout_seconds&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;RUN_TIMEOUT_SECONDS&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;start&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;time&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;time&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;while&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;True&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;result&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;method&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;arn&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;arn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;current_status&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;get_status_callable&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;result&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;current_status&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;success_statuses&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;result&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;logger&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;info&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;Waiting for &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%r&lt;/span&gt;&lt;span class=&quot;s&quot;&gt; status &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%r&lt;/span&gt;&lt;span class=&quot;s&quot;&gt; to be in &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%r&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;arn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;current_status&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;success_statuses&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;now&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;time&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;time&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;now&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;start&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;timeout_seconds&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;raise&lt;/span&gt; &lt;span class=&quot;ne&quot;&gt;StopIteration&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;Time out waiting for &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%r&lt;/span&gt;&lt;span class=&quot;s&quot;&gt; to be done&amp;#39;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;arn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;time&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sleep&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;check_every_seconds&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+
+&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;wait_for_upload&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;arn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_poll_until&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;device_farm&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;get_upload&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;arn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;get_status_callable&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;lambda&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;upload&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;][&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;status&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;success_statuses&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;SUCCEEDED&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+
+&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;wait_for_run&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;test_package_arn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;result&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_poll_until&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;device_farm&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;get_run&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;test_package_arn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;get_status_callable&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;lambda&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;run&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;][&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;status&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;success_statuses&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;COMPLETED&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;timeout_seconds&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;RUN_TIMEOUT_SECONDS&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;final_run&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;result&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;run&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;logger&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;info&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;Final run counts: &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(counters)s&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;final_run&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;final_run&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;result&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;#39;PASSED&amp;#39;&lt;/span&gt;
+
+
+&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;get_run_web_url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;project_arn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;test_run_arn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;# project_arn = arn:aws:devicefarm:us-west-2:foo:project:NEW-ARN-HERE&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;# test_run_arn = arn:aws:devicefarm:us-west-2:foo:run:project-arn/NEW-ARN-HERE&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;project_arn_id&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;project_arn&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;split&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;:&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;6&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;test_run_arid&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;test_run_arn&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;split&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;/&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;WEB_URL_TEMPLATE&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;project_arn_id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;test_run_arid&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+
+&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;__name__&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;#39;__main__&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;logging&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;basicConfig&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;format&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(message)s&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;logger&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;setLevel&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;logging&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;INFO&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;project_arn&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;get_project_arn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;PROJECT_NAME&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;logger&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;info&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;Project: &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%r&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;project_arn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;device_pool_arn&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;get_device_pool&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;project_arn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;DEVICE_POOL_NAME&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;logger&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;info&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;Device pool: &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%r&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;device_pool_arn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;app_arn&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;create_upload&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;project_arn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;s&quot;&gt;&amp;#39;ANDROID_APP&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;s&quot;&gt;&amp;#39;my-app.apk&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;s&quot;&gt;&amp;#39;/tmp/my-app.apk&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;wait_for_upload&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;app_arn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;logger&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;info&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;App: &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%s&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;app_arn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;test_package_arn&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;create_upload&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;project_arn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;s&quot;&gt;&amp;#39;APPIUM_PYTHON_TEST_PACKAGE&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;s&quot;&gt;&amp;#39;test_bundle.zip&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;s&quot;&gt;&amp;#39;/tmp/test_bundle.zip&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;wait_for_upload&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;test_package_arn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;logger&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;info&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;Test package: &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%s&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;test_package_arn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;test_run_arn&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;schedule_run&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;project_arn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;Test Run 1&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;device_pool_arn&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;device_pool_arn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;app_arn&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;app_arn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;test_package_arn&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;test_package_arn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;logger&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;info&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;Scheduled test run &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%r&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;test_run_arn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;logger&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;info&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;View scheduled run at &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%s&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;get_run_web_url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;project_arn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;test_run_arn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;success&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;wait_for_run&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;test_run_arn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;logger&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;info&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;Success&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;The only tricky parts here are using the pre-signed URLs from the &lt;code&gt;create_upload&lt;/code&gt;
+step to make a subsequent &lt;code&gt;PUT&lt;/code&gt; call with the file contents, and setting the
+&lt;code&gt;ContentType&lt;/code&gt; correctly for that to work. Also, we need to poll for both uploads
+to be processed before we kick off the test run.&lt;/p&gt;
+</content>
+        </entry>
+    
+        <entry>
+            <title>Long Term Software Estimates</title>
+            <link href="/blog/2017/02/03/software-long-term-estimates.html"/>
+            <updated>2017-02-03T00:00:00-08:00</updated>
+            <id>http://chase-seibert.github.com/blog//2017/02/03/software-long-term-estimates</id>
+            <content type="html">&lt;blockquote&gt;
+&lt;p&gt;False scheduling to match a patron&amp;#39;s desired date is more common in our discipline than elsewhere in engineering because it is VERY DIFFICULT to make a vigorous, plausible, job-risking defense of an estimate that is derived by no quantitative method, supported by little data, and brought about by the hunches of developers.
+- Mythical Man Month&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Estimating a timeline for a project that will take many months and dozens of
+engineers to complete has a very high failure rate - defined as the rate of
+projects that take longer than the estimate to complete.&lt;/p&gt;
+
+&lt;h1&gt;The Myth of Software Project Planning&lt;/h1&gt;
+
+&lt;p&gt;The biggest myth of software engineering is that we can estimate with any
+accuracy. Junior engineers often learn this the hard way; coming up with estimates
+that are best case scenarios, and working extra hours when the inevitable complications
+arise. Seasoned engineers learn to pad their estimates (by a lot) to account
+for the risk of going over. They learn that estimates are not reliable.&lt;/p&gt;
+
+&lt;p&gt;So why do we keep relying on estimates that the estimators themselves know are
+unreliable? Because there is a legitimate business need to know. But we should
+not confuse the need for certainty with the ability to be certain.&lt;/p&gt;
+
+&lt;h1&gt;Estimates Change as Scope Changes&lt;/h1&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://s-media-cache-ak0.pinimg.com/736x/7f/cc/b0/7fccb03a99c29ca90290709cf08afc7c.jpg&quot; alt=&quot;Dilbert&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;There is often a great amount of accepted uncertainly around what will be built.
+A successful business realizes that they need to keep requirements loosely defined
+so that they can respond to new data as it comes up. Of course, if the scope
+of a project is not high confidence, the estimate cannot be high confidence, either.&lt;/p&gt;
+
+&lt;h1&gt;Agile - Enter the Ordered Backlog&lt;/h1&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;No battle plan survives contact with the enemy.
+- &lt;a href=&quot;http://www.lexician.com/lexblog/2010/11/no-battle-plan-survives-contact-with-the-enemy/&quot;&gt;Helmuth von Moltke&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;There are two main problems that need to be solved with making project estimates:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Humans are really bad at estimating.&lt;/li&gt;
+&lt;li&gt;We know that the scope of the project will change.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;I&amp;#39;m not someone who believes that process can solve everything, but
+&lt;a href=&quot;http://chase-seibert.github.io/blog/2013/07/19/agile-motivations-and-objections.html&quot;&gt;Agile&lt;/a&gt;
+ does address these problems pretty well. The practice of using &lt;a href=&quot;http://chase-seibert.github.io/blog/2016/05/13/agile-points-vs-hours.html&quot;&gt;relative pointing&lt;/a&gt;
+for estimates helps greatly with accounting for uncertainty and human error. Using
+an ordered backlog chops uncertainty into bite sized chunks and using a well
+established velocity keeps the error bars on longer term estimates manageable.&lt;/p&gt;
+
+&lt;p&gt;The most important thing is to ship it early and iterate.&lt;/p&gt;
+</content>
+        </entry>
+    
+
+</feed>

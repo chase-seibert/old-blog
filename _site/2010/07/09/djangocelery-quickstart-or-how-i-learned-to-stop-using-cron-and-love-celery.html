@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Django/Celery Quickstart (or, how I learned to stop using cron and love celery)</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2010/07/09/djangocelery-quickstart-or-how-i-learned-to-stop-using-cron-and-love-celery.html" />
+
+        <meta property="og:title" content="Django/Celery Quickstart (or, how I learned to stop using cron and love celery)"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2010/07/09/djangocelery-quickstart-or-how-i-learned-to-stop-using-cron-and-love-celery.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Django/Celery Quickstart (or, how I learned to stop using cron and love celery)
+                            
+                                <span class="post-date subtitle">09 Jul 2010</span>
+                            
+                        </h1>
+                    
+                    <p>
+Websites often need tasks that run periodically, behind the scenes. Examples include sending email reminders, aggregating denormalized data and permanently deleting archived records. Very often the simplest solution is to setup a <a href="https://help.ubuntu.com/community/CronHowto">cron</a> job to hit a URL on the site that performs the task.
+</p>
+
+<p>
+Cron has the advantage of simplicity, but it's not not ideal for the job. You have to take steps to ensure that regular users of the site cannot hit those URLs directly. It also forces you to manage an external configuration. What if you forget to perform the configuration on the qa or production servers? It would be safer and easier if the configuration was in the code for the site.
+</p>
+
+<p>
+For Django sites, <a href="http://ask.github.com/celery/getting-started/introduction.html">celery</a> seems to be the solution of choice. Celery is really focused on being a distributed task queue, but it can also be a great scheduler. Their <a href="http://ask.github.com/celery/index.html">documentation</a> is excellent, but I found that they lack a quickstart guide for getting started with Django and celery, <b>just</b> for replacing cron.
+</p>
+
+<p>
+Note: Celery typically runs with RabbitMQ as the back-end. For just task scheduling, this may be overkill. This guide starts out using kombu, which is backed by the database Django is already using.
+</p>
+
+<ol>
+
+<li>
+Install django-celery, ghettoq
+<pre name="code" class="bash">
+sudo pip install django-celery
+</pre>
+</li>
+
+<li>
+Edit settings.py, and add the celery config info
+<pre name="code" class="python">
+INSTALLED_APPS = (
+    ...
+    'kombu.transport.django',
+    'djcelery',
+)
+
+BROKER_URL = "django://" # tell kombu to use the Django database as the message queue
+
+import djcelery
+djcelery.setup_loader()
+</pre>
+</li>
+
+<li>
+Add the new tables to the Django database
+<pre name="code" class="bash">
+./manage.py syncdb
+</pre>
+</li>
+
+<li>
+Create a file, tasks.py in your project (same level as models.py)
+<pre name="code" class="python">
+from celery.task.schedules import crontab
+from celery.decorators import periodic_task
+
+# this will run every minute, see http://celeryproject.org/docs/reference/celery.task.schedules.html#celery.task.schedules.crontab
+@periodic_task(run_every=crontab(hour="*", minute="*", day_of_week="*"))
+def test():
+    print "firing test task"
+</pre>
+</li>
+
+<li>
+Start the celery daemon in "beat" mode, which is required for scheduling
+<pre name="code" class="bash">
+sudo ./manage.py celeryd -v 2 -B -s celery -E -l INFO
+</pre>
+</li>
+
+</ol>
+
+<p>
+At this point, you should see your celery tasks in the console output, and you should see the task firing every minute.
+</p>
+
+<pre name="code" class="bash">
+[2012-03-02 09:34:49,170: WARNING/MainProcess]
+
+ -------------- celery@chase-VirtualBox v2.5.1
+---- **** -----
+--- * ***  * -- [Configuration]
+-- * - **** ---   . broker:      django://localhost//
+- ** ----------   . loader:      djcelery.loaders.DjangoLoader
+- ** ----------   . logfile:     [stderr]@INFO
+- ** ----------   . concurrency: 1
+- ** ----------   . events:      ON
+- *** --- * ---   . beat:        ON
+-- ******* ----
+--- ***** ----- [Queues]
+ --------------   . celery:      exchange:celery (direct) binding:celery
+
+
+[Tasks]
+  . myapp.tasks.test
+
+[2012-03-02 09:34:49,236: INFO/PoolWorker-2] child process calling self.run()
+[2012-03-02 09:34:49,239: WARNING/MainProcess] celery@chase-VirtualBox has started.
+[2012-03-02 09:34:49,245: INFO/Beat] child process calling self.run()
+[2012-03-02 09:34:49,249: INFO/Beat] Celerybeat: Starting...
+[2012-03-02 09:34:49,283: INFO/Beat] Scheduler: Sending due task myapp.tasks.test
+[2012-03-02 09:34:54,654: INFO/MainProcess] Got task from broker: myapp.tasks.test[39d57f82-fdd2-406a-ad5f-50b0e30a6492]
+[2012-03-02 09:34:54,666: WARNING/PoolWorker-2] firing test task
+[2012-03-02 09:34:54,667: INFO/MainProcess] Task myapp.tasks.test[39d57f82-fdd2-406a-ad5f-50b0e30a6492] succeeded in 0.00423407554626s: None
+</pre>
+
+<p>
+If you want, you can <a href="http://ask.github.com/celery/getting-started/broker-installation.html#installing-rabbitmq">upgrade to RabbitMQ</a>. Just make sure to <a href="http://ask.github.com/celery/getting-started/first-steps-with-celery.html#configuration">update</a> your setting.py, as well.
+</p>
+
+<p>
+You may also want to run <a href="http://celeryproject.org/docs/cookbook/daemonizing.html">celeryd as a service</a>.
+</p>
+
+<p>
+<b>Update 3/1/2012:</b> updated instructions Kombu. Tested on Python 2.7.2 and Django 1.3.0 in a clean environment.
+</p>
+
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/django">django</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/celery">celery</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

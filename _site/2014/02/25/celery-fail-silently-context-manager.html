@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Celery fail silently context manager</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2014/02/25/celery-fail-silently-context-manager.html" />
+
+        <meta property="og:title" content="Celery fail silently context manager"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2014/02/25/celery-fail-silently-context-manager.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Celery fail silently context manager
+                            
+                                <span class="post-date subtitle">25 Feb 2014</span>
+                            
+                        </h1>
+                    
+                    <p><a href="http://www.celeryproject.org/">Celery</a> ships with an configuration option called <a href="http://celery.readthedocs.org/en/latest/configuration.html#celery-always-eager">CELERY<em>ALWAYS</em>EAGER</a> which causes all tasks to be executed immediately instead of being asynchronously executed on workers. This can be very useful for unit tests. Instead of running a real message queue and separate worker processes, your unit tests can execute all in one process and still run the necessary tasks.</p>
+
+<p>But in many cases, those tasks are not necessary for the unit tests to succeed. Say you have a task that fires when you create a user that sends a welcome email. You don&#39;t want the caller to wait while a worker composes a MIME message and contacts the SMTP server; that could take a little time. It&#39;s more of a fire and forget model. Actually, this is ALWAYS the case if you don&#39;t use the celery results backend; your callers have no way of receiving a result from the task, so it can&#39;t depend on it in a strict sense, unless it&#39;s doing some kind of database polling and waiting.</p>
+
+<p>If this matches your usage pattern for celery, it may make you wish that you have a setting called CELERY<em>ALWAYS</em>FAIL<em>SILENTLY, instead. To save time on your unit tests, you could tell celery to simply discard any calls to <code>.delay()</code> or `.apply</em>async()`. It would be just as if celery had accepted the task, but it hadn&#39;t got around to running just yet. Except that it would never run.</p>
+
+<p>It turns out that you can implement this yourself by monkeypatching celery. Here is a context manager that does just that:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">contextlib</span> <span class="kn">import</span> <span class="n">contextmanager</span>
+<span class="kn">from</span> <span class="nn">celery</span> <span class="kn">import</span> <span class="n">Celery</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">Celery</span><span class="p">(</span><span class="s">&#39;tasks&#39;</span><span class="p">,</span> <span class="n">broker</span><span class="o">=</span><span class="s">&#39;amqp://guest:guest@localhost:5672//&#39;</span><span class="p">)</span>
+
+<span class="nd">@app.task</span>
+<span class="k">def</span> <span class="nf">mytask</span><span class="p">():</span>
+    <span class="k">print</span> <span class="s">&#39;Inside mytask&#39;</span>
+
+<span class="nd">@contextmanager</span>
+<span class="k">def</span> <span class="nf">celery_fail_silenty</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; short-circuit all tasks unless we are in eager mode &#39;&#39;&#39;</span>
+
+    <span class="kn">from</span> <span class="nn">celery.app</span> <span class="kn">import</span> <span class="n">current_app</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">current_app</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">send_task</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">app</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">CELERY_ALWAYS_EAGER</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">original_send_task</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="n">original_send_task</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">send_task</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">send_task</span> <span class="o">=</span> <span class="n">send_task</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="mi">1</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">send_task</span> <span class="o">=</span> <span class="n">original_send_task</span>
+
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="c">#app.conf.update(CELERY_ALWAYS_EAGER=True)</span>
+    <span class="k">with</span> <span class="n">celery_fail_silenty</span><span class="p">():</span>
+        <span class="n">mytask</span><span class="o">.</span><span class="n">delay</span><span class="p">()</span></code></pre></figure>
+
+<p>As an added feature, it will execute the task in process if CELERY<em>ALWAYS</em>ENABLED is set. That way, you can use something like Django&#39;s <a href="https://docs.djangoproject.com/en/1.4/topics/testing/#overriding-settings">override settings</a> if you want just a small subset of your unit tests to actually execute their tasks.</p>
+
+<p>I originally tried to mock <code>apply_async</code> directly, but that is a bound method per-task, and they are bound on import, so you can&#39;t easily change them all at runtime.</p>
+
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/python">python</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/celery">celery</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

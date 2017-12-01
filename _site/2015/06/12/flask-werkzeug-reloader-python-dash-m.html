@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Flask absolute import bug in debug mode</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2015/06/12/flask-werkzeug-reloader-python-dash-m.html" />
+
+        <meta property="og:title" content="Flask absolute import bug in debug mode"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2015/06/12/flask-werkzeug-reloader-python-dash-m.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Flask absolute import bug in debug mode
+                            
+                                <span class="post-date subtitle">12 Jun 2015</span>
+                            
+                        </h1>
+                    
+                    <p>Ran into a vexing issue this week. I was getting errors trying to use absolute imports in a new flask app:</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">Traceback <span class="o">(</span>most recent call last<span class="o">)</span>:
+  File <span class="s2">&quot;nw_api/example/run.py&quot;</span>, line 5, in &lt;module&gt;
+      from nw_api.docgen.base import DocumentationGenerator
+      ImportError: No module named nw_api.docgen.base
+</code></pre></div>
+<p>I was able to use relative imports (i.e. <code>from docgen import base</code>), but that&#39;s generally considered bad practice. Plus, it was just weird. My unit tests were working with either method, which finally lead me to the offending line:</p>
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">flask_app</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">debug</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</code></pre></div>
+<p>It turned out that setting <code>debug=False</code> fixed the problem. Of course, debug mode is really useful, so I needed to figure out exactly what was going on. That turned up this <a href="https://github.com/mitsuhiko/werkzeug/issues/461">werkzeug bug</a> titled &quot;Reloader, python -m, and sys.path&quot;.</p>
+
+<p>Werkzueg, which provides a lot of Flask functionality (including the <a href="http://werkzeug.pocoo.org/docs/0.10/debug/">web based debugger</a>), is doing something pretty tricky to implement hot-reloading of the source when you change a Python file. It spawns a subprocess to and loads the code again. However, it does not pass all of the arguments of the original python command line, notably missing the <code>-m</code> argument, which is how you get python to run a module versus a single file:</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">venv/bin/activate<span class="p">;</span> <span class="o">(</span><span class="nb">cd </span>src <span class="o">&amp;&amp;</span> python -m nw_api.example.run<span class="o">)</span>
+</code></pre></div>
+<p>That was the run line from my original Makefile. Instead, I had to go with this:</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">venv/bin/activate<span class="p">;</span> <span class="o">(</span><span class="nb">cd </span>src <span class="o">&amp;&amp;</span> <span class="nb">export </span><span class="nv">PYTHONPATH</span><span class="o">=</span><span class="k">${</span><span class="nv">PYTHONPATH</span><span class="k">}</span>:nw_api <span class="o">&amp;&amp;</span> python nw_api/example/run.py<span class="o">)</span>
+</code></pre></div>
+<p>Success! What&#39;s going on here is that to avoid using <code>-m</code>, you need to update your <code>PYTHONPATH</code> environment variable to include the (relative in this case) path to your module. Then you can run any single file in that module and it will pick up absolute imports for the rest.</p>
+
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/python,">python,</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/flask">flask</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

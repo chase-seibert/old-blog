@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Flatten entire HBase column families with Pig and Python UDFs</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2013/02/10/pig-hbase-flatten-column-family.html" />
+
+        <meta property="og:title" content="Flatten entire HBase column families with Pig and Python UDFs"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2013/02/10/pig-hbase-flatten-column-family.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Flatten entire HBase column families with Pig and Python UDFs
+                            
+                                <span class="post-date subtitle">10 Feb 2013</span>
+                            
+                        </h1>
+                    
+                    <p>Most <a href="http://pig.apache.org/">Pig</a> tutorials you will find assume that you are working with data where you know all the column names ahead of time, and that the column names themselves are just labels, versus being composites of labels and data. For example, when working with <a href="http://hbase.apache.org/">HBase</a>, it&#39;s actually not uncommon for both of those assumptions to be false. Being a columnar database, it&#39;s very common to be working to rows that have <a href="https://issues.apache.org/jira/browse/HBASE-867">thousands of columns</a>. Under that circumstance, it&#39;s also common for the column names themselves to encode to dimensions, such as <a href="https://www.facebook.com/video/video.php?v=707216889765">date and counter type</a>.</p>
+
+<p>How do you solve this mismatch? If you&#39;re in the early stages of designing a schema, you could reconsider a more row based approach. If you have to work with an existing schema, however, you can with the help of <a href="http://ofps.oreilly.com/titles/9781449302641/udf_lists.html">Pig UDFs</a>.</p>
+
+<p>Say we have the following table:</p>
+
+<table>
+    <tr>
+        <th>rowkey</th>
+        <th>cf1:20130101post</th>
+        <th>cf1:20130101comment</th>
+        <th>cf1:20130101like</th>
+        <th>cf1:20130102post</th>
+        <th>...</th>
+    </tr>
+    <tr>
+        <td>ce410-00005031-00089182</td>
+        <td>147</td>
+        <td>5</td>
+        <td>41</td>
+        <td>153</td>
+    </tr>
+    <tr>
+        <td>ce410-00005031-00021915</td>
+        <td>1894</td>
+        <td>33</td>
+        <td>86</td>
+        <td>1945</td>
+    </tr>
+    <tr>
+        <td>5faa4-00009521-00019828</td>
+        <td>30</td>
+        <td>2</td>
+        <td>8</td>
+        <td>31</td>
+    </tr>
+    <tr>
+        <td>...</td>
+    </tr>
+</table>
+
+<p>Here there is a composite row key, but also composite column keys. Because the date is part of the column keys, there are potentially many, many columns. Enumerating them all in your Pig scripts in impractical. Notice that they are also in the same column family. To load them all, you can do the following in Pig:</p>
+
+<figure class="highlight"><pre><code class="language-sql" data-lang="sql"><span class="k">data</span> <span class="o">=</span> <span class="k">load</span> <span class="s1">&#39;hbase://table_name&#39;</span> <span class="k">using</span> <span class="n">org</span><span class="p">.</span><span class="n">apache</span><span class="p">.</span><span class="n">pig</span><span class="p">.</span><span class="n">backend</span><span class="p">.</span><span class="n">hadoop</span><span class="p">.</span><span class="n">hbase</span><span class="p">.</span><span class="n">HBaseStorage</span><span class="p">(</span><span class="s1">&#39;cf1:*&#39;</span><span class="p">,</span> <span class="s1">&#39;-loadKey true&#39;</span><span class="p">)</span> <span class="k">AS</span> <span class="p">(</span><span class="n">id</span><span class="p">:</span><span class="n">chararray</span><span class="p">,</span> <span class="n">stats</span><span class="p">:</span><span class="k">map</span><span class="p">[</span><span class="nb">int</span><span class="p">]);</span>
+<span class="n">illustrate</span> <span class="k">data</span><span class="p">;</span></code></pre></figure>
+
+<p>This will result in all columns being loaded into a <a href="http://pig.apache.org/docs/r0.7.0/piglatin_ref2.html#Data+Types">Pig map</a>, which is just a collection of tuples:</p>
+
+<pre>
+-----------------------------------------------------------------------------------------------------
+| data         | id:chararray            | stats:map(:int)                                          |
+-----------------------------------------------------------------------------------------------------
+|              | ce410-00005031-00089182 | {20130101post=147,20130101comment=5,20130101like=41,...} |
+-----------------------------------------------------------------------------------------------------
+</pre>
+
+<p>So, now you have loaded all the data, but how to you parse the column names into their respective parts, so you can apply logic to the values? Here is a very simply Python implementation of a UDF that will turn that map into a bag:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="nd">@outputSchema</span><span class="p">(</span><span class="s">&quot;values:bag{t:tuple(key, value)}&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">bag_of_tuples</span><span class="p">(</span><span class="n">map_dict</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">map_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()</span></code></pre></figure>
+
+<p>You can include this UDF (place the above in a file called udfs.py in the current working directory for pig), and invoke it like this:</p>
+
+<figure class="highlight"><pre><code class="language-sql" data-lang="sql"><span class="n">register</span> <span class="s1">&#39;udfs.py&#39;</span> <span class="k">using</span> <span class="n">jython</span> <span class="k">as</span> <span class="n">py</span>
+<span class="k">data</span> <span class="o">=</span> <span class="k">load</span> <span class="s1">&#39;hbase://table_name&#39;</span> <span class="k">using</span> <span class="n">org</span><span class="p">.</span><span class="n">apache</span><span class="p">.</span><span class="n">pig</span><span class="p">.</span><span class="n">backend</span><span class="p">.</span><span class="n">hadoop</span><span class="p">.</span><span class="n">hbase</span><span class="p">.</span><span class="n">HBaseStorage</span><span class="p">(</span><span class="s1">&#39;cf1:*&#39;</span><span class="p">,</span> <span class="s1">&#39;-loadKey true&#39;</span><span class="p">)</span> <span class="k">AS</span> <span class="p">(</span><span class="n">id</span><span class="p">:</span><span class="n">chararray</span><span class="p">,</span> <span class="n">stats</span><span class="p">:</span><span class="k">map</span><span class="p">[</span><span class="nb">int</span><span class="p">]);</span>
+<span class="n">databag</span> <span class="o">=</span> <span class="n">foreach</span> <span class="k">data</span> <span class="n">generate</span> <span class="n">id</span><span class="p">,</span> <span class="n">FLATTEN</span><span class="p">(</span><span class="n">py</span><span class="p">.</span><span class="n">bag_of_tuples</span><span class="p">(</span><span class="n">stats</span><span class="p">));</span>
+<span class="n">illustrate</span> <span class="n">databag</span><span class="p">;</span></code></pre></figure>
+
+<p>This is taking advantage of the built-in <a href="http://pig.apache.org/docs/r0.7.0/piglatin_ref2.html#Flatten+Operator">FLATTEN</a> operator, which takes a bag and does a cross product with bag&#39;s row to produce N new rows.</p>
+
+<pre>
+------------------------------------------------------------------------------
+| databag      | id:chararray            | key:bytearray  | value:bytearray  |
+------------------------------------------------------------------------------
+|              | ce410-00005031-00089182 | 20130101post    | 147             |
+------------------------------------------------------------------------------
+|              | ce410-00005031-00089182 | 20130101comment | 5               |
+------------------------------------------------------------------------------
+|              | ce410-00005031-00089182 | 20130101like    | 41              |
+------------------------------------------------------------------------------
+</pre>
+
+<p>You can then process your data as normal. You can then write your data bag to HBase in the same format by using the built-in UDFs <a href="http://pig.apache.org/docs/r0.9.1/api/org/apache/pig/builtin/TOMAP.html">TOMAP</a> and and same * syntax. Assuming you have produced new column names and values in your script, you can do:</p>
+
+<figure class="highlight"><pre><code class="language-sql" data-lang="sql"><span class="p">...</span>
+<span class="n">mapped</span> <span class="o">=</span> <span class="n">foreach</span> <span class="n">processed_data</span> <span class="n">generate</span> <span class="n">TOMAP</span><span class="p">(</span><span class="n">columnname</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="k">as</span> <span class="n">stats</span><span class="p">;</span>
+<span class="n">store</span> <span class="n">mapped</span> <span class="k">into</span> <span class="s1">&#39;hbase://table_name&#39;</span> <span class="k">using</span> <span class="n">org</span><span class="p">.</span><span class="n">apache</span><span class="p">.</span><span class="n">pig</span><span class="p">.</span><span class="n">backend</span><span class="p">.</span><span class="n">hadoop</span><span class="p">.</span><span class="n">hbase</span><span class="p">.</span><span class="n">HBaseStorage</span><span class="p">(</span><span class="s1">&#39;stats:*&#39;</span><span class="p">);</span></code></pre></figure>
+
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/hbase">hbase</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/pig">pig</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

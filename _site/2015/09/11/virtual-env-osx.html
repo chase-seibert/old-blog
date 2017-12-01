@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Per-OS virtual environments in Python</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2015/09/11/virtual-env-osx.html" />
+
+        <meta property="og:title" content="Per-OS virtual environments in Python"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2015/09/11/virtual-env-osx.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Per-OS virtual environments in Python
+                            
+                                <span class="post-date subtitle">11 Sep 2015</span>
+                            
+                        </h1>
+                    
+                    <p>A common setup for web development is to have a virtual machine on your Mac running all your code. Typically this involves a shared folder containing the code, so that you can edit the file locally on your Mac, but it&#39;s also available to the guest OS to execute. At least with Vagrant and either VirutalBox or VMWare, the performance of the shared folder can quickly become a nuisance.</p>
+
+<p>If you&#39;re running a long test suite, you may be sacrificing as much as 40% of the time to the virtualization in my admittedly informal testing. Also vexing is hot reloading code changes in your web app, where you suffer from lag between when a file is changed and when the event bubbles up in the guest OS. I&#39;ve written about some <a href="http://chase-seibert.github.io/blog/2014/03/09/vagrant-cachefilesd.html">mitigation strategies</a> before. The upshot is that you may be waiting several seconds longer than necessary before you can refresh your app the see the changes. Those seconds add up when you perform this cycle hundreds of times a day. Git hook performance can also be slower than normal.</p>
+
+<p>What&#39;s preventing you from running some or all of these operations on your local Mac? Mainly that all your dependencies only exist inside the virtual machine. With Python code bases, this often translates into the fact that your virtualenv directory has architecture (Linux) specific binary packages inside it.</p>
+
+<p>If you happen to use a <code>Makefile</code> to generate your virtualenv and run common commands, you can easily handle this there by creating different virtualenv directories for each environment.</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">VENV_DIR</span><span class="o">=</span>venv
+ifeq <span class="o">(</span><span class="k">$(</span>shell uname<span class="k">)</span>,Darwin<span class="o">)</span>
+    <span class="c"># allows you to have two venv dirs, one for local osx development (faster)</span>
+    <span class="nv">VENV_DIR</span><span class="o">=</span>venv-osx
+endif
+
+<span class="nb">test</span>:
+    @. <span class="k">$(</span>VENV_DIR<span class="k">)</span>/bin/activate<span class="p">;</span> nosetests
+</code></pre></div>
+<p>Just remember to add the new virtualenv directories to your <code>.gitignore</code> file.</p>
+
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/python">python</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

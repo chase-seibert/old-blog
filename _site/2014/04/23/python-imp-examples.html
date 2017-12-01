@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Loading classes from modules with reflection in Python (imp module)</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2014/04/23/python-imp-examples.html" />
+
+        <meta property="og:title" content="Loading classes from modules with reflection in Python (imp module)"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2014/04/23/python-imp-examples.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Loading classes from modules with reflection in Python (imp module)
+                            
+                                <span class="post-date subtitle">23 Apr 2014</span>
+                            
+                        </h1>
+                    
+                    <p>For a dynamic language, it&#39;s more difficult than it needs to be to import a module dynamically in Python. It&#39;s very easy to just <code>from foo import bar</code>, but what if you want to load a list of things and all you have is a string representation of each one, for example <code>foo.bar</code>?</p>
+
+<p>One use case for this is for configuration. Django uses this pattern to initialize apps via its <code>INSTALLED_APPS</code> setting. For example, the default settings looks like this:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">INSTALLED_APPS</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s">&#39;django.contrib.admin&#39;</span><span class="p">,</span>
+    <span class="s">&#39;django.contrib.auth&#39;</span><span class="p">,</span>
+    <span class="s">&#39;django.contrib.contenttypes&#39;</span><span class="p">,</span>
+    <span class="s">&#39;django.contrib.sessions&#39;</span><span class="p">,</span>
+    <span class="s">&#39;django.contrib.messages&#39;</span><span class="p">,</span>
+    <span class="s">&#39;django.contrib.staticfiles&#39;</span><span class="p">,</span>
+    <span class="s">&#39;polls&#39;</span><span class="p">,</span>
+<span class="p">)</span></code></pre></figure>
+
+<p>At some point, Django does the equivalent of a <code>from django.contrib import admin</code> and then starts poking around for <code>urls</code> and <code>models</code> modules. I&#39;m guessing this is done primarily to avoid circular import issues; if Django imports your apps as normal, but your apps turn around and import Django, then you&#39;ve got a problem.</p>
+
+<p>I wanted to reproduce this pattern myself, and it was a little harder than I expected. Python provides an <a href="https://docs.python.org/2/library/imp.html">imp</a> for just this occasion. But, from the docs:</p>
+
+<blockquote>
+<blockquote>
+<blockquote>
+<p>This function does not handle hierarchical module names (names containing dots). In order to find P.M, that is, submodule M of package P, use find<em>module() and load</em>module() to find and load package P, and then use find<em>module() with the path argument set to P.</em><em>path</em>_. When P itself has a dotted name, apply this recipe recursively.</p>
+</blockquote>
+</blockquote>
+</blockquote>
+
+<p>So, it&#39;s basically is a pain the balls to deal with. Here is a working example:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">imp</span>
+
+
+<span class="n">THINGS_TO_IMPORT</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s">&#39;utils.misc.MyClass1&#39;</span><span class="p">,</span>   <span class="c"># class</span>
+    <span class="s">&#39;utils.misc.foo&#39;</span><span class="p">,</span>  <span class="c"># constant</span>
+    <span class="s">&#39;utils.bar&#39;</span><span class="p">,</span>  <span class="c"># from __init__.py</span>
+    <span class="s">&#39;utils.misc&#39;</span><span class="p">,</span>  <span class="c"># module</span>
+<span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">import_from_dotted_path</span><span class="p">(</span><span class="n">dotted_names</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; import_from_dotted_path(&#39;foo.bar&#39;) -&gt; from foo import bar; return bar &quot;&quot;&quot;</span>
+    <span class="n">next_module</span><span class="p">,</span> <span class="n">remaining_names</span> <span class="o">=</span> <span class="n">dotted_names</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">fp</span><span class="p">,</span> <span class="n">pathname</span><span class="p">,</span> <span class="n">description</span> <span class="o">=</span> <span class="n">imp</span><span class="o">.</span><span class="n">find_module</span><span class="p">(</span><span class="n">next_module</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+    <span class="n">module</span> <span class="o">=</span> <span class="n">imp</span><span class="o">.</span><span class="n">load_module</span><span class="p">(</span><span class="n">next_module</span><span class="p">,</span> <span class="n">fp</span><span class="p">,</span> <span class="n">pathname</span><span class="p">,</span> <span class="n">description</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">remaining_names</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">remaining_names</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s">&#39;.&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">remaining_names</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">module</span>
+    <span class="k">return</span> <span class="n">import_from_dotted_path</span><span class="p">(</span><span class="n">remaining_names</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">module</span><span class="o">.</span><span class="n">__path__</span><span class="p">)</span>
+
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">name_of_thing</span> <span class="ow">in</span> <span class="n">THINGS_TO_IMPORT</span><span class="p">:</span>
+        <span class="n">thing</span> <span class="o">=</span> <span class="n">import_from_dotted_path</span><span class="p">(</span><span class="n">name_of_thing</span><span class="p">)</span>
+        <span class="k">print</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s"> =&gt; </span><span class="si">%r</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">name_of_thing</span><span class="p">,</span> <span class="n">thing</span><span class="p">)</span></code></pre></figure>
+
+<p>And the output as expected:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">utils.misc.MyClass1 <span class="o">=</span>&gt; &lt;class <span class="s1">&#39;misc.MyClass1&#39;</span>&gt;
+utils.misc.foo <span class="o">=</span>&gt; <span class="o">{</span><span class="s1">&#39;bar&#39;</span>: 7<span class="o">}</span>
+utils.bar <span class="o">=</span>&gt; <span class="s1">&#39;foo&#39;</span>
+utils.misc <span class="o">=</span>&gt; &lt;module <span class="s1">&#39;utils&#39;</span> from <span class="s1">&#39;myapp/utils/__init__.pyc&#39;</span>&gt;</code></pre></figure>
+
+<p>Here is a directory listing of my test modules, in case this isn&#39;t clear.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">./utils/__init__.py:
+
+<span class="nv">bar</span> <span class="o">=</span> <span class="s1">&#39;foo&#39;</span>
+
+
+./utils/misc.py:
+
+class MyClass1<span class="o">(</span>object<span class="o">)</span>:
+    pass
+
+<span class="nv">foo</span> <span class="o">=</span> <span class="o">{</span><span class="s1">&#39;bar&#39;</span>: 7<span class="o">}</span></code></pre></figure>
+
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/python">python</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

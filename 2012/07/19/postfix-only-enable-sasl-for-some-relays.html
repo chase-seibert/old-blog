@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>postfix&#58; only enable sasl for some relays</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2012/07/19/postfix-only-enable-sasl-for-some-relays.html" />
+
+        <meta property="og:title" content="postfix&#58; only enable sasl for some relays"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2012/07/19/postfix-only-enable-sasl-for-some-relays.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            postfix&#58; only enable sasl for some relays
+                            
+                                <span class="post-date subtitle">19 Jul 2012</span>
+                            
+                        </h1>
+                    
+                    <p>
+Some mail hosts, like <a href="http://sendgrid.com/">SendGrid</a>, require you to use <a href="http://asg.web.cmu.edu/sasl/">SASL</a> authentication to relay mail through their systems. Many of those same hosts only want you to send mail for verified, double-opt-in squeaky clean recipients. But what if you have a subset of recipients that are not verified, and you want to continue sending mail to those yourself?
+</p>
+
+<p>
+Seven (!) years ago, I covered <a href="http://bitkickers.blogspot.com/2005/10/postifx-header-based-routing.html">basic content based routing</a> in Postfix. You can use that same mechanism to route mail based on a custom header that you've inserted into your mail that designates a particular message as verified.
+</p>
+
+<p>
+For example, from Python you might do the following in your application server code.
+</p>
+
+<pre name="code" class="python">
+from django.core.mail get_connection
+from django.core.mail EmailMessage
+
+def send_message(to_user, from_addr, subject, body):
+    connection = get_connection()
+    headers = {"X-Recipient-Verified": to_user.is_verified}
+    message = EmailMessage(
+        subject, body, from_addr, [to_user.email],
+        connection=connection, headers=headers)
+    message.send()
+</pre>
+
+<p>
+To configure Postfix, you just need to add a header_checks file. This particular class of emails will get routed through SendGrid.
+</p>
+
+<pre name="code" class="bash">
+# /etc/postfix/header_checks
+/^X-Recipient-Verified: True$/ FILTER smtp:[smtp.sendgrid.net]:587
+</pre>
+
+<p>
+In your Postfix main.cf config file, you need to point to the header_checks file, and provide the boilerplate SendGrid SASL config.
+</p>
+
+<pre name="code" class="bash">
+# /etc/postfix/main.cf
+
+header_checks = regexp:/etc/postfix/header_checks
+
+smtp_sasl_auth_enable = yes
+smtp_sasl_password_maps = hash:/etc/postfix/smtp_sasl_password_maps
+smtp_sasl_security_options = noanonymous
+smtp_tls_security_level = may
+header_size_limit = 4096000
+</pre>
+
+<p>
+Where this config differs from the <a href="http://docs.sendgrid.com/documentation/get-started/integrate/examples/postfix/">SendGrid documentation</a> is the smtp_sasl_password_maps setting. They suggest you get started by using the static mapping. This works fine as long as you're ONLY sending through SendGrid. But in our case, we need to enable SASL conditionally.
+</p>
+
+<p>
+To do this, we need another external file, smtp_sasl_password_maps. The key here is that if there is no hostname match in the SASL password map, then it proceeded <a href="http://www.postfix.org/postconf.5.html#smtp_sasl_password_maps">without authentication</a>.
+</p>
+
+<pre name="code" class="bash">
+# /etc/postfix/smtp_sasl_password_maps
+[smtp.sendgrid.net]:587 yourSendgridUsername:yourSendgridPassword
+</pre>
+
+<p>
+Then, you need to compile the text file smtp_sasl_password_maps into a binary smtp_sasl_password_maps.db, and restart postfix.
+</p>
+
+<pre name="code" class="bash">
+postmap /etc/postfix/smtp_sasl_password_maps
+service postfix restart
+</pre>
+
+<p>
+If you <a href="http://serverfault.com/questions/347842/postfix-sasl-auth-only-for-fallback-relay/409335#409335">fail to disable SASL</a> for non-SendGrid relays, you will likely find that while mail to large hosts like gmail is fine, mail to smaller hosts that do not support SASL will fail:
+</p>
+
+<pre name="code" class="bash">
+deferred (SASL authentication failed: server mail.example.com[1.2.3.4] offered no compatible authentication mechanisms for this type of connection security)
+</pre>
+
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/python">python</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/postfix">postfix</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

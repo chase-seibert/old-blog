@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Django&#58; uniform image resizing</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2010/10/29/django-uniform-image-resizing.html" />
+
+        <meta property="og:title" content="Django&#58; uniform image resizing"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2010/10/29/django-uniform-image-resizing.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Django&#58; uniform image resizing
+                            
+                                <span class="post-date subtitle">29 Oct 2010</span>
+                            
+                        </h1>
+                    
+                    <p>
+Sometimes, you want all the thumbnails you're creating to be the same dimensions. For example, your layout may require a certain width so that all the items line up in a grid. In my case, I wanted them to be exactly 96x96 pixels. 
+</p>
+
+<p>
+The tool of choice in Django is <a href="http://www.pythonware.com/products/pil/">PIL</a>, which is a PITA to install, but which works well once it's installed. Just be sure to check that JPEG works, it's <a href="http://effbot.org/zone/pil-decoder-jpeg-not-available.htm">commonly flubbed</a> by the installer.
+</p>
+
+<img src="http://lh5.ggpht.com/_EE2zVzGv1Ds/TMsNuxj-MvI/AAAAAAAALYQ/NwOc_Il-Tlw/s800/chase.png" border=1>
+
+<p>
+Another common requirement is to retain the aspect ratio of the original image. For example, 
+given the above input image, we would not want to produce this:</p>
+
+<img src="http://lh5.ggpht.com/_EE2zVzGv1Ds/TMsNvCYh4dI/AAAAAAAALYY/CeXKCMtiY3g/s800/chase_scaled.png" border=1>
+
+<p>
+For that, PIL's built-in <a href="http://www.pythonware.com/library/pil/handbook/image.htm#Image.thumbnail">thumbnail</a> method will do nicely. However, that would not get us a perfect 96x96 square. Unless the original image is also a square, it will instead produce a thumbnail where only the larger dimension it 96 pixels.
+</p>
+
+<p>
+To compensate, we need to add literal white space to fill out the remaining pixels. In PIL, you can accomplish this with the <a href="http://www.pythonware.com/library/pil/handbook/image.htm#Image.paste">paste</a> method.
+</p>
+
+<pre name="code" class="python">
+import Image
+import traceback
+import sys
+
+def resize_aspect_ratio(path, maxSize, method=Image.ANTIALIAS):
+    """ Resizing an image to a static side, in place """
+
+    try:
+        
+        # shrink, but maintain aspect ratio
+        image = Image.open(path)   
+        image.thumbnail(maxSize)
+        
+        # fill out to exactly maxSize (square image)        
+        background = Image.new("RGBA", maxSize, (255, 255, 255, 0)) # use white for empty space
+        background.paste(image, ((maxSize[0] - image.size[0]) / 2, (maxSize[1] - image.size[1]) / 2))
+    
+        background.save(path)
+    
+    except Exception, e:
+        
+        print "Error resizing image: %s" % e
+</pre>
+
+<img src="http://lh3.ggpht.com/_EE2zVzGv1Ds/TMsNvI5bekI/AAAAAAAALYU/o-LyinWy4oY/s800/chase_96.png" border=1>
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/django">django</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

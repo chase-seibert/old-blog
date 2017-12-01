@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Django ManyToMany error&#58; "Cannot resolve keyword XXX into a field"</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2010/04/30/django-manytomany-error-cannot-resolve-keyword-xxx-into-a-field.html" />
+
+        <meta property="og:title" content="Django ManyToMany error&#58; "Cannot resolve keyword XXX into a field""/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2010/04/30/django-manytomany-error-cannot-resolve-keyword-xxx-into-a-field.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Django ManyToMany error&#58; "Cannot resolve keyword XXX into a field"
+                            
+                                <span class="post-date subtitle">30 Apr 2010</span>
+                            
+                        </h1>
+                    
+                    <p>This week I was doing some refactoring, and started getting the following exception in Django's admin site. This was under Django 1.1.1, and Python 2.6.4.
+</p>
+
+<pre name="code" class="bash">
+Traceback:
+File "/usr/lib/pymodules/python2.6/django/core/handlers/base.py" in get_response
+  92.                 response = callback(request, *callback_args, **callback_kwargs)
+File "/usr/lib/pymodules/python2.6/django/contrib/admin/sites.py" in root
+  490.                 return self.model_page(request, *url.split('/', 2))
+File "/usr/lib/pymodules/python2.6/django/views/decorators/cache.py" in _wrapped_view_func
+  44.         response = view_func(request, *args, **kwargs)
+File "/usr/lib/pymodules/python2.6/django/contrib/admin/sites.py" in model_page
+  509.         return admin_obj(request, rest_of_url)
+File "/usr/lib/pymodules/python2.6/django/contrib/admin/options.py" in __call__
+  1098.             return self.change_view(request, unquote(url))
+File "/usr/lib/pymodules/python2.6/django/db/transaction.py" in _commit_on_success
+  240.                 res = func(*args, **kw)
+File "/usr/lib/pymodules/python2.6/django/contrib/admin/options.py" in change_view
+  840.             form = ModelForm(instance=obj)
+File "/home/chase/bullhorn/branches/powerfill/django/powerfill/search/admin.py" in __init__
+  113.         super(CompanyAdminForm, self).__init__(*args, **kwargs)
+File "/usr/lib/pymodules/python2.6/django/forms/models.py" in __init__
+  222.             object_data = model_to_dict(instance, opts.fields, opts.exclude)
+File "/usr/lib/pymodules/python2.6/django/forms/models.py" in model_to_dict
+  140.                 data[f.name] = [obj.pk for obj in f.value_from_object(instance)]
+File "/usr/lib/pymodules/python2.6/django/db/models/fields/related.py" in value_from_object
+  964.         return getattr(obj, self.attname).all()
+File "/usr/lib/pymodules/python2.6/django/db/models/manager.py" in all
+  105.         return self.get_query_set()
+File "/usr/lib/pymodules/python2.6/django/db/models/fields/related.py" in get_query_set
+  424.             return superclass.get_query_set(self)._next_is_sticky().filter(**(self.core_filters))
+File "/usr/lib/pymodules/python2.6/django/db/models/query.py" in filter
+  498.         return self._filter_or_exclude(False, *args, **kwargs)
+File "/usr/lib/pymodules/python2.6/django/db/models/query.py" in _filter_or_exclude
+  516.             clone.query.add_q(Q(*args, **kwargs))
+File "/usr/lib/pymodules/python2.6/django/db/models/sql/query.py" in add_q
+  1675.                             can_reuse=used_aliases)
+File "/usr/lib/pymodules/python2.6/django/db/models/sql/query.py" in add_filter
+  1569.                     negate=negate, process_extras=process_extras)
+File "/usr/lib/pymodules/python2.6/django/db/models/sql/query.py" in setup_joins
+  1737.                             "Choices are: %s" % (name, ", ".join(names)))
+
+Exception Type: FieldError at /admin/search/company/2273/
+Exception Value: Cannot resolve keyword 'company' into field.
+</pre>
+
+<p>
+Having made quite a number of changes before noticing this, it took some time to track down. It turned out that it started happening when I moved an import. Eventually, I found <a href="http://code.djangoproject.com/ticket/1796">Django Ticket #1796</a>. While that ticket is marked as "Fixed", it does not actually appear to be fixed in all cases.
+</p>
+
+<p>
+The problem is deep in the Django stack, and involves class loading at the Python level as well. It's in a piece of the Django code that is only executed for ManyToMany relationships. Read the ticket if you're interested in the details.
+</p>
+
+<p>
+In my case, the ManyToMany relationship in question was a field on a Company model which referenced a Django User model:
+</p>
+
+<pre name="code" class="python">
+class Company(models.Model):
+
+    ...
+
+    connection_users = models.ManyToManyField(
+        User,
+        symmetrical=False,
+        blank=True,
+        null=True
+        )
+</pre>
+
+<p>
+I also have a UserProfile model which extends the base User model:
+</p>
+
+
+<pre name="code" class="python">
+class UserProfile(models.Model):
+    user = models.ForeignKey(User, unique=True)
+    company = models.ForeignKey(Company)
+    phone = PhoneNumberField()
+</pre>
+
+<p>
+Essentially, the django.contrib.auth.models.User model is necessarily loaded first, then my related UserProfile model is loaded before the Company model due to Python class loading behavior. When Company finally loads, the Django bug kicks in and it confuses the company field on UserProfile with a symmetric version of the ManyToMany relationship connection_users on Company.
+</p>
+
+<p>
+After much fiddling, the fix was to force the class loading order to load Company before UserProfile. A good spot to do this is at the top of the models module.
+</p>
+
+<pre name="code" class="python">
+from company import Company, UserProfile
+</pre>
+
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/django">django</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/python">python</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

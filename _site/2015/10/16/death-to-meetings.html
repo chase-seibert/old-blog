@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Death to Meetings (and other alternatives)</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2015/10/16/death-to-meetings.html" />
+
+        <meta property="og:title" content="Death to Meetings (and other alternatives)"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2015/10/16/death-to-meetings.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Death to Meetings (and other alternatives)
+                            
+                                <span class="post-date subtitle">16 Oct 2015</span>
+                            
+                        </h1>
+                    
+                    <blockquote>
+<p>What percentage of your time at work do spend in meetings? If you’re a middle manager, it&#39;s likely about 35% of your time, and if you’re in upper management, it can be a whopping 50%. What&#39;s worse is how unproductive these meetings usually are. - <a href="https://www.themuse.com/advice/how-much-time-do-we-spend-in-meetings-hint-its-scary">themuse.com</a></p>
+</blockquote>
+
+<p>Meetings are a fact of life in corporate America, whether you&#39;re working at a large company, or a startup. Is that 35% number correct? Seems pretty close to my personal results. I&#39;ve been using <a href="">Toggl</a> for a while to track time, and over the last 30 days, I have spent more like 40% of my time in meetings.</p>
+
+<p><img src="/blog/images/toggl_meetings.png" alt="toggl_meetings"></p>
+
+<p><em>The red block is meetings, green is coding, and blue is writing.</em></p>
+
+<p>What&#39;s worse, it&#39;s actually not that much lower for individual contributors. Do business owners really want their employees spending this much time in meetings? Is that the most productive arrangement? What&#39;s wrong with meetings, anyway?</p>
+
+<h1>Bad Meetings</h1>
+
+<blockquote>
+<p>Meetings are indispensable when you don&#39;t want to do anything. - <a href="http://www.brainyquote.com/quotes/keywords/meetings.html#z5clr8zclSbxAafk.99">John Kenneth Galbraith</a></p>
+</blockquote>
+
+<p>Some meetings are very useful. The problem is that every meeting is very expensive. Say you get 10 people in a room for an hour. If they each make $150k/year (hey, this is the Bay Area), you just spent $750 (plus taxes and benefits). What if there are 100 such meetings a day across the company? What did you get for that money?</p>
+
+<p>Have an all hands meeting for 250 people? That comes to $18,750. For that amount of money, you could book the <a href="http://priceonomics.com/how-much-does-it-cost-to-book-your-favorite-band/">Indigo Girls</a> to present your powerpoint slides for you. You could give each employee a little over <a href="https://www.thrillist.com/drink/nation/best-coconut-water-brand-amy-brian-coconut-juice-from-thailand-ranks-top">2 gallons</a> of coconut water. <strong>You could hire another six engineers.</strong></p>
+
+<p>The worst case scenario is that meetings are being called primarily for the benefit of the meeting organizer. That person obviously feels that it&#39;s a good use of time. What about everyone else? If you&#39;re not careful, you may have attendees who only need to engage for 5-10 minutes in a one hour slot, and are basically sitting idle the rest of the time.</p>
+
+<p>For a software engineer, that looks a lot like synchronous blocking on I/O. You&#39;re killing throughput. Wouldn&#39;t a system of asynchronous callbacks be a lot more efficient?</p>
+
+<h1>Alternative to Meetings</h1>
+
+<blockquote>
+<p>If you had to identify, in one word, the reason why the human race has not achieved, and never will achieve, its full potential, that word would be &#39;meetings.&#39; - <a href="http://www.brainyquote.com/quotes/keywords/meetings.html#z5clr8zclSbxAafk.99">Dave Barry</a></p>
+</blockquote>
+
+<p>We have tools at our disposal to solve this problem - but we need a shift in approach.</p>
+
+<h2>Slack</h2>
+
+<p><a href="https://slack.com/">Slack</a> is awesome. You should get it. If you&#39;re on anything else, you&#39;re missing out. How can you use it to replace some meetings? Just create a channel or private group instead of a meeting. Invite the attendees. Put the agenda in the chat. Link to some shared docs that people need to reference. Start a discussion.</p>
+
+<p>One interesting thing that happens is that the conversation becomes asynchronous. It no longer strictly matters <em>when</em> people chime in. You can hold a conversation over the course of a day, or a week. This is a <em>big win</em> for everyone involved; let them participate when it makes the most sense for them.</p>
+
+<p>Will people sometimes be slow to engage? Yep. That&#39;s when it&#39;s on the &quot;meeting&quot; organizer to ping people with an @mention. Meeting owners <em>need</em> to be driving the conversation - whether it&#39;s over Slack or in a traditional sit down.</p>
+
+<p>Bonus points: your meeting is taking its own notes! Next time you have the meeting; the last meeting&#39;s notes are right there.</p>
+
+<p><em>PS: If you work at Slack and you&#39;re reading this - you guys should totally implement a &quot;kill this meeting&quot; plugin for Google calendar that deletes the meeting and sets up a temporary Slack channel with all the attendees.</em></p>
+
+<h2>Email</h2>
+
+<p>Email is another good option. Less collaborative than chat, but maybe better for longer prose. Of course, email is only slightly less maligned than meetings themselves. But hey, at least it&#39;s asynchronous.</p>
+
+<h2>GoToMeeting</h2>
+
+<p>GoToMeeting is another good option, especially for screen sharing. Slack really needs to get on this, but for now it&#39;s probably your best option for some types of meetings.</p>
+
+<h2>Recurring &quot;Meetings&quot;</h2>
+
+<p>One sticky wicket is the recurring meeting. If you have the same meeting weekly, do you still need a calendar item to remind people to join the chat, or start the email chain?</p>
+
+<p>I guess you could, but that seems like the wrong tool for the job. Most recurring meetings are run by managers. Managers have a ton of things to keep track of. I guarantee they have a personal reminder system. They should use that to remind themselves to kick off the meeting on the right day.</p>
+
+<p>Better yet, maybe you don&#39;t actually <em>need</em> the meeting this week. This is a subtle benefit - recurring meetings default to <em>not happening</em>, versus defaulting to happening unless someone cancels them. Inertia is a funny thing. Managers <em>should</em> be consciously thinking about whether a meeting is really required, every time.</p>
+
+<h1>Good Meetings</h1>
+
+<blockquote>
+<p>Meetings are at the heart of an effective organization, and each meeting is an opportunity to clarify issues, set new directions, sharpen focus, create alignment, and move objectives forward. - <a href="http://www.amazon.com/Meetings-Matter-Strategies-Remarkable-Conversations/dp/0943097142">Paul Axtell</a></p>
+</blockquote>
+
+<p>Some meetings are not really meetings. One on ones are not meetings. Those should absolutely be on the calendar and happen every week.</p>
+
+<p>What are some examples of good meetings?</p>
+
+<ul>
+<li>Demo + celebration of recently shipped projects</li>
+<li>Brainstorming ideas for a new product</li>
+<li>Strategy sessions</li>
+</ul>
+
+<p><em>Note: if you&#39;re going to have a brainstorming meeting, make sure people know how to brainstorm. Talking about potential implementation and challanges is not brainstorming.</em></p>
+
+<h1>Meeting Hygiene</h1>
+
+<p>No matter what the meeting is for, practice basic meeting hygiene.</p>
+
+<ul>
+<li>Have a clear meeting owner</li>
+<li>Have a clear agenda written down ahead of time</li>
+<li>Start the meeting on time</li>
+<li>The owner drives the discussion - stay on track</li>
+<li>End the meeting with a +/-/delta poll</li>
+<li>End the meeting on time, if not early</li>
+<li>Send out meeting notes via email to the whole team</li>
+</ul>
+
+<h1>Culture</h1>
+
+<blockquote>
+<p>Management&#39;s job is to convey leadership&#39;s message in a compelling and inspiring way. Not just in meetings, but also by example. - <a href="http://www.brainyquote.com/quotes/keywords/meetings.html#z5clr8zclSbxAafk.99">Jeffrey Gitomer</a></p>
+</blockquote>
+
+<p>Again, most meetings are called by managers. It&#39;s up to those managers to set a culture of respect for people&#39;s time. Some parting ideas:</p>
+
+<ul>
+<li>Give everyone explicit permission to skip meetings at their discretion. No judgement when they do!</li>
+<li>Meeting notes are a great way to make sure people are not attending meetings just so they can know what&#39;s going on.</li>
+<li>What if a meeting owner had to put $1 in a jar every time they schedule a meeting? What if it was $1/person?</li>
+<li>Are you <a href="https://github.com/chase-seibert/gcal-report">tracking metrics</a> on hours spent in meetings? Probably not. Why not?</li>
+</ul>
+
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/process">process</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/reading-list">reading-list</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/meetings">meetings</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/manager">manager</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/newboss">newboss</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

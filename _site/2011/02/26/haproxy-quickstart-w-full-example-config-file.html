@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>HAProxy Quickstart w/ full example config file</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2011/02/26/haproxy-quickstart-w-full-example-config-file.html" />
+
+        <meta property="og:title" content="HAProxy Quickstart w/ full example config file"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2011/02/26/haproxy-quickstart-w-full-example-config-file.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            HAProxy Quickstart w/ full example config file
+                            
+                                <span class="post-date subtitle">26 Feb 2011</span>
+                            
+                        </h1>
+                    
+                    <p>
+I recently installed HAProxy as a web server load balancer. While <a href="http://haproxy.1wt.eu/download/1.4/doc/configuration.txt">their documentation</a> is great, I found it lacking a complete example of a working configuration file. For reference, here is the config file I ended up with along with comments.
+</p>
+
+<pre name="code" class="bash">
+# /etc/haproxy/haproxy.cfg, version 1.4
+
+global
+   maxconn 4096
+   user haproxy
+   group haproxy
+   daemon
+
+defaults
+   log   global
+   mode   http
+   # logs which servers requests go to, plus current connections and a whole lot of other stuff 
+   option   httplog
+   option   dontlognull
+   retries   3
+   option redispatch
+   maxconn   2000
+   contimeout   5000
+   clitimeout   50000
+   srvtimeout   50000
+   log        127.0.0.1       local0
+   # use rsyslog rules to forword to a centralized server  
+   log        127.0.0.1       local7 debug
+   # check webservers for health, taking them out of the queue as necessary 
+   option httpchk
+
+# this load balancer servers both www.site.com and static.site.com, but those two URLS have  
+# different servers on the backend (app servers versus statis media apache instances)  
+# also, I want to server www.site.com/static/* from the later farm  
+
+frontend http
+
+   bind 0.0.0.0:80
+
+   # important, see comment from Willy Tarreau bellow
+   option http-server-close
+
+   # NAT static host names and static paths in other hostnames to static.bullhornreach.com
+   acl host_static hdr_beg(host) -i static
+   acl url_static  path_beg    /static
+   use_backend static if host_static
+   use_backend static if url_static
+
+    default_backend www
+
+backend www
+   balance roundrobin
+   server www1 www1 check port 80
+   server www2 www2 check port 80
+   server www3 www3 check port 80
+   # provide a maintenance page functionality, only used when all other servers are down
+   server load1 localhost:8080 backup
+
+backend static
+   # for static media, connections are cheap, plus the client is very likely to request multiple files  
+   # so, keep the connection open (KeepAlive is the default)  
+   balance roundrobin
+   server media1 media1 check port 80
+   server media2 media2 check port 80
+
+listen stats :1936
+   mode http
+   stats enable
+   stats scope http
+   stats scope www
+   stats scope static
+   stats scope static_httpclose
+   stats realm Haproxy\ Statistics
+   stats uri /
+   stats auth haproxy:YOURPASSWORDHERE
+
+</pre>
+
+<b>Edit: made changes suggested by Willy Tarreau.</b>
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

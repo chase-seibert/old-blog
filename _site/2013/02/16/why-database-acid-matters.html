@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Why Database Integrity Matters</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2013/02/16/why-database-acid-matters.html" />
+
+        <meta property="og:title" content="Why Database Integrity Matters"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2013/02/16/why-database-acid-matters.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Why Database Integrity Matters
+                            
+                                <span class="post-date subtitle">16 Feb 2013</span>
+                            
+                        </h1>
+                    
+                    <p>Given the rise in popularity of <a href="http://en.wikipedia.org/wiki/NoSQL">NoSQL</a> solutions, typically set apart by their explicit forfeiture of traditional <a href="http://en.wikipedia.org/wiki/Relational_database_management_system">RDBMS</a> features, you might think that age old concepts like ACID transactions and foreign key constraints are simply antiquated. In the face of the new shiny hotness, why did we ever value <a href="ftp://public.dhe.ibm.com/software/solutions/soa/pdfs/Whydataintegritymatters-trifold.pdf">data integrity</a> so highly, anyway?</p>
+
+<p>Personally, I think it&#39;s critical to realize that NoSQL solutions were born primarily out of necessity. At some extremely high volumes of data, you simply don&#39;t have the luxury of data integrity. But that&#39;s a problem for the Facebooks and Googles of the world. The other 99% of us are flattering ourselves if we think we have the same data scaling problems. Of course, given NoSQL tools, more data will be accumulated by smaller companies, simply because it is now practical to work with.</p>
+
+<p>But for traditional RDBMS systems, it&#39;s important to re-emphasize the value of data consistency. In short:</p>
+
+<blockquote>
+<p>Anything that can happen in a schema, will happen.</p>
+</blockquote>
+
+<h1>Soft Deletion</h1>
+
+<p>Soft deleting a record refers to marking it as deleting, typically with a 0/1 value in a column like <code>is_deleted</code>. Some NoSQL solutions like HBase can do this natively, by keeping multiple versions of a data cell around. But it&#39;s actually a long-standing pattern from RDBMS. Typical reasons include enabling undo features, providing audit trails and simple fear of deleting data permanently.</p>
+
+<p>Soft deletes are totally reasonable, but there are some <a href="http://weblogs.asp.net/fbouma/archive/2009/02/19/soft-deletes-are-bad-m-kay.aspx">trade offs</a> to be aware of.</p>
+
+<ul>
+<li>Natural primary keys become more difficult. Do you allow two user records with the same username if one is deleted?</li>
+<li>Prevents you from using the cascading delete feature of you database, leading to orphaned records.</li>
+<li>Invites logically <a href="http://ayende.com/blog/4157/avoid-soft-deletes">invalid foreign key references</a>- ie references from a soft-deleted record to a live record.</li>
+<li>Easiest to enforce through an ORM, but you won&#39;t always be accessing the data through the ORM.</li>
+</ul>
+
+<p>Most importantly, they can slow down performance. If you have a significant amount of data, you will end up adding more indexes that you would otherwise need, simply to be sure you are always looking at non-deleted records. That will <a href="http://richarddingwall.name/2009/11/20/the-trouble-with-soft-delete/">slow down writes</a> to some extent. You could regularly delete soft-deleted records, but in practice I have not seen people actually doing that regularly.</p>
+
+<p>It&#39;s easy to get into a situation where you have multiple soft-deleted versions of every record. You may find that you have more deleted data than live data! One alternative to soft-deletes is to put these records into a separate archive. It could even be another RDBMS. If you really ever do need the data, it will be there. But don&#39;t be surprised if you never use it.</p>
+
+<h1>Foreign Key Constraints</h1>
+
+<p>There seems to be a misunderstanding that &quot;Real Internet Applications Don&#39;t Use Foreign Keys&quot; (<a href="http://www.thisblog.runsfreesoftware.com/?q=2009/03/20/real-internet-applications-dont-use-foreign-keys">source</a>). Let me assure you, foreign key constraints are an absolutely fundamental building block of most of the web apps that you use. It&#39;s what the &quot;relational&quot; in RDBMS stands for!</p>
+
+<p>Foreign keys are the primary method for enforcing data integrity. Without them, you are inviting <a href="http://stackoverflow.com/questions/83147/whats-wrong-with-foreign-keys">orphaned rows and giving up cascading deletes</a>. These are similar trade-offs to use soft deletes. In fact, soft deletes can <a href="http://stackoverflow.com/questions/3492485/mysql-with-soft-deletion-unique-key-and-foreign-key-constraints">exacerbate the issue</a>.</p>
+
+<p>In the end, not using foreign keys is similar to not <a href="http://www.oreillynet.com/onlamp/blog/2006/05/misunderstanding_foreign_keys.html">validating your input</a>. You&#39;re assuming that your infallible application layer will never insert bad data into the system. First of all, that&#39;s just wishful thinking. In practice, I have observed that if the schema allows bad data, you will eventually see that exact form of bad data in the system. Better to put as much data validation as you can right next to the data itself, where it is much harder to circumvent.</p>
+
+<h1>Transactions</h1>
+
+<p><a href="http://en.wikipedia.org/wiki/ACID">ACID</a> compliance is a big deal. Databases competed on this playing field for decades. Yes, transactions absolutely do slow down performance. Would you rather have wrong answers quickly, or correct answers a few milliseconds later?</p>
+
+<p>Yes, transactions <a href="http://jasonswett.net/blog/why-you-should-use-database-transactions/">can throw errors</a> when you are inserting data. You can&#39;t insert bad data; that&#39;s the point! When you say you want to disable transactions because &quot;I don&#39;t ever want to loose data&quot;, I hear &quot;I would rather have bad data in the system than no data&quot;. (Application layer isn&#39;t looking so infallible now, is it?) In general, transactions reduce the scope of data problems from &quot;I just inserted a bunch of invalid data, let&#39;s fix the &#39;bugs&#39; in the application layer to deal with it&quot; to &quot;one user got an error trying to insert bad data&quot;. IMHO, that&#39;s a good thing.</p>
+
+<h1>JSON Data</h1>
+
+<p>Like all of these anti-patterns, putting JSON data into your relational database is fine in small doses. I actually think it&#39;s advisable when dealing will small bits of schema-less data. But it should be the exception, not the rule. It&#39;s all too easy to avoid the small up-front cost of parsing the data and defining a schema, only to find that you&#39;re fighting bugs in your application when you&#39;re trying to do just that on the fly per-request.</p>
+
+<ul>
+<li>You&#39;re relying on your application layer to validate the format; the database can&#39;t even check that it IS JSON. (Unless you use <a href="http://www.postgresql.org/docs/devel/static/datatype-json.html">Postgres</a>)</li>
+<li>You can&#39;t index inside this field.</li>
+<li>You are probably storing these as TEXT to account for their in determinant length; MySQL in particular can&#39;t do <a href="http://dev.mysql.com/doc/refman/5.1/en/internal-temporary-tables.html">standard optimizations</a> on tables with TEXT blobs.</li>
+</ul>
+
+<p>Note: the later is also <a href="http://stackoverflow.com/questions/348416/in-postgresql-is-it-faster-to-include-text-columns-in-the-same-table-rather-th">not a problem</a> on Postgres.</p>
+
+<h1>Conclusion</h1>
+
+<p>In the final analysis, poor data integrity is really all about <em>SPEED</em>. Not the speed of your application, but the speed of your engineers. Soft deletion, disabling foreign keys, eschewing transactions and not normalizing data properly all have their valid use cases. But over-used, you&#39;re slowing down every engineer that has to write new code on top of the database by inundating them with edge cases they frankly shouldn&#39;t have to worry about.</p>
+
+<p>They have a reference to an active user, but the required profile record is soft-deleted. Add more code to deal with that. I tried to show the user a link from an invoice to their internal CRM with a reference_id, but that key was missing from the json column. Add more code to deal with that. Not to mention volume of bugs that can be traced back to data integrity issues.</p>
+
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/database">database</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>The Role of Specifications in Agile</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2015/11/09/specifications-in-agile.html" />
+
+        <meta property="og:title" content="The Role of Specifications in Agile"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2015/11/09/specifications-in-agile.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            The Role of Specifications in Agile
+                            
+                                <span class="post-date subtitle">09 Nov 2015</span>
+                            
+                        </h1>
+                    
+                    <p>It&#39;s commonly said that everyone does Agile differently. In my experience, it&#39;s also common to do 
+basically whatever you want and call it Agile. It can be useful to occasionally reset and examine 
+what canonical Agile recommends. For software specifications, it&#39;s pretty simple. Do just enough, 
+no more.</p>
+
+<h1>Why do we need specifications at all?</h1>
+
+<blockquote>
+<p>A software requirements specification (SRS) is a description of a software system to be 
+developed, laying out functional and non-functional requirements, and may include a set of use 
+cases that describe interactions the users will have with the software.
+    - <a href="https://en.wikipedia.org/wiki/Software_requirements_specification">Wikipedia</a></p>
+</blockquote>
+
+<p>Historically, specifications have been used to communicate to the customer (be it an internal or 
+external customer) what will be built. Agile is built on the principle that this is actually not in
+the best interest of the customer. Why? </p>
+
+<ul>
+<li>Low effort specifications will have all parties making critical assumptions.</li>
+<li>High effort specifications take a lot of time - and will necessarily be wrong in big ways.</li>
+<li>Scope can and should change as we learn more about the problem.</li>
+</ul>
+
+<p>In Agile, we build in short sprints. Documentation need only be created for the next sprint, or 
+perhaps one additional sprint. This is known as 
+    - <a href="http://www.agileforall.com/2009/02/new-to-agile-remember-one-thing-just-enough-just-in-time/">&quot;Just in time Documentation&quot;</a></p>
+
+<h1>Self-directed Agile Teams</h1>
+
+<blockquote>
+<p>Agile artefacts such as technical spikes and development iterations mean that high-level 
+requirements can be considered sufficient at project initiation. 
+    - <a href="http://www.batimes.com/articles/applying-agile-principles-to-requirement-analysis.html">Ryan Hewitt</a></p>
+</blockquote>
+
+<p>For agile teams, specifications exist so that the team knows what they need to build.
+Because we are committing only to one sprint at a time, we have no need to project long-term dates
+that would necessitate a full specification. What documentation does the team need to get started? 
+A highly detailed specification for just that first sprint.</p>
+
+<p><img src="http://www.userstories.com/system/product_image/file/980/Feedback_Flow-original.png?1392328012" alt="agile"></p>
+
+<p>An agile team is composed of a product manager, a designer and one or more developers. This team 
+must be empowered to design and implement their vision of a solution. A specification is definitely
+NOT for feedback or sign-off prior to building. </p>
+
+<h1>How does the team know to build the right thing?</h1>
+
+<blockquote>
+<p>Agile requirements, on the other hand, depend on a shared understanding of the customer that is 
+shared between the product owner, designer, and the development team. That shared understanding and 
+empathy for the target customer unlocks hidden bandwidth for product owners. They can focus on 
+higher-level requirements and leave implementation details to the development team, who is fully 
+equipped to do so – again, because of that shared understanding.
+    - <a href="https://www.atlassian.com/agile/requirements/">Dan Radigan, Senior Agile Evangelist, Atlassian</a></p>
+</blockquote>
+
+<p>User stories are the form that specifications take. Each user story is created in advance and 
+placed in a backlog, but only the small set of the very next stories are flesh out in detail. Then,
+the level of detail is very high. Designs are included at this stage, and so are detailed 
+descriptions of fine grained behavior like validation, individual errors messages, etc.</p>
+
+<p>Though the PM owns the user story, the team itself generates the detail through a processes called
+grooming. User empathy is critical - while PM and design naturally represent the customer in the 
+design process, the entire team needs to understand the customer motivation and pain points. </p>
+
+<p>In the end, the team may very well not build the right thing. This is where feedback comes in - at
+the end of a sprint, once working software is produced and shown to the customer.</p>
+
+<h1>When to get feedback</h1>
+
+<blockquote>
+<p>Working software over comprehensive documentation
+    - <a href="http://agilemanifesto.org/">The Agile Manifesto</a></p>
+</blockquote>
+
+<p>In Agile, feedback is given based on working software, not specifications. The team commits to 
+delivering and demoing working software every sprint. These demos are where feedback is generated. 
+I&#39;ve often been surprised when <a href="http://haacked.com/archive/2005/08/17/misunderstanding-agile-design.aspx/">customers don&#39;t really know what they want until they see it.</a></p>
+
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/process">process</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

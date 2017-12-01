@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Appium + React Native Quickstart</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2017/01/06/appium-react-native-quickstart.html" />
+
+        <meta property="og:title" content="Appium + React Native Quickstart"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2017/01/06/appium-react-native-quickstart.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Appium + React Native Quickstart
+                            
+                                <span class="post-date subtitle">06 Jan 2017</span>
+                            
+                        </h1>
+                    
+                    <p><a href="http://appium.io/">Appium</a> is a great framework for automated functional testing
+of mobile apps. But it&#39;s very general purpose, meaning that there is relatively
+little documentation for specific mobile app architectures. It&#39;s also fairly
+complicated. Being &quot;Selenium for mobile&quot;, and leveraging a lot of existing
+Selenium architecture, it requires a lot of context to get up and running.
+This is a guide for getting starting testing a React Native app on Appium,
+without assuming too much prior knowledge.</p>
+
+<h1>Moving Pieces</h1>
+
+<p>At a high level, you write code in any number of supported languages that
+comprise your tests. You can use your existing test framework, i.e. py.test for
+Python, Mocha for JavaScript, whatever you want. In your test bootstrapping, you
+are going to instantiate a Appium &quot;web driver&quot;[1] client, and configure it. The
+driver will connect to a running <code>appium</code> service, which you will have installed
+and kicked off in the background. Down the line, you can get a vendor like
+<a href="https://saucelabs.com/">SauceLabs</a> or <a href="https://aws.amazon.com/device-farm/">AWS Device Farm</a>
+to run that in the cloud if you want.</p>
+
+<p>In your tests, you use the driver to tell the appium service to launch your app
+in a simulator. Eventually, you can also tell it to run on a physical device. You
+give it a path to your app <code>.app</code> file for iOS, or the <code>.apk</code> for Android, and it
+can either re-use an emulator that you&#39;ve already launched on your desktop, or
+start one.</p>
+
+<p>Once the app loads, you issue commands to the driver to perform certain actions
+inside the app. Common examples are clicking on buttons or links, entering data
+into forms and checking for content on the screen. Those checks are essentially
+the asserts in your tests. If at any point your tests cannot locate the item
+that it&#39;s expecting on the screen, you will get an exception and that test will
+fail.</p>
+
+<p>[1] The term &quot;web driver&quot; is a historical hold over from Selenium.</p>
+
+<h2>Potentially Confusing Parts &amp; Gotchas</h2>
+
+<p>I&#39;ve written some Selenium test suites in the past, but it&#39;s been a while. I
+remember having some of the same initial confusions with Appium.</p>
+
+<ul>
+<li>The <code>appium</code> service needs to be launched and run in the background; your
+tests do not kick that off for you.</li>
+<li>You can start your emulator manually and have Appium connect to that instance.
+It happens automatically, for Android anyway.</li>
+</ul>
+
+<h1>Installing Stuff</h1>
+
+<p>Appium&#39;s <a href="http://appium.io/getting-started.html">getting started</a> doc has a
+surprising amount of confusing cruft on it, but you should reference it for the
+latest instructions.</p>
+
+<p>As of 2017-01-16, this is a TL;DR version to get you started with everything
+you need for both iOS and Android.</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">brew install libimobiledevice --HEAD
+brew install carthage
+brew install node
+npm install -g appium
+npm install wd
+npm install -g ios-deploy
+gem install xcpretty  <span class="c"># optional</span>
+appium
+</code></pre></div>
+<p>That should get you a running <code>appium</code> process. Just leave it open in a tab.</p>
+
+<p>Example output:</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="o">[</span>Appium<span class="o">]</span> Welcome to Appium v1.6.3
+<span class="o">[</span>Appium<span class="o">]</span> Appium REST http interface listener started on 0.0.0.0:4723
+</code></pre></div>
+<h1>Running a Dummy Test</h1>
+
+<p><em>Note: Your React Native app build should be in production mode. Otherwise,
+selecting elements on the page will be super crazy slow. You can validate that
+you&#39;re in the right mode by killing your packager; the production builds should
+have all the JS assets packaged into the app.</em></p>
+
+<p>Before getting into the full blown details of how to write a full test, I found
+that I first just wanted to make sure I could write some code that launched my
+app correctly in the emulator. I suggest starting with Android if possible; iOS
+apps under XCode 8 and later required a <a href="https://github.com/appium/appium-xcuitest-driver">bunch of additional moving pieces</a>.</p>
+
+<p>Appium has a bunch of <a href="https://github.com/appium/sample-code/tree/master/sample-code/examples">sample client code</a>
+for various languages. I found it to be too much; it&#39;s hard to tell what&#39;s abstracted
+where, and if you don&#39;t know the test runner they have chosen, there may be
+additional learning curve. I&#39;m going give you a very simple example in Python.</p>
+
+<p><strong>Note: we&#39;re assuming that your app has a link with specific text in it on the
+first screen, and clicking that links loads a second page with more specific
+text on it.</strong></p>
+
+<p>First, you need to install the Python client:</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">virtualenv venv
+. venv/bin/activate
+pip install Appium-Python-Client
+</code></pre></div>
+<p>Then, create a file called <code>test.py</code>:</p>
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">appium</span> <span class="kn">import</span> <span class="n">webdriver</span>
+
+<span class="n">driver</span> <span class="o">=</span> <span class="n">webdriver</span><span class="o">.</span><span class="n">Remote</span><span class="p">(</span>
+    <span class="n">command_executor</span><span class="o">=</span><span class="s">&#39;http://127.0.0.1:4723/wd/hub&#39;</span><span class="p">,</span>
+    <span class="n">desired_capabilities</span><span class="o">=</span><span class="p">{</span>
+        <span class="s">&#39;app&#39;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s">&#39;~/Downloads/app-release.apk&#39;</span><span class="p">),</span>
+        <span class="s">&#39;platformName&#39;</span><span class="p">:</span> <span class="s">&#39;Android&#39;</span><span class="p">,</span>
+        <span class="s">&#39;deviceName&#39;</span><span class="p">:</span> <span class="s">&#39;Nexus 6P API 25&#39;</span><span class="p">,</span>
+    <span class="p">})</span>
+
+<span class="c"># wait for app to load</span>
+<span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="c"># find the link with the text &quot;Click here&quot; and click on it</span>
+<span class="n">link</span> <span class="o">=</span> <span class="n">driver</span><span class="o">.</span><span class="n">find_element_by_xpath</span><span class="p">(</span><span class="s">&#39;//*[@text=&quot;Click Here&quot;]&#39;</span><span class="p">)</span>
+<span class="n">link</span><span class="o">.</span><span class="n">click</span><span class="p">()</span>
+
+<span class="c"># wait for the next screen to load</span>
+<span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="c"># make sure the correct &quot;Success&quot; result is on the page</span>
+<span class="n">driver</span><span class="o">.</span><span class="n">find_element_by_xpath</span><span class="p">(</span><span class="s">&#39;//*[@text=&quot;Success&quot;]&#39;</span><span class="p">)</span>
+
+<span class="c"># important; you will not be able to launch again if this does not happen</span>
+<span class="n">driver</span><span class="o">.</span><span class="n">quit</span><span class="p">()</span>
+</code></pre></div>
+<p>This is terrible code, but it should launch your app, in any case. From there
+you can start to play around with it. Try inserting a <code>import pdb; pdb.set_trace</code>
+before the first <code>sleep</code> to get an interactive repl where you can try querying
+for selectors.</p>
+
+<h1>Writing Tests</h1>
+
+<p>You might notice that we&#39;re using a bunch of sleeps. That&#39;s a common anti-pattern
+in both Selenium and Appium; you don&#39;t want to rely on indeterministic page loading
+timing. We&#39;re also using xpath selectors. I don&#39;t know about you, but I never want
+to write another one of those. Let&#39;s explore some options.</p>
+
+<h2>Useful Patterns</h2>
+
+<p>My goal here is to make individual tests as simple to define as possible, and to
+remove boilerplate, waits and finicky selectors from them.</p>
+
+<h3>A Base Test Class</h3>
+
+<p>It&#39;s common to have a base class for all your functional tests that does the basic
+starting the simulator and loading of the app. But it&#39;s also useful as a place to
+put re-usable methods for making writing tests easier.</p>
+
+<p>Replace the contents of your <code>test.py</code>:</p>
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">unittest</span>
+<span class="kn">from</span> <span class="nn">appium</span> <span class="kn">import</span> <span class="n">webdriver</span>
+
+
+<span class="k">class</span> <span class="nc">AppiumTest</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">driver</span> <span class="o">=</span> <span class="n">webdriver</span><span class="o">.</span><span class="n">Remote</span><span class="p">(</span>
+            <span class="n">command_executor</span><span class="o">=</span><span class="s">&#39;http://127.0.0.1:4723/wd/hub&#39;</span><span class="p">,</span>
+            <span class="n">desired_capabilities</span><span class="o">=</span><span class="p">{</span>
+              <span class="s">&#39;app&#39;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s">&#39;~/Downloads/app-release.apk&#39;</span><span class="p">),</span>
+              <span class="s">&#39;platformName&#39;</span><span class="p">:</span> <span class="s">&#39;Android&#39;</span><span class="p">,</span>
+              <span class="s">&#39;deviceName&#39;</span><span class="p">:</span> <span class="s">&#39;Nexus 6P API 25&#39;</span><span class="p">,</span>
+        <span class="p">})</span>
+
+    <span class="k">def</span> <span class="nf">tearDown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">driver</span><span class="o">.</span><span class="n">quit</span><span class="p">()</span>
+
+
+<span class="k">class</span> <span class="nc">ExampleTests</span><span class="p">(</span><span class="n">AppiumTest</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">test_login</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+      <span class="k">assert</span> <span class="bp">True</span>        
+</code></pre></div>
+<p>If you&#39;re using <code>py.test</code> (avaiable with <code>pip install pytest</code>), then you can run
+your example test with the command <code>py.test test.py</code>.</p>
+
+<h2>Selectors</h2>
+
+<p>The hardest part of writing tests is figuring out how to locate the elements on
+the screen that you need to interact with, or validate. Whether you&#39;re dealing with
+iOS or Android, Appium exposes an XML DOM that represents what&#39;s currently on
+the screen. You can actually see the full DOM at any time by evaluating
+<code>driver.page_source</code>. It get&#39;s pretty complicated quickly. Here is vastly
+simplified example:</p>
+<div class="highlight"><pre><code class="language-xml" data-lang="xml"><span class="cp">&lt;?xml version=&quot;1.0&quot; ?&gt;</span>
+<span class="nt">&lt;hierarchy</span> <span class="na">rotation=</span><span class="s">&quot;0&quot;</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;android.widget.FrameLayout</span> <span class="na">bounds=</span><span class="s">&quot;[0,0][1440,2392]&quot;</span> <span class="na">checkable=</span><span class="s">&quot;false&quot;</span> <span class="na">checked=</span><span class="s">&quot;false&quot;</span> <span class="na">class=</span><span class="s">&quot;android.widget.FrameLayout&quot;</span> <span class="na">clickable=</span><span class="s">&quot;false&quot;</span> <span class="na">content-desc=</span><span class="s">&quot;&quot;</span> <span class="na">enabled=</span><span class="s">&quot;true&quot;</span> <span class="na">focusable=</span><span class="s">&quot;false&quot;</span> <span class="na">focused=</span><span class="s">&quot;false&quot;</span> <span class="na">index=</span><span class="s">&quot;0&quot;</span> <span class="na">instance=</span><span class="s">&quot;0&quot;</span> <span class="na">long-clickable=</span><span class="s">&quot;false&quot;</span> <span class="na">package=</span><span class="s">&quot;com.myapp&quot;</span> <span class="na">password=</span><span class="s">&quot;false&quot;</span> <span class="na">resource-id=</span><span class="s">&quot;&quot;</span> <span class="na">scrollable=</span><span class="s">&quot;false&quot;</span> <span class="na">selected=</span><span class="s">&quot;false&quot;</span> <span class="na">text=</span><span class="s">&quot;&quot;</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;android.widget.LinearLayout</span> <span class="na">bounds=</span><span class="s">&quot;[0,0][1440,2392]&quot;</span> <span class="na">checkable=</span><span class="s">&quot;false&quot;</span> <span class="na">checked=</span><span class="s">&quot;false&quot;</span> <span class="na">class=</span><span class="s">&quot;android.widget.LinearLayout&quot;</span> <span class="na">clickable=</span><span class="s">&quot;false&quot;</span> <span class="na">content-desc=</span><span class="s">&quot;&quot;</span> <span class="na">enabled=</span><span class="s">&quot;true&quot;</span> <span class="na">focusable=</span><span class="s">&quot;false&quot;</span> <span class="na">focused=</span><span class="s">&quot;false&quot;</span> <span class="na">index=</span><span class="s">&quot;0&quot;</span> <span class="na">instance=</span><span class="s">&quot;0&quot;</span> <span class="na">long-clickable=</span><span class="s">&quot;false&quot;</span> <span class="na">package=</span><span class="s">&quot;com.myapp&quot;</span> <span class="na">password=</span><span class="s">&quot;false&quot;</span> <span class="na">resource-id=</span><span class="s">&quot;&quot;</span> <span class="na">scrollable=</span><span class="s">&quot;false&quot;</span> <span class="na">selected=</span><span class="s">&quot;false&quot;</span> <span class="na">text=</span><span class="s">&quot;&quot;</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;android.view.ViewGroup</span> <span class="na">bounds=</span><span class="s">&quot;[0,224][1440,1655]&quot;</span> <span class="na">checkable=</span><span class="s">&quot;false&quot;</span> <span class="na">checked=</span><span class="s">&quot;false&quot;</span> <span class="na">class=</span><span class="s">&quot;android.view.ViewGroup&quot;</span> <span class="na">clickable=</span><span class="s">&quot;false&quot;</span> <span class="na">content-desc=</span><span class="s">&quot;&quot;</span> <span class="na">enabled=</span><span class="s">&quot;true&quot;</span> <span class="na">focusable=</span><span class="s">&quot;true&quot;</span> <span class="na">focused=</span><span class="s">&quot;false&quot;</span> <span class="na">index=</span><span class="s">&quot;0&quot;</span> <span class="na">instance=</span><span class="s">&quot;6&quot;</span> <span class="na">long-clickable=</span><span class="s">&quot;false&quot;</span> <span class="na">package=</span><span class="s">&quot;com.myapp&quot;</span> <span class="na">password=</span><span class="s">&quot;false&quot;</span> <span class="na">resource-id=</span><span class="s">&quot;&quot;</span> <span class="na">scrollable=</span><span class="s">&quot;false&quot;</span> <span class="na">selected=</span><span class="s">&quot;false&quot;</span> <span class="na">text=</span><span class="s">&quot;&quot;</span><span class="nt">&gt;</span>
+            <span class="nt">&lt;android.widget.TextView</span> <span class="na">bounds=</span><span class="s">&quot;[53,224][1388,298]&quot;</span> <span class="na">checkable=</span><span class="s">&quot;false&quot;</span> <span class="na">checked=</span><span class="s">&quot;false&quot;</span> <span class="na">class=</span><span class="s">&quot;android.widget.TextView&quot;</span> <span class="na">clickable=</span><span class="s">&quot;false&quot;</span> <span class="na">content-desc=</span><span class="s">&quot;&quot;</span> <span class="na">enabled=</span><span class="s">&quot;true&quot;</span> <span class="na">focusable=</span><span class="s">&quot;false&quot;</span> <span class="na">focused=</span><span class="s">&quot;false&quot;</span> <span class="na">index=</span><span class="s">&quot;0&quot;</span> <span class="na">instance=</span><span class="s">&quot;0&quot;</span> <span class="na">long-clickable=</span><span class="s">&quot;false&quot;</span> <span class="na">package=</span><span class="s">&quot;com.myapp&quot;</span> <span class="na">password=</span><span class="s">&quot;false&quot;</span> <span class="na">resource-id=</span><span class="s">&quot;&quot;</span> <span class="na">scrollable=</span><span class="s">&quot;false&quot;</span> <span class="na">selected=</span><span class="s">&quot;false&quot;</span> <span class="na">text=</span><span class="s">&quot;Sign in&quot;</span><span class="nt">/&gt;</span>
+        <span class="nt">&lt;/android.view.ViewGroup&gt;</span>
+        <span class="nt">&lt;/android.widget.LinearLayout&gt;</span>
+        <span class="nt">&lt;android.view.View</span> <span class="na">bounds=</span><span class="s">&quot;[0,2392][1440,2560]&quot;</span> <span class="na">checkable=</span><span class="s">&quot;false&quot;</span> <span class="na">checked=</span><span class="s">&quot;false&quot;</span> <span class="na">class=</span><span class="s">&quot;android.view.View&quot;</span> <span class="na">clickable=</span><span class="s">&quot;false&quot;</span> <span class="na">content-desc=</span><span class="s">&quot;&quot;</span> <span class="na">enabled=</span><span class="s">&quot;true&quot;</span> <span class="na">focusable=</span><span class="s">&quot;false&quot;</span> <span class="na">focused=</span><span class="s">&quot;false&quot;</span> <span class="na">index=</span><span class="s">&quot;1&quot;</span> <span class="na">instance=</span><span class="s">&quot;0&quot;</span> <span class="na">long-clickable=</span><span class="s">&quot;false&quot;</span> <span class="na">package=</span><span class="s">&quot;com.myapp&quot;</span> <span class="na">password=</span><span class="s">&quot;false&quot;</span> <span class="na">resource-id=</span><span class="s">&quot;android:id/navigationBarBackground&quot;</span> <span class="na">scrollable=</span><span class="s">&quot;false&quot;</span> <span class="na">selected=</span><span class="s">&quot;false&quot;</span> <span class="na">text=</span><span class="s">&quot;&quot;</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;/android.widget.FrameLayout&gt;</span>
+<span class="nt">&lt;/hierarchy&gt;</span>
+</code></pre></div>
+<h3>XPath</h3>
+
+<p>See the <code>TextView</code> element with the text <code>Sign in</code>? If you want to locate that
+element, you can select it using XPath:</p>
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">link</span> <span class="o">=</span> <span class="n">driver</span><span class="o">.</span><span class="n">find_element_by_xpath</span><span class="p">(</span><span class="s">&#39;//*[@text=&quot;Sign in&quot;]&#39;</span><span class="p">)</span>
+</code></pre></div>
+<p>This selector looks for any DOM element (<code>*</code>) that has a <code>text</code> attribute of
+&quot;Sign in&quot;. What if there is more than one on the page? You can use
+<code>find_elements_by_xpath</code> (notice the plural &quot;s&quot; on elements) to get the full
+list, and these pick the right one by index.</p>
+
+<p>XPath is somewhat finicky. As your DOM changes, hardcoded text values and
+especially indexes for multiple matches will change often. This will break
+your tests.</p>
+
+<h3>Accessibility Labels</h3>
+
+<p>A better option is to put IDs on elements and use a selector for that specific ID.
+Typically, options here are test IDs, test tags and accessibility labels. Until
+React Native <a href="https://github.com/facebook/react-native/pull/9942">implements test IDs</a>,
+or Appium <a href="https://discuss.appium.io/t/react-native-ui-element-access-via-testid/7845/5">supports test tags</a>,
+the only option here is accessibility labels.</p>
+
+<p>In your React Native code, you can add the <code>accessibilityLabel</code> to any <code>View</code>
+element. <em>Note: these are ONLY for View elements, you will likely end up wrapping
+other elements in a View often.</em></p>
+<div class="highlight"><pre><code class="language-xml" data-lang="xml"><span class="nt">&lt;View</span> <span class="na">accessibilityLabel=</span><span class="s">&quot;Sign in here&quot;</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;Link</span>
+    <span class="na">onPress=</span><span class="s">{this.selectOnboardingType.bind(this,</span> <span class="err">&#39;signin&#39;)}</span>
+    <span class="na">style=</span><span class="s">{styles.link}</span>
+    <span class="na">id=</span><span class="s">&quot;signin&quot;</span>
+  <span class="nt">&gt;</span>
+    {I18n.t(&#39;signInTitle&#39;)}
+  <span class="nt">&lt;/Link&gt;</span>
+<span class="nt">&lt;/View&gt;</span>
+</code></pre></div>
+<p><strong>Note: Accessibility labels ARE user visible; they are used for disabled users.
+So you need to make sure they are human readable and make sense.</strong></p>
+
+<p>Then, in your test, you can use the</p>
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">link_view</span> <span class="o">=</span> <span class="n">driver</span><span class="o">.</span><span class="n">find_elements_by_accessibility_id</span><span class="p">(</span><span class="s">&quot;Sign in here&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p>You can typically interact with the <code>View</code> object directly for clicking and
+sending user input. If that doesn&#39;t work, you can use <code>link_view.find_element_by_xpath</code>
+method to query for it&#39;s children.</p>
+
+<p>See <a href="http://appium.io/slate/en/0.18.x/?javascript#ios-only">Appium documentation</a> for
+other selector strategies. <a href="http://appium.wikia.com/wiki/Finding_Elements">More</a>.</p>
+
+<h2>Waits</h2>
+
+<p>I&#39;ve found that a useful pattern for avoiding sleeps is to instead wait for an
+expected element to show up on the screen. You define a total time you&#39;re willing
+to wait, such as 10 seconds, and a short time interval that you want to poll the
+screen on, say 200 milliseconds.</p>
+
+<p>This is exactly what Selenium&#39;s <code>WebDriverWait</code> module does. But I&#39;m going to
+show you a basic implementation.</p>
+
+<h2>Putting it all together</h2>
+
+<p>Ideally, I want my actual test cases to be very concise. Here is an example:</p>
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="k">def</span> <span class="nf">test_login</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">wait_until</span><span class="p">(</span><span class="s">&#39;Please enter your login&#39;</span><span class="p">,</span> <span class="n">partial</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;#Email&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">send_keys</span><span class="p">(</span><span class="s">&#39;foo@example.com</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;#Password&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">send_keys</span><span class="p">(</span><span class="s">&#39;Password1&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">driver</span><span class="o">.</span><span class="n">hide_keyboard</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;Sign in&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">click</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">wait_until</span><span class="p">(</span><span class="s">&#39;Welcome&#39;</span><span class="p">)</span>
+    <span class="c"># self.dump_page()  &lt;-- write the DOM to a file</span>
+    <span class="c"># self.repl()  &lt;-- get an interactive shell</span>
+</code></pre></div>
+<p>Here is an example test base class with those helpers:</p>
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="k">class</span> <span class="nc">AppiumTest</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">driver</span> <span class="o">=</span> <span class="n">webdriver</span><span class="o">.</span><span class="n">Remote</span><span class="p">(</span>
+            <span class="n">command_executor</span><span class="o">=</span><span class="s">&#39;http://127.0.0.1:4723/wd/hub&#39;</span><span class="p">,</span>
+            <span class="n">desired_capabilities</span><span class="o">=</span><span class="n">OPTIONS</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">tearDown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">driver</span><span class="o">.</span><span class="n">quit</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">repl</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">import</span> <span class="nn">pdb</span><span class="p">;</span> <span class="n">pdb</span><span class="o">.</span><span class="n">set_trace</span><span class="p">()</span>
+
+      <span class="k">def</span> <span class="nf">dump_page</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+          <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;appium_page.xml&#39;</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+              <span class="n">raw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">driver</span><span class="o">.</span><span class="n">page_source</span>
+              <span class="k">if</span> <span class="ow">not</span> <span class="n">raw</span><span class="p">:</span>
+                  <span class="k">return</span>
+              <span class="n">source</span> <span class="o">=</span> <span class="n">xml</span><span class="o">.</span><span class="n">dom</span><span class="o">.</span><span class="n">minidom</span><span class="o">.</span><span class="n">parseString</span><span class="p">(</span><span class="n">raw</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&#39;utf8&#39;</span><span class="p">))</span>
+              <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">toprettyxml</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="nf">_get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">partial</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; get RIGHT NOW, fail if it&#39;s not there &#39;&#39;&#39;</span>
+        <span class="n">selector</span> <span class="o">=</span> <span class="n">options</span><span class="p">[</span><span class="s">&#39;xpath_selector&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">text</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;#&#39;</span><span class="p">):</span>
+            <span class="n">elements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">driver</span><span class="o">.</span><span class="n">find_elements_by_accessibility_id</span><span class="p">(</span><span class="n">text</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+        <span class="k">elif</span> <span class="n">partial</span><span class="p">:</span>
+            <span class="n">elements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">driver</span><span class="o">.</span><span class="n">find_elements_by_xpath</span><span class="p">(</span><span class="s">&#39;//*[contains(@</span><span class="si">%s</span><span class="s">, &quot;</span><span class="si">%s</span><span class="s">&quot;)]&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">selector</span><span class="p">,</span> <span class="n">text</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">elements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">driver</span><span class="o">.</span><span class="n">find_elements_by_xpath</span><span class="p">(</span><span class="s">&#39;//*[@</span><span class="si">%s</span><span class="s">=&quot;</span><span class="si">%s</span><span class="s">&quot;]&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">selector</span><span class="p">,</span> <span class="n">text</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">elements</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">index</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">elements</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">index</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">elements</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s">&#39;More that one element found for </span><span class="si">%r</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">text</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">elements</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; try to get for X seconds; paper over loading waits/sleeps &#39;&#39;&#39;</span>
+        <span class="n">timeout_seconds</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;timeout_seconds&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="k">while</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span> <span class="o">&lt;</span> <span class="n">timeout_seconds</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                <span class="k">raise</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="o">.</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;Could not find text </span><span class="si">%r</span><span class="s"> after </span><span class="si">%r</span><span class="s"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">text</span><span class="p">,</span> <span class="n">timeout_seconds</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">wait_until</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c"># only care if there is at least one match</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</code></pre></div>
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

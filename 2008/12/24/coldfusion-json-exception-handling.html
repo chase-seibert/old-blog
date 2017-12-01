@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>ColdFusion JSON Exception Handling</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2008/12/24/coldfusion-json-exception-handling.html" />
+
+        <meta property="og:title" content="ColdFusion JSON Exception Handling"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2008/12/24/coldfusion-json-exception-handling.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            ColdFusion JSON Exception Handling
+                            
+                                <span class="post-date subtitle">24 Dec 2008</span>
+                            
+                        </h1>
+                    
+                    <p>When calling a ColdFusion end-point from an Ajax call, the caller is expecting a certain format. In my projects, that's usually JSON. Regardless, it would be nice if the caller could assume a constant format, even for exceptions.</p>
+
+<p>Typically, when an exception is generated in ColdFusion, the server auto-generates an HTML description of the exception. The assumption is that a developer or an end-user will be looking at the resulting HTML.</p>
+
+<p>But in our case, the caller is a script, and parsing that HTML would be a chore. Instead, we can leverage ColdFusion's CFERROR tag to make sure that even exceptions generate valid JSON. Then, the caller can handle the exception data, possibly merging the information into the UI.</p>
+
+<p>You can setup an exception handler for you JSON API calls as follows. You would typically include this on an individual API page, or in the Application.cfm above all your APIs.</p>
+
+<pre name="code" class="html">
+&lt;CFERROR type=&quot;exception&quot; template=&quot;JSONExceptionSerializer.cfm&quot;&gt;
+</pre>
+
+<p>Here is an example of how to handle the exception and format the results. You could also use a JSON library such as CFJSON or the tool that comes with CF8 to do the formatting.</p>
+
+<pre name="code" class="html">
+&lt;CFSETTING showdebugoutput=&quot;no&quot; enablecfoutputonly=&quot;yes&quot;&gt;
+
+&lt;CFHEADER statuscode=&quot;500&quot; statustext=&quot;&quot;&gt;
+
+&lt;CFCONTENT reset=&quot;true&quot;&gt;
+&lt;CFOUTPUT&gt;
+    {
+        error: {
+            message: &quot;#JSStringFormat(Error.message)#&quot;,
+            template: &quot;#Error.TagContext[1].template#&quot;,
+            line: &quot;#Error.TagContext[1].line#&quot;,
+            type: &quot;#Error.RootCause.type#&quot;,
+            stacktrace: &quot;#JSStringFormat(Error.StackTrace)#&quot;
+        }
+    }
+&lt;/CFOUTPUT&gt;
+&lt;CFEXIT&gt;
+</pre>
+
+<i>JSStringFormat() ensures that string content inside the JSON elements is properly escaped.</i>
+
+<p>Extending this method, you can also manually throw exception in your ColdFusion code. For example, if the user is not logged in on the back-end, instead of doing this:</p>
+
+<pre name="code" class="html">
+&lt;CFOUTPUT&gt;Error: not logged in!&lt;/CFOUTPUT&gt;
+&lt;CFEXIT&gt;
+</pre>
+
+You can simply throw an exception.
+
+<pre name="code" class="html">
+&lt;CFTHROW message=&quot;Not logged in!&quot;&gt;
+</pre>
+
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/javascript">javascript</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/coldfusion">coldfusion</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

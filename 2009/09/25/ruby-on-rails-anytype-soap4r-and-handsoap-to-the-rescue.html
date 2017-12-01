@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Ruby on Rails&#58; anyType, soap4r and handsoap to the rescue</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2009/09/25/ruby-on-rails-anytype-soap4r-and-handsoap-to-the-rescue.html" />
+
+        <meta property="og:title" content="Ruby on Rails&#58; anyType, soap4r and handsoap to the rescue"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2009/09/25/ruby-on-rails-anytype-soap4r-and-handsoap-to-the-rescue.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Ruby on Rails&#58; anyType, soap4r and handsoap to the rescue
+                            
+                                <span class="post-date subtitle">25 Sep 2009</span>
+                            
+                        </h1>
+                    
+                    <blockquote>
+Perl makes the easy things easy and the hard things possible. - <a href="http://www.perl.com/lpt/a/748">Larry Wall</a>
+</blockquote>
+
+<p>
+This sentiment has been applied to many different languages, frameworks and systems. It not surprising; it's the underlying goal of most software. Ruby on Rails is a little different. It makes the easy things extremely easy. But god help you if you want to get off the train in between stops.
+</p>
+
+<p>
+After playing with rails a few months ago, I wanted to upgrade my toy project by getting some data from a SOAP web-service. Google pointed me to <a href="http://dev.ctor.org/soap4r">soap4r</a>, which seems to be the common solution. However, I quickly ran into problems.
+</p>
+
+<p>
+It seems that the WSDL I was consuming made judicious use of the anyType primitive, which Java uses to expose an Object parameter in a method. However, the remote method end-points assumed you were going to tell it at runtime what the type of the object you're passing is. In practice, it was an integer.
+</p>
+
+<pre name="code" class="xml">
+&lt;?xml version="1.0" encoding="utf-8" ?&gt;
+&lt;env:Envelope xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:env="http://schemas.xmlsoap.org/soap/envelope/"&gt;
+  &lt;env:Body&gt;
+    &lt;n1:find xmlns:n1="http://apiservice.bullhorn.com/"&gt;
+      &lt;session&gt;
+        &lt;client&gt;rO0ABXNyACpjb20uYnVsbGhvcm4uZGF0YXNlcnZpY2UuYXBpLkFwaURhdGFDbGllbnQAAAAAAAAA
+AQIACEoACmxhc3RBY2Nlc3NJAA5zdXBlckNsdXN0ZXJJZEwADWNvcnBvcmF0aW9uSWR0ABNMamF2
+YS9sYW5nL0ludGVnZXI7TAAGZGJOYW1ldAASTGphdmEvbGFuZy9TdHJpbmc7TAAMbWFzdGVyVXNl
+cklkcQB+AAFMAA5wcml2YXRlTGFiZWxJZHEAfgABTAAGdXNlcklkcQB+AAFMAAp1c2VyVHlwZUlk
+cQB+AAF4cAAAASPoSwbkAAAAAHNyABFqYXZhLmxhbmcuSW50ZWdlchLioKT3gYc4AgABSQAFdmFs
+dWV4cgAQamF2YS5sYW5nLk51bWJlcoaslR0LlOCLAgAAeHAAAARmdAAJQlVMTEhPUk4xc3EAfgAE
+AE2pkXNxAH4ABAAABmZzcQB+AAQAAADpc3EAfgAEAAAP3A==&lt;/client&gt;
+        &lt;corporationId&gt;1126&lt;/corporationId&gt;
+        &lt;userId&gt;233&lt;/userId&gt;
+      &lt;/session&gt;
+      &lt;entityName&gt;JobOrder&lt;/entityName&gt;
+      &lt;id xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xs="http://www.w3.org/2001/XMLSchema" xsi:type="xs:int"&gt;67&lt;/id&gt;
+    &lt;/n1:find&gt;
+  &lt;/env:Body&gt;
+&lt;/env:Envelope&gt;
+</pre>
+
+<p>
+The soap4r generated classes output a packet without the namespaces on the id tag, which resulted in the following exception.
+</p>
+
+<pre>
+java.lang.IllegalArgumentException: Provided id of the wrong type for class com.bullhorn.entity.job.JobOrder.
+Expected: class java.lang.Integer, got class org.apache.xerces.dom.ElementNSImpl
+ at org.hibernate.ejb.AbstractEntityManagerImpl.find(AbstractEntityManagerImpl.java:196)
+ at com.bullhorn.dataservice.jpa.BhEntityManagerImpl.find(BhEntityManagerImpl.java:62)
+ at com.bullhorn.dataservice.serviceImpl.BaseService.find(BaseService.java:29)
+ ...
+Caused by: org.hibernate.TypeMismatchException: Provided id of the wrong type for class com.bullhorn.entity.job.JobOrder.
+Expected: class java.lang.Integer, got class org.apache.xerces.dom.ElementNSImpl
+ at org.hibernate.event.def.DefaultLoadEventListener.onLoad(DefaultLoadEventListener.java:109)
+ at org.hibernate.impl.SessionImpl.fireLoad(SessionImpl.java:905)
+ at org.hibernate.impl.SessionImpl.get(SessionImpl.java:842)
+ at org.hibernate.impl.SessionImpl.get(SessionImpl.java:835)
+ at org.hibernate.ejb.AbstractEntityManagerImpl.find(AbstractEntityManagerImpl.java:182)
+ ... 48 more
+</pre>
+
+<p>
+You could rightly say that this was a Java problem, or at least a problem with the API of this web-service. It's a good illustration of why you should try to use primitives only for web-service parameters. However, in this case I could not control the web-service, so I needed to solve this in Ruby.
+</p>
+
+<p>
+I briefly tried to download the WSDL and muck with it. <a href="http://www.soapui.org/">SoapUI</a>, by the way, has the ability to download a multi-part (think 50 parts) WSDL and save all the pieces locally. But I soon exhausted my expertise in hand-editing WSDL. Besides, ideally this needed to be done at runtime to support types other than integers.
+</p>
+
+<p>
+Having "gone off the rails", I turned to a library called <a href="http://github.com/troelskn/handsoap">handsoap</a>. Their philosophy is that you often need a higher level of control over the SOAP packets themselves.
+</p>
+
+<blockquote>...soap4r has problems. It's incomplete and buggy. If you try to use it for any real-world services, you quickly run into compatibility issues...
+
+Handsoap tries to do better by taking a minimalistic approach. Instead of a full abstraction layer, it is more like a toolbox with which you can write SOAP bindings. -<a href="http://github.com/troelskn/handsoap">troelskn</a>
+</blockquote>
+
+<p>
+As promised, I did have to do the SOAP binding myself. But I also got the opportunity to do anything I wanted to the XML DOM object, including set these pesky required namespaces.
+</p>
+
+<pre name="code" class="ruby">
+require 'handsoap'
+
+Handsoap.http_driver = :httpclient
+Handsoap::Service.logger = $stdout
+
+class ApiService &lt; Handsoap::Service
+  endpoint API_SERVICE_ENDPOINT
+
+  def on_create_document(doc)
+    # register namespaces for the request
+    doc.alias 'tns', 'http://apiservice.bullhorn.com/'
+  end
+
+  def on_response_document(doc)
+    # register namespaces for the response
+    doc.add_namespace 'ns', 'http://apiservice.bullhorn.com/'
+  end
+
+  def start_session!(state)
+    soap_action = ''
+    response = invoke('tns:startSession', soap_action) do |message|
+      message.add "username", state[:username]
+      message.add "password", state[:password]
+      message.add "apiKey", state[:apiKey]
+    end
+    node = response/"//return"
+    { :client =&gt; (node/"//client").to_s, :corporationId =&gt; (node/"//corporationId").to_s , :userId =&gt; (node/"//userId").to_s}
+  end
+
+  def find(state)
+    soap_action = ''
+    response = invoke('tns:find', soap_action) do |message|
+
+      session = state[:session]
+
+      message.add "session" do |i|
+        i.add "client", session[:client]
+        i.add "corporationId", session[:corporationId]
+        i.add "userId", session[:userId]
+      end
+
+      message.add "entityName", state[:entityName]
+
+      # ids are set to "anyType" in the WSDL, and our end-point enforces that these namespaces be in the post
+      message.add "id", state[:id] do |i|
+        i.set_attr("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance")
+        i.set_attr("xmlns:xs", "http://www.w3.org/2001/XMLSchema")
+        i.set_attr("xsi:type", "xs:int")
+      end
+
+    end
+  end
+
+end
+</pre>
+
+<p>
+PS - Installing handsoap was a pita. I could not get the <a href="http://curb.rubyforge.org/">curb</a> gem, a ruby binding for the Linux curl utility, installed. So this example uses httpclient, instead.
+</p>
+
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/rails">rails</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/soap">soap</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

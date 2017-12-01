@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Rotate just one monitor with Ubuntu/Nvidia</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2009/08/07/rotate-just-one-monitor-with-ubuntunvidia.html" />
+
+        <meta property="og:title" content="Rotate just one monitor with Ubuntu/Nvidia"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2009/08/07/rotate-just-one-monitor-with-ubuntunvidia.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Rotate just one monitor with Ubuntu/Nvidia
+                            
+                                <span class="post-date subtitle">07 Aug 2009</span>
+                            
+                        </h1>
+                    
+                    <p>
+I took some time this week to figure out how to rotate just my <a href="http://support.dell.com/support/edocs/monitors/2005FPW/En/about.htm#Front%20View">Dell 2005FPW</a> in an Ubuntu dual-monitor setup. The graphics card is an Nvidia GeForce 6200 LE, and I'm v180.44 of the proprietary binary drivers.
+</p>
+
+<p>
+This gives you an idea of the setup I was going for, where the red monitor is the primary, and the blue monitor is the rotated secondary.
+</p>
+
+<IMG SRC='http://lh3.ggpht.com/_EE2zVzGv1Ds/Snx2MlYA8mI/AAAAAAAAJS8/3e9QlMqhfpU/s800/dual_monitors.png' width=300px>
+
+<p>
+While I had been happily using Nvidia TwinView, I found that rotating just one of the monitors was impossible in this mode, due to the entire desktop being a single X screen. Instead, I switched to "Separate X screens", and then invoke the "Rotate" option on one of them.
+</p>
+
+<p>
+I also had to use <a href="http://en.wikipedia.org/wiki/Xinerama">Xinerama</a>, which is an X extension that allows multiple X screens to operate as a single screen, allowing you to share windows, a task bar and a background between them.
+</p>
+
+<p>
+Here is the xorg.conf file I ended up with. Most of it was generated from the Nvidia config tool, but then I tweaked it by hand a little.
+</p>
+
+<STYLE>
+   .monitor0 {
+      color: red;
+   }
+   .monitor1 {
+      color: blue;
+   }
+</STYLE>
+
+<PRE name="code" class="none">
+
+Section "ServerLayout"
+    Identifier     "Default Layout"
+    <SPAN class="monitor0">Screen      0  "Screen0" 0 0</SPAN>
+    <SPAN class="monitor1">Screen      1  "Screen1" <B>RightOf "Screen0"</B></SPAN>
+    ...
+    <B>Option    "Xinerama" "true"</B>
+EndSection
+
+...
+
+Section "Monitor"
+    Identifier     "Configured Monitor"
+EndSection
+
+<SPAN class="monitor0">Section "Monitor"
+    Identifier     "Monitor0"
+    VendorName     "Unknown"
+    ModelName      "Samsung SyncMaster"
+    HorizSync       30.0 - 81.0
+    VertRefresh     56.0 - 75.0
+EndSection</SPAN>
+
+<SPAN class="monitor1">Section "Monitor"
+    Identifier     "Monitor1"
+    VendorName     "Unknown"
+    ModelName      "DELL 2005FPW"
+    HorizSync       30.0 - 83.0
+    VertRefresh     56.0 - 75.0
+EndSection</SPAN>
+
+Section "Device"
+    Identifier     "Configured Video Device"
+    Driver         "nvidia"
+    Option         "UseFBDev" "true"
+    Option         "NoLogo" "True"
+EndSection
+
+<SPAN class="monitor0">Section "Device"
+    Identifier     "Device0"
+    Driver         "nvidia"
+    VendorName     "NVIDIA Corporation"
+    BoardName      "GeForce 6200 LE"
+    BusID          "PCI:1:0:0"
+    Screen          0
+EndSection</SPAN>
+
+<SPAN class="monitor1">Section "Device"
+    Identifier     "Device1"
+    Driver         "nvidia"
+    VendorName     "NVIDIA Corporation"
+    BoardName      "GeForce 6200 LE"
+    BusID          "PCI:1:0:0"
+    Screen          1
+    <B>Option          "Rotate" "left"</B>
+EndSection</SPAN>
+
+Section "Screen"
+    Identifier     "Default Screen"
+    Device         "Configured Video Device"
+    Monitor        "Configured Monitor"
+    DefaultDepth    24
+EndSection
+
+<SPAN class="monitor0">Section "Screen"
+    Identifier     "Screen0"
+    Device         "Device0"
+    Monitor        "Monitor0"
+    DefaultDepth    24
+    Option         "TwinView" "0"
+    Option         "TwinViewXineramaInfoOrder" "DFP-0"
+    Option         "metamodes" "DFP: 1680x1050 +0+0"
+    SubSection     "Display"
+        Depth       24
+    EndSubSection
+EndSection</SPAN>
+
+<SPAN class="monitor1">Section "Screen"
+    Identifier     "Screen1"
+    Device         "Device1"
+    Monitor        "Monitor1"
+    DefaultDepth    24
+    Option         "TwinViewXineramaInfoOrder" "DFP-0"
+    Option         "TwinView" "0"
+    Option         "metamodes" "CRT: 1680x1050 +0+0"
+    SubSection     "Display"
+        Depth       24
+    EndSubSection
+EndSection</SPAN>
+
+</PRE>
+
+<p>
+Voila! I can view web pages and edit code in 16:9 vertical, while doing everything else in 16:9 horizontal.
+</p>
+
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/xorg">xorg</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/ubuntu">ubuntu</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

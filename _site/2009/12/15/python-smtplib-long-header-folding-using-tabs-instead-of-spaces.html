@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Python smtplib long header folding using tabs instead of spaces</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2009/12/15/python-smtplib-long-header-folding-using-tabs-instead-of-spaces.html" />
+
+        <meta property="og:title" content="Python smtplib long header folding using tabs instead of spaces"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2009/12/15/python-smtplib-long-header-folding-using-tabs-instead-of-spaces.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Python smtplib long header folding using tabs instead of spaces
+                            
+                                <span class="post-date subtitle">15 Dec 2009</span>
+                            
+                        </h1>
+                    
+                    <p>
+Unless you have done a lot of work with generating and parsing emails, you are probably not intimately familiar with the details of the <a href="http://tools.ietf.org/html/rfc2822">MIME format</a>. Here is an example of a MIME encoded email:
+</p>
+
+<pre name="code" class="html">
+From: user1@example.com
+To: user2@example.com
+Subject: Christmas party!
+Mime-Version: 1.0
+Content-Type: multipart/mixed;
+ boundary="----=_Part_20502_1870283373.1261059406023"
+Date: 17 Dec 2009 09:16:46 -0500
+
+------=_Part_20502_1870283373.1261059406023
+Content-Type: multipart/alternative;
+ boundary="----=_Part_20503_1134508872.1261059406023"
+...
+</pre>
+
+<p>
+Typically, all lines in MIME wrap at 80 characters. For headers, the standard is to break before the last whitespace under the character limit. This is defined in <a href="http://tools.ietf.org/html/rfc2822#section-2.2.3">RFC 2822, section 2.2.3</a>. So, if you have a long subject, it might look like:
+</p>
+
+<pre name="code" class="html">
+...
+Subject: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec quis
+ est dolor, a faucibus nisi. Curabitur et ipsum ut arcu commodo feugiat.
+...
+</pre>
+
+<p>
+I ran into <a href="http://bugs.python.org/issue1974">bug 1974</a> in Python where the standard smptlib example was throwing an error on long subject lines.
+</p>
+
+<pre name="code" class="python">
+    from email.MIMEText import MIMEText
+
+    msg = MIMEText(body, "html")
+    msg["From"] = "user1@example.com"
+    msg["To"] = "user2@example.com"
+    msg["subject"] = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec quis est dolor, a faucibus nisi. Curabitur et ipsum ut arcu commodo feugiat."
+
+    ...
+</pre>
+
+<p>
+When looking at the resulting email is some clients (Outlook, Thunderbird), the subject like was concatenating the words "quis" and "est" into "quisest", instead of "quis est". It turns out that smtplib is inserting a tab character in between them, which some clients ignore.
+</p>
+
+<p>
+The solution was simple enough. Just set header fields as Header objects, instead of strings:
+</p>
+
+<pre name="code" class="python">
+    from email.MIMEText import MIMEText
+    from email.Header import Header
+    import smtplib
+
+    msg = MIMEText(body, "html")
+    msg["From"] = "powerfill@powerfill.com"
+    msg["To"] = to_addr
+    msg["subject"] = Header(subject)
+
+    smtp = smtplib.SMTP(settings.EMAIL_HOST, settings.EMAIL_PORT)
+    smtp.sendmail(msg["From"], [msg["To"]], msg.as_string())
+    smtp.quit()
+</pre>
+
+<p>
+<i>Edit: Don't wrap the from/to addresses in Header object. I ran into a "TypeError: unhashable instance" deploying this code to Python 2.6.</i>
+</p>
+
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/email">email</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/python">python</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

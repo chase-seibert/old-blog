@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Writing a cURL to Python Install Script for a Django development environment</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2013/09/03/curl-installer-python.html" />
+
+        <meta property="og:title" content="Writing a cURL to Python Install Script for a Django development environment"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2013/09/03/curl-installer-python.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Writing a cURL to Python Install Script for a Django development environment
+                            
+                                <span class="post-date subtitle">03 Sep 2013</span>
+                            
+                        </h1>
+                    
+                    <h3>Paste and Pray</h3>
+
+<p>It&#39;s pretty common to Google a technical issue, and come up with a blog or a Stackoverflow article that promises to fix the issue by copying and pasting a simple one-liner into a terminal. At first it&#39;s just a quick <code>chmod</code>, or a simple <code>apt-get</code>. It&#39;s completely unsafe unless you know exactly what the command is doing, but it&#39;s pretty damn effective. Then you graduate to doing few lines at a time without really thinking about it too much, like a bad drug habit. Repetition slowly convinces you that it&#39;s not insane.</p>
+
+<p>In the last couple of years, I&#39;ve seen a few extreme versions of this same idea, but taken to the next level. Homebrew can be installed by running <code>ruby -e &quot;$(curl -fsSL https://raw.github.com/mxcl/homebrew/go)&quot;</code>. Heroku Toolbelt for Linux is just a <code>wget -qO- https://toolbelt.heroku.com/install-ubuntu.sh | sh</code> away. I call these <strong>Paste and Pray</strong> installers.</p>
+
+<p>Sounds like fun, right? I thought so, so I came up with a version that installs a pretty vanilla Django development environment, <em>from scratch</em>. It doesn&#39;t assume anything except cURL and Python, both of which come pre-installed on OSX and Ubuntu. It does a fully automated install of Homebrew (including its dependency XCode on OSX), as well as pip, virtualenv, your code from GitHub, Django and any other Python requirements you have. It also sets some environment variables and updates your hosts file.</p>
+
+<p>Oh, did I mention that some of these steps require root access? That&#39;s right! It&#39;s more like <strong>Super Paste and Pray</strong>&trade;.</p>
+
+<p><em>Note:</em> this code is not intended to be directly re-usable. Instead, I thought I would share what I learned while writing it.</p>
+
+<h3>The Code</h3>
+
+<p>You can view the <a href="https://github.com/chase-seibert/paste-and-pray">code and documentation</a>. The code itself can be run with <code>curl -fsS https://raw.github.com/chase-seibert/paste-and-pray/go/run.py |sudo -E python</code>. You should be able to modify it pretty easily for any Django app.</p>
+
+<h3>Sh Stuff</h3>
+
+<p>Although I didn&#39;t want any dependencies required for the installer itself, I did want to take this chance to play around with <a href="https://github.com/amoffat/sh">sh</a>, a nice Python API for interfacing with the shell. Because I could not rely on pip to be installed, I just downloaded this dependency right in Python:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">urllib</span><span class="o">.</span><span class="n">urlretrieve</span><span class="p">(</span><span class="s">&quot;https://raw.github.com/amoffat/sh/master/sh.py&quot;</span><span class="p">,</span> <span class="s">&quot;sh.py&quot;</span><span class="p">)</span>
+<span class="n">sh</span> <span class="o">=</span> <span class="n">imp</span><span class="o">.</span><span class="n">load_source</span><span class="p">(</span><span class="s">&quot;sh&quot;</span><span class="p">,</span> <span class="s">&quot;sh.py&quot;</span><span class="p">)</span></code></pre></figure>
+
+<p>Working with <code>sh</code> turned out to be a little trickier than I imagined. First off, many of my commands required root access. The easiest method was to start the script with <code>sudo</code>, and wrap any steps that did <strong>not</strong> require root in a <code>sudo -E -u username</code> prefix. This is exactly what <a href="http://amoffat.github.io/sh/#baking">sh.bake</a> is for.</p>
+
+<p>I found it useful to redirect <code>_out</code> to <code>sys.stdout</code> for trouble-shooting purposes. Similarly, if you need to take user input, you will need to redirect stdin with something like:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="k">def</span> <span class="nf">raw_input_tty</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">prompt</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; the main use case for this script has the user piping in the results from</span>
+<span class="sd">    a curl; which over-rides stdin. But we also want to interactively prompt the user</span>
+<span class="sd">    for some input, so dynamcially switch back to tty. &#39;&#39;&#39;</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">stdin</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;/dev/tty&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">raw_input</span><span class="p">(</span><span class="n">prompt</span><span class="p">)</span></code></pre></figure>
+
+<h3>Sudo Madness</h3>
+
+<p>Initially, I had tried calling <a href="http://docs.python.org/2/library/os.html#os.setuid">setuid</a> to downgrade to a non-root user. But, I was not able to go back to root, meaning that you would need to do all the root steps in one chunk, then do all the non-root stuff. This was a show-stopper as the Homebrew install step must be run as a regular user, but subsequent <code>pip</code> and <code>virtualenv</code> tool installs required root.</p>
+
+<p>Another wrinkle was getting the original username from inside sudo. This was simple, thought I did need to hunt around before I discovered that both OSX and Linux set a <code>SUDO_USER</code> environment variable for just this purpose.</p>
+
+<h3>OSX Stuff</h3>
+
+<p>Installing Homebrew manually is straight-forward, but does require the XCode command line tools to be installed first. Normally, this is a headache as you have to create an Apple ID and hunt and peck trough their developer website for a binary installer.</p>
+
+<p>It turns out there there <strong>are</strong> direct download links, they just are not publicised. Here is some python code to download and install the correct version.</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="k">def</span> <span class="nf">install_xcode</span><span class="p">(</span><span class="n">osx_version</span><span class="p">):</span>
+    <span class="c"># see: https://devimages.apple.com.edgekey.net/downloads/xcode/simulators/index-3905972D-B609-49CE-8D06-51ADC78E07BC.dvtdownloadableindex</span>
+    <span class="n">downloads</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="mf">10.7</span><span class="p">:</span> <span class="s">&quot;http://devimages.apple.com/downloads/xcode/command_line_tools_for_xcode_os_x_lion_april_2013.dmg&quot;</span><span class="p">,</span>
+        <span class="mf">10.8</span><span class="p">:</span> <span class="s">&quot;http://devimages.apple.com/downloads/xcode/command_line_tools_for_xcode_os_x_mountain_lion_april_2013.dmg&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="n">osx_version</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">downloads</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&quot;Could not locate XCode download for OSX </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">osx_version</span><span class="p">)</span>
+    <span class="n">download_file</span> <span class="o">=</span> <span class="n">downloads</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">osx_version</span><span class="p">)</span>
+    <span class="c"># save this OUTSIDE the normal tmp dir; in case we need to restart install</span>
+    <span class="n">dmg_file</span> <span class="o">=</span> <span class="s">&quot;/tmp/xcode.dmg&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">dmg_file</span><span class="p">):</span>
+        <span class="n">urllib</span><span class="o">.</span><span class="n">urlretrieve</span><span class="p">(</span><span class="n">download_file</span><span class="p">,</span> <span class="n">dmg_file</span><span class="p">)</span>
+    <span class="n">volume_dir</span> <span class="o">=</span> <span class="s">&quot;/tmp/xcode&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">volume_dir</span><span class="p">):</span>
+        <span class="n">sh</span><span class="o">.</span><span class="n">hdiutil</span><span class="p">(</span><span class="s">&quot;attach&quot;</span><span class="p">,</span> <span class="s">&quot;-mountpoint&quot;</span><span class="p">,</span> <span class="n">volume_dir</span><span class="p">,</span> <span class="n">dmg_file</span><span class="p">)</span>
+    <span class="n">mpkg_file</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">volume_dir</span><span class="p">)</span> <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&quot;.mpkg&quot;</span><span class="p">)][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">sh</span><span class="o">.</span><span class="n">installer</span><span class="p">(</span><span class="s">&quot;-pkg&quot;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">volume_dir</span><span class="p">,</span> <span class="n">mpkg_file</span><span class="p">),</span> <span class="s">&quot;-target&quot;</span><span class="p">,</span> <span class="s">&quot;/&quot;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">sh</span><span class="o">.</span><span class="n">ErrorReturnCode</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">print</span> <span class="n">e</span><span class="o">.</span><span class="n">stderr</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="n">sh</span><span class="o">.</span><span class="n">hdiutil</span><span class="p">(</span><span class="s">&quot;detach&quot;</span><span class="p">,</span> <span class="n">volume_dir</span><span class="p">)</span></code></pre></figure>
+
+<p>As I said, the Homebrew install is easy. I did have to include a small <a href="https://gist.github.com/rpavlik/768518/raw/fix_homebrew.rb">fixup gist</a> to get it to work on one of my test machines.</p>
+
+<h3>Python Stuff</h3>
+
+<p>Working with Python made a lot of the script easier. Specifically, working with <code>sh</code> made tasks like getting the list of items currently installed by brew pretty simple:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">installed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sh</span><span class="o">.</span><span class="n">brew</span><span class="p">(</span><span class="s">&quot;list&quot;</span><span class="p">,</span> <span class="s">&quot;-1&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+<span class="n">not_installed</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dependencies</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">installed</span><span class="p">))</span></code></pre></figure>
+
+<p>It also allows chaining, just like in a bash shell:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">sh</span><span class="o">.</span><span class="n">grep</span><span class="p">(</span><span class="n">sh</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span><span class="s">&quot;/etc/hosts&quot;</span><span class="p">),</span> <span class="n">HOST_NAME</span><span class="p">)</span></code></pre></figure>
+
+<p>One area that was a little tricky was activating virtualenv from inside Python. However, there is actually a <a href="http://www.virtualenv.org/en/latest/#using-virtualenv-without-bin-python">supported method</a> for this.</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">activate_this</span> <span class="o">=</span> <span class="s">&#39;/path/to/env/bin/activate_this.py&#39;</span>
+<span class="nb">execfile</span><span class="p">(</span><span class="n">activate_this</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">__file__</span><span class="o">=</span><span class="n">activate_this</span><span class="p">))</span></code></pre></figure>
+
+<h3>GitHub Stuff</h3>
+
+<p>For the shortest URL possible, you can set the <a href="https://help.github.com/articles/setting-the-default-branch">default branch</a> in GitHub to be something short, like &quot;go&quot;. Looking at the homebrew installer, I noticed that it&#39;s possible to leave the file name off, too. GitHub&#39;s raw file service apparently picks the first file by alphabetical order if you do this. However, I didn&#39;t want to mess with trying to get my code to show up alphabetically before <code>.gitignore</code>, so I skipped this optimization.</p>
+
+<h3>Final Thoughts</h3>
+
+<p>Random other thoughts on writing installers:</p>
+
+<ul>
+<li>Create a temp directory if you need to do anything like download files.</li>
+<li>Make the installer idempotent; you want to be able to retry cleanly.</li>
+<li>Checking whether a step has already been run is a good idea.</li>
+<li>Don&#39;t try to hide the debug output; at least for a development audience.</li>
+</ul>
+
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/python">python</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Estimating Epic Stories in Three Steps</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2017/08/28/epic-story-estimation.html" />
+
+        <meta property="og:title" content="Estimating Epic Stories in Three Steps"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2017/08/28/epic-story-estimation.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Estimating Epic Stories in Three Steps
+                            
+                                <span class="post-date subtitle">28 Aug 2017</span>
+                            
+                        </h1>
+                    
+                    <p>In Agile, an Epic story is a potentially large placeholder story in the backlog.
+Typically they will be broken down into manageable stories during grooming
+before they are worked on. But if you need to estimate an Epic before breaking
+it down, how might you do that?</p>
+
+<h1>Use Story Points</h1>
+
+<p>In <a href="https://www.mountaingoatsoftware.com/blog/in-defense-of-large-numbers">Defense of Large Numbers</a>,
+Mike Cohn talks about how removing the larger values from your estimation
+toolkit is like deciding to strike &quot;millions&quot; and &quot;billions&quot; from our vocabulary
+just because our bank balances are only in the thousands.</p>
+
+<h2>#1 Show Historical Data</h2>
+
+<p>Pull up a list of recently completed Epics, along with their final point value.
+For example, if you recently finished a &quot;User Registration&quot; Epic, tally up all
+the points from all the stories in that Epic.</p>
+
+<p>You might end up with something like this:</p>
+
+<ul>
+<li>Password Reset, 15 points</li>
+<li>User Registration, 35 points</li>
+<li>Admin Interface, 70 points</li>
+</ul>
+
+<h2>#2 Discussion of Mocks</h2>
+
+<p>The next step is to view the mocks as a team. Yes, this means to need mocks.
+Go over every screen as a team.</p>
+
+<ul>
+<li>Write down a high level set of features.</li>
+<li>Write down how many pages/screens are involved.</li>
+<li>Write down any complexity you see.</li>
+<li>Think about any dependencies you may have.</li>
+</ul>
+
+<p>For Epic estimation, I like to cheat a little and ask the team to agree whether
+this story is the same size as another Epic on the board, or whether it&#39;s
+between two of the epics. That will ground planning poker.</p>
+
+<h2>#3 Relative Estimation</h2>
+
+<p>You should be ready to play planning poker. Ask the team if they are ready to
+estimate. Tell them that we are going to continue to use the Fibonacci sequence.
+As a refresher, here are the larger Fibonacci numbers:</p>
+
+<p>13, 21, 34, 55, 89, 144</p>
+
+<p>Assign a number of fingers to each number. For example:</p>
+
+<p>13 (1), 21 (2), 34 (3), 55 (4), 89 (5), 144 (6)</p>
+
+<p>Now, it&#39;s time to vote. On the count of three, every one holds up a number of
+fingers simultaneously. You would be surprised how often everyone in the room
+holds up the same number of fingers at this point. Congratulations; you have
+an Epic estimate.</p>
+
+<h1>Bonus: Milestones</h1>
+
+<p>Remember that high level set of features you wrote down during the discussion of
+the mocks? You have already done 90% of the work for milestone definition, might
+as well take it over the finish line to de-risk your project. Reminder: the goal
+of milestones is to deliver (usually three) potentially shippable product
+increments along the way to a finished product.</p>
+
+<p>Just write down labels for milestone 1, 2 and 3 on the board. Start with
+the most critical features, and put them in the early milestones. You will
+likely run out of room and have to bump features to later milestones. That&#39;s
+fine! The goal is to keep the product potentially shippable; be ruthless in
+prioritizing only features that would block a user from getting the primary
+user value.</p>
+
+<h1>What about T-Shirt Sizing?</h1>
+
+<p>On common method is to assign T-Shirt sizes to stories, such as Extra Small,
+Small, Large, Extra Large, etc. This method has the benefit of being in a
+non-numerical unit. It&#39;s very hard to hold a team accountable to a deadline
+around an estimate of &quot;Large&quot;.</p>
+
+<p>This method also lends itself to relational estimation, versus absolute
+estimation. But, you have to hold to that bar yourself. For example, you could
+identify one medium sized story in the batch and randomly call it a &quot;Medium&quot;.
+Then, you can relatively estimate from there. If you do T-Shirt sizing a lot,
+you should present the team with some of their previous complete stories, along
+with their original T-Shirt sizes, to ground the discussion.</p>
+
+<p>However, what if you also need to estimate how long the Epic might take in terms
+of time? You might be tempted to equate T-Shirt sizes directly with a number of
+weeks or sprints. But that&#39;s the same thing as equating story points to hours,
+which is a huge no-no.</p>
+
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/manager">manager</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

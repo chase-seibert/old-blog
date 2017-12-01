@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Using HBase/Thrift through the Rackspace Load Balancer</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2013/03/22/happybase-thrif-rackspace-load-balancer.html" />
+
+        <meta property="og:title" content="Using HBase/Thrift through the Rackspace Load Balancer"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2013/03/22/happybase-thrif-rackspace-load-balancer.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Using HBase/Thrift through the Rackspace Load Balancer
+                            
+                                <span class="post-date subtitle">22 Mar 2013</span>
+                            
+                        </h1>
+                    
+                    <p>Using the binary <a href="http://thrift.apache.org/">Thrift</a> protocol through a load balancer can be a little tricky. While it works out of the box in <a href="http://blog.milford.io/2011/07/productionizing-the-hive-thrift-server/">HAProxy</a>, you may run into some slight trouble running it through other load balancers. By default, when trying to access Thrift through the <a href="http://www.rackspace.com/cloud/load-balancing/">Rackspace Cloud Load Balancers</a>, you may get the following exception:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">Traceback <span class="o">(</span>most recent call last<span class="o">)</span>:
+
+File <span class="s2">&quot;/usr/local/lib/python2.6/dist-packages/Django-1.2-py2.6.egg/django/core/handlers/base.py&quot;</span>,
+line 100, in get_response
+<span class="nv">response</span> <span class="o">=</span> callback<span class="o">(</span>request, *callback_args, **callback_kwargs<span class="o">)</span>
+...
+File <span class="s2">&quot;/usr/local/lib/python2.6/dist-packages/Thrift-0.2.0-py2.6-linux-x86_64.egg/thrift/protocol/TBinaryProtocol.py&quot;</span>,
+line 126, in readMessageBegin
+<span class="nv">sz</span> <span class="o">=</span> self.readI32<span class="o">()</span>
+
+File <span class="s2">&quot;/usr/local/lib/python2.6/dist-packages/Thrift-0.2.0-py2.6-linux-x86_64.egg/thrift/protocol/TBinaryProtocol.py&quot;</span>,
+line 203, in readI32
+<span class="nv">buff</span> <span class="o">=</span> self.trans.readAll<span class="o">(</span>4<span class="o">)</span>
+
+File <span class="s2">&quot;/usr/local/lib/python2.6/dist-packages/Thrift-0.2.0-py2.6-linux-x86_64.egg/thrift/transport/TTransport.py&quot;</span>,
+line 58, in readAll
+<span class="nv">chunk</span> <span class="o">=</span> self.read<span class="o">(</span>sz-have<span class="o">)</span>
+
+File <span class="s2">&quot;/usr/local/lib/python2.6/dist-packages/Thrift-0.2.0-py2.6-linux-x86_64.egg/thrift/transport/TTransport.py&quot;</span>,
+line 155, in <span class="nb">read</span>
+self.__rbuf <span class="o">=</span> StringIO<span class="o">(</span>self.__trans.read<span class="o">(</span>max<span class="o">(</span>sz, self.DEFAULT_BUFFER<span class="o">)))</span>
+
+File <span class="s2">&quot;/usr/local/lib/python2.6/dist-packages/Thrift-0.2.0-py2.6-linux-x86_64.egg/thrift/transport/TSocket.py&quot;</span>,
+line 94, in <span class="nb">read</span>
+raise TTransportException<span class="o">(</span><span class="nb">type</span><span class="o">=</span>TTransportException.END_OF_FILE,
+<span class="nv">message</span><span class="o">=</span><span class="s1">&#39;TSocket read 0 bytes&#39;</span><span class="o">)</span>
+
+thrift.transport.TTransport.TTransportException: TSocket <span class="nb">read </span><span class="m">0</span> bytes</code></pre></figure>
+
+<p>After playing around with the <a href="https://github.com/wbolster/happybase">HappyBase</a> connection <code>transport</code> <a href="http://happybase.readthedocs.org/en/latest/api.html#connection">settings</a>, I was able to rule out <a href="https://github.com/wbolster/happybase/issues/6">framed versus binary transport</a> as the issue. I was also able to verify that a connection directly to the machine worked. </p>
+
+<p>The issue turned out to be a setting on the Rackspace load balancer.</p>
+
+<p><img src="/blog/images/rackspace_lb.png" alt="Rackspace Load Balancer TCP Client First"></p>
+
+<p>The default TCP protocol, called simply &quot;TCP&quot;, did not work. By changing the setting to &quot;TCP (Client First)&quot;, HappyBase was able to connect via Thrift.</p>
+
+<p>What does this setting do? The <a href="http://docs.rackspace.com/loadbalancers/api/v1.0/clb-devguide/content/List_Load_Balancing_Protocols-d1e4269.html">Rackspace documentation</a> simply says &quot;This protocol is similiar to TCP, but is more efficient when a client is expected to write the data first&quot;. This would seem to hint that the regular TCP option attemps to read from the server socket when a client connects, where-as as an RPC protocol, Thrift <a href="http://en.wikipedia.org/wiki/Apache_Thrift">expects the client</a> to send the first data packet.</p>
+
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/hbase">hbase</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

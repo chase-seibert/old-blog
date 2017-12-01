@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Introducing Django Pyfixtures</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2012/11/21/introducing-django-pyfixtures.html" />
+
+        <meta property="og:title" content="Introducing Django Pyfixtures"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2012/11/21/introducing-django-pyfixtures.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Introducing Django Pyfixtures
+                            
+                                <span class="post-date subtitle">21 Nov 2012</span>
+                            
+                        </h1>
+                    
+                    <p><a href="https://docs.djangoproject.com/en/dev/howto/initial-data/">Django fixtures</a> were initially touted as a great way to pre-populate your database, mainly for testing. Over time, various community leaders have suggested that fixtures are <a href="http://pyvideo.org/video/699/testing-and-django">slow</a>, <a href="http://lincolnloop.com/blog/2012/may/3/fixtures-and-factories/">brittle</a>, should be <a href="http://nedbatchelder.com/blog/201206/tldw_speedily_practical_largescale_tests.html">bundled</a> instead of loaded from scratch for every unit test and should probably be replaced with class <a href="https://github.com/dnerdy/factory_boy">factories</a>.</p>
+
+<p>If you&#39;re starting from scratch, that&#39;s great advice. But how do you get there if you already have a bunch of fixtures? Starting today, you can use <a href="https://github.com/chase-seibert/django-pyfixtures">django-pyfixtures</a> to convert your json fixtures to python code.</p>
+
+<blockquote>
+<p>Using the regular Django dumpdata command, pyfixtures will generate a python file that contains all the code necessary to re-constitute that data in an empty database. You can take that code and refactor it into something you maintain going forward, or you can re-generate it from a target database when needed.</p>
+</blockquote>
+
+<h1>How it works</h1>
+
+<p>Pyfixtures implements a new Django serializer that takes a model object stream and produces python constructors for that code. It ends up looking just as it would if you wrote the code by hand, complete with necessary imports, declaring models that other models depend on first, and using previously declared variables for foreign keys. It can also deal with circular references by letting the user decide which models to use primary keys for, instead of references.</p>
+
+<p>Here is an example of what a fixture might look like.</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">pytz</span>
+<span class="kn">from</span> <span class="nn">models</span> <span class="kn">import</span> <span class="n">Organization</span>
+<span class="kn">from</span> <span class="nn">models</span> <span class="kn">import</span> <span class="n">Group</span>
+<span class="kn">from</span> <span class="nn">models</span> <span class="kn">import</span> <span class="n">Contact</span>
+
+
+<span class="n">organization1</span> <span class="o">=</span> <span class="n">Organization</span><span class="p">(</span>
+    <span class="nb">id</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">create_date</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2011</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">44</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">tzinfo</span><span class="o">=</span><span class="n">pytz</span><span class="o">.</span><span class="n">timezone</span><span class="p">(</span><span class="s">&#39;UTC&#39;</span><span class="p">)),</span>
+    <span class="n">name</span><span class="o">=</span><span class="s">u&#39;Marvel Comics&#39;</span><span class="p">)</span>
+
+<span class="n">group1</span> <span class="o">=</span> <span class="n">Group</span><span class="p">(</span>
+    <span class="nb">id</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">create_date</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2011</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">59</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="n">tzinfo</span><span class="o">=</span><span class="n">pytz</span><span class="o">.</span><span class="n">timezone</span><span class="p">(</span><span class="s">&#39;UTC&#39;</span><span class="p">)),</span>
+    <span class="n">name</span><span class="o">=</span><span class="s">u&#39;The Avengers&#39;</span><span class="p">,</span>
+    <span class="n">organization</span><span class="o">=</span><span class="n">organization1</span><span class="p">)</span>
+
+<span class="n">contact1</span> <span class="o">=</span> <span class="n">Contact</span><span class="p">(</span>
+    <span class="nb">id</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">group</span><span class="o">=</span><span class="n">group1</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s">u&#39;Captain America&#39;</span><span class="p">,</span>
+    <span class="n">organization</span><span class="o">=</span><span class="n">organization1</span><span class="p">,</span>
+    <span class="n">create_date</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2010</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">48</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="n">tzinfo</span><span class="o">=</span><span class="n">pytz</span><span class="o">.</span><span class="n">timezone</span><span class="p">(</span><span class="s">&#39;UTC&#39;</span><span class="p">)))</span>
+
+<span class="n">contact2</span> <span class="o">=</span> <span class="n">Contact</span><span class="p">(</span>
+    <span class="nb">id</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">group</span><span class="o">=</span><span class="n">group1</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s">u&#39;Iron Man&#39;</span><span class="p">,</span>
+    <span class="n">organization</span><span class="o">=</span><span class="n">organization1</span><span class="p">,</span>
+    <span class="n">create_date</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2010</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">48</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="n">tzinfo</span><span class="o">=</span><span class="n">pytz</span><span class="o">.</span><span class="n">timezone</span><span class="p">(</span><span class="s">&#39;UTC&#39;</span><span class="p">)))</span></code></pre></figure>
+
+<h1>Getting Started</h1>
+
+<ul>
+<li><code>pip install django-pyfixtures</code></li>
+<li>Edit <code>settings.py</code></li>
+</ul>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">INSTALLED_APPS</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="o">...</span>
+    <span class="s">&#39;pyfixtures&#39;</span><span class="p">,</span>
+    <span class="p">)</span>
+<span class="o">...</span>
+<span class="n">SERIALIZATION_MODULES</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;py&#39;</span><span class="p">:</span> <span class="s">&#39;pyfixtures.serializer&#39;</span><span class="p">}</span></code></pre></figure>
+
+<ul>
+<li>Convert your existing fixtures to python, and test them</li>
+</ul>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">./manage.py loaddata fixtures/initial_data.json
+./manage.py dumpdata --exclude contenttypes --format<span class="o">=</span>py &gt; fixtures/initial_data.py
+./manage.py loaddata fixtures/initial_data.py</code></pre></figure>
+
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/django">django</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/fixtures">fixtures</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

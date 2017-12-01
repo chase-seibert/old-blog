@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Getting started with Splunk as an Engineer</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2013/09/13/splunk-getting-started.html" />
+
+        <meta property="og:title" content="Getting started with Splunk as an Engineer"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2013/09/13/splunk-getting-started.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Getting started with Splunk as an Engineer
+                            
+                                <span class="post-date subtitle">13 Sep 2013</span>
+                            
+                        </h1>
+                    
+                    <p>What is <a href="http://www.splunk.com/">Splunk</a>, and how can you make the best use of it as an engineer? Splunk is first and foremost a hosted web-based tool for your log files. It gives you the following:</p>
+
+<ul>
+<li>Aggregates all your logs in one place</li>
+<li>Search</li>
+<li>Extract meaning</li>
+<li>Group, join, pivot and format results</li>
+<li>Visualization</li>
+<li>Email alerts</li>
+</ul>
+
+<h3>Architecture</h3>
+
+<p>How does it work? You setup all your servers to forward certain log statements to a centralized cluster of Splunk servers via rsyslog. Alternatively, you can use SFTP, NFS, etc. I don&#39;t want to re-hash <a href="http://chase-seibert.github.io/blog/2010/12/31/splunkrsyslogapacheubuntu-quickstart.html">install steps</a> here. Instead, let&#39;s focus on what you can <strong>DO</strong> with it once all your logs are in there.</p>
+
+<h3>Hosts and Sources</h3>
+
+<p>The first thing you will notice is that your log files are broken down by host, and optionally by source. This means that you can quickly search all the logs from one machine, or from a logical group of machines (ex: web servers versus database servers).</p>
+
+<p><img src="/blog/images/splunk2.png" alt="splunk sources"></p>
+
+<h3>Searching</h3>
+
+<p>Searching is pretty easy to use, just type in a search string! You can also do more complicated stuff. Examples:</p>
+
+<ul>
+<li><code>sourcetype=&quot;hsl-prod-fe&quot; &quot;Chase Seibert&quot;</code></li>
+<li><code>sourcetype=&quot;hsl-prod-fe&quot; e186f85c914261eec9e54d3767fdd3cc BEGIN</code></li>
+<li><code>sourcetype=&quot;hsl-prod-crawl&quot; |regex _raw=&quot;fanmgmt\.(analytics|metrics)&quot;</code></li>
+<li><code>sourcetype=&quot;hsl-prod-crawl&quot; facebook OR twitter NOT linkedin</code></li>
+<li><code>sourcetype=&quot;hsl-prod-crawl&quot; facebook OR linkedin OR twitter earliest=-24h</code></li>
+</ul>
+
+<p><img src="/blog/images/splunk3.png" alt="splunk sources"></p>
+
+<h3>Extracting</h3>
+
+<p>This is where is starts to get interesting. You can use a <a href="http://docs.splunk.com/Documentation/Splunk/5.0.4/Knowledge/Addfieldsatsearchtime">built-in GUI</a> to define a custom regex to pull pieces of your lines into variables, which you can then filter, group and aggregate by.</p>
+
+<p>If you can change your log format, you can get this to happen automatically without defining a regex by putting key/value pairs into <code>key=value</code> format. Here is some example code:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="k">def</span> <span class="nf">key_value</span><span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">log_level</span><span class="o">=</span><span class="s">&#39;info&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">log_message</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">prefix</span><span class="p">,</span> <span class="s">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">=&quot;</span><span class="si">%s</span><span class="s">&quot;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()]))</span>
+    <span class="nb">getattr</span><span class="p">(</span><span class="n">logging</span><span class="p">,</span> <span class="n">log_level</span><span class="p">)(</span><span class="n">log_message</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span></code></pre></figure>
+
+<h3>Piping</h3>
+
+<p>Just like in Unix, you can pipe various commands together to produce more complicated behavior in your searches.  Example: <code>sourcetype=&quot;hsl-prod-crawl&quot; succeeded |stats count perc95(task_seconds) by python_module |sort count desc |head 10</code>.</p>
+
+<p>Other basic <a href="http://docs.splunk.com/Documentation/Splunk/5.0.4/SearchReference/SearchCheatsheet">pipe commands</a>:</p>
+
+<ul>
+<li><code>| uniq</code></li>
+<li><code>| script python myscript myarg1 myarg2</code></li>
+<li><code>| bucket _time span=5m</code></li>
+<li><code>| eval name=coalesce(firstName, lastName)</code></li>
+<li><code>| rare, | anomalous</code></li>
+<li><code>| spath output=commit_author path=commits.author.name  # extract xml/json values</code></li>
+</ul>
+
+<p>Other <a href="http://docs.splunk.com/Documentation/Splunk/5.0.4/SearchReference/SearchCheatsheet">functions</a> you can call:</p>
+
+<ul>
+<li><code>avg()</code></li>
+<li><code>| eval description=case(error == 404, &quot;Not found&quot;, error == 200, &quot;OK&quot;)</code></li>
+<li><code>floor(), ceiling()</code></li>
+<li><code>len()</code></li>
+<li><code>isbool(), isint(), etc</code></li>
+<li><code>upper(), lower()</code></li>
+<li><code>trim(), ltrim(), rtrim()</code></li>
+<li><code>md5()</code></li>
+<li><code>now()</code></li>
+<li><code>random()</code></li>
+<li><code>replace()</code></li>
+<li><code>split()</code></li>
+<li><code>substr()</code></li>
+</ul>
+
+<h3>Visualizations</h3>
+
+<p>It&#39;s easy to create graphs and charts by pointing and clicking your way through their GUI builder. You can also do the same thing with raw commands and functions, assuming you know what to call. You can create pie charts, bar, columns and line graphs, as well as more complicated stuff like gauges.</p>
+
+<p><img src="/blog/images/splunk1.png" alt="splunk dashboard"></p>
+
+<h3>Email Alerts</h3>
+
+<p>Finally, you can configure Splunk to send you email alerts based on a cron schedule when certain searches either produce or do not produce certain results. Alerts:</p>
+
+<ul>
+<li>Start with a regular search</li>
+<li>Take a time window</li>
+<li>Can be scheduled (supports cron syntax)</li>
+<li>Can alert always, or when num rows &gt; N</li>
+<li>Can remember not to re-alert on the same items</li>
+<li>Sends an email, or publishes to an RSS feed</li>
+</ul>
+
+<h3>Next steps</h3>
+
+<ul>
+<li><a href="http://docs.splunk.com/Documentation/Splunk">Official Documentation</a></li>
+<li><a href="http://answers.splunk.com/">Help Forums</a></li>
+<li><a href="http://www.splunk.com/view/education-videos">Getting Started Videos</a></li>
+</ul>
+
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/splunk">splunk</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

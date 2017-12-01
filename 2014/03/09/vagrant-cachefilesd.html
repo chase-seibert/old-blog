@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Speed up your Vagrant NFS shares with cachefilesd</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2014/03/09/vagrant-cachefilesd.html" />
+
+        <meta property="og:title" content="Speed up your Vagrant NFS shares with cachefilesd"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2014/03/09/vagrant-cachefilesd.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Speed up your Vagrant NFS shares with cachefilesd
+                            
+                                <span class="post-date subtitle">09 Mar 2014</span>
+                            
+                        </h1>
+                    
+                    <p>Most web based tech startups are deploying to cloud hosted Linux machines. At the same time, only a small percentage of engineers actually run Linux on their development desktops. Enter <a href="http://www.vagrantup.com/">Vagrant</a>, an easy way to provision local Linux development environments in a virtual machine.</p>
+
+<p>At my current startup, we&#39;re using Vagrant with our regular <a href="http://www.getchef.com/chef/">Chef</a> recipes so that the configuration of development matches production as closely as possible. The primary difference is the way the code is loaded. Instead of being saved on the VM itself, it&#39;s mounted via a shared directory with the host. That way, the 1/4 or so of the engineers on the team that use a graphical IDE as their editor get the super fast file access they require.</p>
+
+<p>In that setup, although we&#39;re editing files on the host system, we run git inside the guest VM. This is done to support <a href="http://git-scm.com/book/en/Customizing-Git-Git-Hooks">git hooks</a> that rely on our dependencies that are only installed inside the VM.</p>
+
+<h1>VirtualBox Shared Folders are Slow</h1>
+
+<p>Right at the start, we noticed considerable lag running git commands in this setup. At this point we were using the default <a href="http://docs.vagrantup.com/v2/synced-folders/basic_usage.html">synced folder</a> mechanism, VirtualBox shared folders. Our <code>Vagrantfile</code> had a section like this:</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">synced_folder</span> <span class="s2">&quot;~/projects&quot;</span><span class="p">,</span> <span class="s2">&quot;/home/vagrant/projects&quot;</span></code></pre></figure>
+
+<p>After a little research, we found that there were <a href="http://jsosic.wordpress.com/tag/shared-folders/">known issues</a> with VirtualBox shared folders being <a href="https://forums.virtualbox.org/viewtopic.php?f=6&amp;t=55044">very slow for large folders</a>. The recommended solution was to use <a href="http://en.wikipedia.org/wiki/Network_File_System">NFS</a>.</p>
+
+<h1>Using NFS with Vagrant</h1>
+
+<p>Vagrant makes switching to NFS fairly easy. It&#39;s all pretty seamless with a simple configuration change, except for the fact that folder permissions owner and group can only be set to the vagrant user. For us, this involved some chef recipe tweaking; as we normally place the files in the developer&#39;s home directory.</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">synced_folder</span> <span class="s2">&quot;~/projects&quot;</span><span class="p">,</span> <span class="s2">&quot;/home/vagrant/projects&quot;</span><span class="p">,</span> <span class="ss">type</span><span class="p">:</span> <span class="s2">&quot;nfs&quot;</span></code></pre></figure>
+
+<p>You will need to do a <code>vagrant reload</code> to update the config.</p>
+
+<p><em>Note: don&#39;t try to use NFS4 with <code>mount_options: [&#39;vers=4&#39;]</code> on a Mac host. The Mac NFS4 implementation is <a href="http://dfusion.com.au/wiki/tiki-index.php?page=NFSv4+on+Apple+OS+X">not ready for primetime</a>.</em>.</p>
+
+<h1>Futher Performance Improvements with cachefilesd</h1>
+
+<p>Git commands were still not running instantly, which is part of the benefit of using git in the first place. Enter <a href="http://linux.die.net/man/8/cachefilesd">cachefilesd</a>, a Linux service that caches NFS file access.</p>
+
+<p>You can install it manually in your Vagrant instance, just to see what the performance difference is.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">sudo apt-get install cachefilesd
+sudo <span class="nb">echo</span> <span class="s2">&quot;RUN=yes&quot;</span> &gt; /etc/default/cachefilesd</code></pre></figure>
+
+<p>Then, update your <code>Vagrantfile</code> as follows:</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">synced_folder</span> <span class="s2">&quot;~/projects&quot;</span><span class="p">,</span> <span class="s2">&quot;/home/vagrant/projects&quot;</span><span class="p">,</span> <span class="ss">type</span><span class="p">:</span> <span class="s2">&quot;nfs&quot;</span><span class="p">,</span> <span class="ss">mount_options</span><span class="p">:</span> <span class="o">[</span><span class="s1">&#39;rw&#39;</span><span class="p">,</span> <span class="s1">&#39;vers=3&#39;</span><span class="p">,</span> <span class="s1">&#39;tcp&#39;</span><span class="p">,</span> <span class="s1">&#39;fsc&#39;</span><span class="o">]</span>  <span class="c1"># the fsc is for cachedfilesd</span></code></pre></figure>
+
+<p>You will need to do a <code>vagrant reload</code> to update the config. You can check that cachefilesd is actually working by listing the cache directory inside the VM:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">cd</span> /var/cache/fscache/
+sudo du -sh</code></pre></figure>
+
+<p>If you are using Chef, you can install cachefilesd with something like the following:</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">package</span> <span class="s2">&quot;cachefilesd&quot;</span> <span class="k">do</span>
+  <span class="n">action</span> <span class="ss">:install</span>
+<span class="k">end</span>
+
+<span class="n">file</span> <span class="s2">&quot;/etc/default/cachefilesd&quot;</span> <span class="k">do</span>
+  <span class="n">content</span> <span class="o">&lt;&lt;-</span><span class="no">EOS</span>
+<span class="sh">RUN=yes</span>
+<span class="no">  EOS</span>
+  <span class="n">action</span> <span class="ss">:create</span>
+  <span class="n">mode</span> <span class="mo">0755</span>
+<span class="k">end</span></code></pre></figure>
+
+<h1>Leveraging Git&#39;s preloadindex setting</h1>
+
+<p>I also found a git setting specifically designed to <a href="http://git-scm.com/docs/git-config">increase peformance over NFS</a>. Hopefully this will be made a <a href="http://git.661346.n2.nabble.com/git-status-takes-30-seconds-on-Windows-7-Why-td7580816.html#a7580853">default git setting</a> soon. Simply run the following.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">git config core.preloadindex <span class="nb">true</span></code></pre></figure>
+
+<h1>Measuring the Performance Difference</h1>
+
+<p>Here are the stats for our git repository. This was in a repo with approximately 33,000 files. The host machine is OSX 10.9 with an SSD. The guest VM was configured with 2GB RAM and 2 CPUs. My methodology was to run <code>git status</code> four times for each configuration. The first time is noted separately, and the last three times are averaged. Time was measured using the <code>time</code> command.</p>
+
+<p><img src="/blog/images/nfsgit.png" alt="performance numbers"></p>
+
+<h1>Still looking for a better solution</h1>
+
+<p>Git over NFS is <a href="http://git.661346.n2.nabble.com/hosting-git-on-a-nfs-td1489016.html">not ideal</a>, even when everything is &quot;local&quot;. The main problem seems to be very large repos (tens of thousands of files or more). Smaller repos still perform in the hundreds of milliseconds.</p>
+
+<p>Other stuff to try:</p>
+
+<ul>
+<li>Git 1.7 added <a href="http://jasonkarns.com/blog/subdirectory-checkouts-with-git-sparse-checkout/">sparse checkouts</a></li>
+<li>Git also has an <a href="http://git-scm.com/docs/git-update-index#_using_%60%60assume_unchanged%27%27_bit">--assume-unchanged</a> that can be used to exlcude directories that don&#39;t often change.</li>
+</ul>
+
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/vagrant">vagrant</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

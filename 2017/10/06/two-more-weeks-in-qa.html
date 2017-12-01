@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Two (more) Weeks in QA</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2017/10/06/two-more-weeks-in-qa.html" />
+
+        <meta property="og:title" content="Two (more) Weeks in QA"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2017/10/06/two-more-weeks-in-qa.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Two (more) Weeks in QA
+                            
+                                <span class="post-date subtitle">06 Oct 2017</span>
+                            
+                        </h1>
+                    
+                    <p>Due to our regular QA engineer being out on vacation, I once again has the
+opportunity to do a tour of duty in QA. This time, for a big mobile release.
+I previously <a href="http://chase-seibert.github.io/blog/2009/03/20/my-two-weeks-in-qa.html">wrote about a similar experience</a>
+ eight (!) years ago, so I thought I would once again write down some reflections.</p>
+
+<h1>Web vs Mobile</h1>
+
+<p>Last time, I was testing a web product. This time, it was a mobile app. That
+turned out to make a <strong>big difference</strong>. For one thing, I spent a lot more time
+manually testing on various physical phones. Our app is on both Android and iOS,
+so that&#39;s at least two devices for every test. But you also have to test on
+older slower phones, phones on older versions of the operating system, etc. Plus
+it&#39;s all via touch interfaces. It ends up being more time than testing web
+features for a few browsers.</p>
+
+<h1>More Documentation Time</h1>
+
+<p>This time I spent a lot more time updating test plans. Because we have to test
+on so many phones, we have an outsourced QA team for even more manual testing
+horsepower. While I may test on five or six phones, I can send a test plan over
+to a remote team to run it on fifteen to twenty phones.</p>
+
+<p>The existing documentation turned out to be very useful. Not only did it remind
+me about a bunch of test cases I would have forgotten about, but it had all kinds
+of hints about the most efficient way to test a specific case.</p>
+
+<h1>Communication</h1>
+
+<p>Because it was a big release, I spent a bunch of time coming up with daily
+reports of whether we were on track for launch. At a high level, I wanted to
+communicate how many bugs we had, new bugs we had discovered that day, any
+blockers for release and what step on our release schedule we were on.</p>
+
+<p>But I also made some fun graphs!</p>
+
+<p><img src="/blog/images/qa_time.png" alt="img">
+<img src="/blog/images/qa_type.png" alt="img"></p>
+
+<h1>Triage &amp; Troubleshooting</h1>
+
+<p>This time, I got more involved in triaging new bugs. Not just reproducing them
+and writing a good bug report, but also setting priority. This turned out to
+often involve discussions with both the product owner and the engineers. On more
+than a few bugs, we decided that while the severity of the bug was low to medium,
+we actually did not want to fix it now because we don&#39;t have a good solution that
+doesn&#39;t involve a medium sized refactor.</p>
+
+<p>Similarly, we ended up having a lot of conversations about how to be more
+defensive in the code to prevent errors like the one in a particular bug report
+more generically. Some of these were also not feasible/wise to take on
+immediately. They went into the backlog.</p>
+
+<h1>What Was the Same</h1>
+
+<p>Once again, I was surprised my how many blocking issues I ran into just trying
+to get a build running well enough to test. We have most of the kinks worked
+out of our build pipeline, so there were not any problems getting a given
+build onto a phone. But I was blocked for days at a time on things like third
+party API integration staging environments being down. In one case, it took
+way too much time to discover that the breakage was related to a new network
+configuration in the office; we had forgotten to whitelist some IPs.</p>
+
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/qa">qa</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                                    <li><a href="/blog/2017/08/28/epic-story-estimation.html">Estimating Epic Stories in Three Steps</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

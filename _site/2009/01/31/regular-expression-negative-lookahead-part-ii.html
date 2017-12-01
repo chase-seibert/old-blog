@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Regular Expression&#58; Negative Lookahead Part II</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2009/01/31/regular-expression-negative-lookahead-part-ii.html" />
+
+        <meta property="og:title" content="Regular Expression&#58; Negative Lookahead Part II"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2009/01/31/regular-expression-negative-lookahead-part-ii.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Regular Expression&#58; Negative Lookahead Part II
+                            
+                                <span class="post-date subtitle">31 Jan 2009</span>
+                            
+                        </h1>
+                    
+                    <p>
+<a href='http://bitkickers.blogspot.com/2009/01/regular-expression-negative-lookahead.html'>When we left off</a>, I had set out to replace any ampersand outside a CDATA segment with the XML encoded version. Instead of ditching the regex approach and using a lenient DOM parser, I chose to escalate the ugly hack even further! The helpful folks over at <a href='http://stackoverflow.com/questions/462831/regular-expression-to-escape-html-ampersands-while-respecting-cdata'>stack overflow</a> had a ready made solution:
+</p>
+
+<pre name="code" class="xml:nocontrols">
+    &amp;(?!(?:[a-zA-Z][a-zA-Z0-9]*|#\d+);)(?!(?&gt;(?:(?!&lt;!\[CDATA\[|\]\]&gt;).)*)\]\]&gt;)
+</pre>
+
+<p>
+I think this is self-explanatory. See you next time!
+</p>
+
+<p>
+OK, maybe not. I don't know about you, but I certainly didn't grok that when I first saw it, or even an hour later. I think it helps to start with a simplified example. Instead of CDATA, let's say that the start token is "a", and the end token is "b". So, we would want the following matches:
+</p>
+
+<pre>
+ <font color=navy><b>&</b></font> 
+ <font color=navy><b>&</b></font> a b
+ a b <font color=navy><b>&</b></font>
+
+ a & b a
+ &
+ b
+ a & & b
+</pre>
+
+</p>
+My idea was to match any "&" that's not followed by a "b" without an "a" in between. The smallest regex I could come up with for this case is:
+</p>
+
+<pre name="code" class="xml:nocontrols">
+    &amp;(?![^a]*b)
+</pre>
+
+<p>
+The only piece that might be news to the regex journeyman is the "(?!" syntax. This is a <a href='http://www.regular-expressions.info/lookaround.html'>negative look ahead</a>. In other words, this regex won't match an ampersand if it's not followed by a match for "[^a]*b". It works like a charm, but it's cheating. The solution is so simple because we're taking large advantage of a hidden assumption: that the start token specifically is exactly one character.
+</p>
+
+<p>
+The "[^a]*" means any string of characters that is NOT "a". When you try to extend this to literal strings (such as "&lt;![CDATA["), you will find that the only way to negate a literal is the aforementioned "(?!" syntax. Also, you must escape certain characters so they are evaluated as literals. 
+</p>
+
+<pre name="code" class="xml:nocontrols">
+    (?!&lt;!\[CDATA\[)
+</pre>
+
+<p>
+The "b" token would simply be the literal. If we simply replace "a" and "b", we get:
+</p>
+
+<pre name="code" class="xml:nocontrols">
+    &amp;(?!(?!&lt;!\[CDATA\[)*\]\]&gt;)
+</pre>
+
+<p>
+Now, we have two look around clauses, which is confusing. But the bigger problem is that this <a href='http://www.rubular.com/regexes/5949'>doesn't actually work</a>. This is because the (?!) clause itself isn't matching anything; it's a zero-width token. To actually progress the matching, we need to throw good old ".*" in there. But don't want the expanding match to include the look ahead clause, so we wrap the look ahead and the "." in it's own set:
+</p>
+
+<pre name="code" class="xml">
+    &amp;(?!((?!&lt;!\[CDATA\[).)*\]\]&gt;)
+</pre>
+
+<p><i>
+Note: this regex requires that the optional flag <a href='http://www.regular-expressions.info/dot.html'>period matches newlines</a> is set to TRUE. This is not the default. You can also replace the lone "." in the regex with "(.|\s)".
+</i></p>
+
+<p>
+That's the basic idea, anyway. The stack overflow script has some other stuff in it. It starts with "&amp;(?!(?:[a-zA-Z][a-zA-Z0-9]*|#\d+);)", which is an attempt to not match ampersands that are already part of an XML encoded value. That's not necessary for my case, but nice to have. Their CDATA clause is also slightly different. But it's all just optimizations. Maybe we can explore this in a later post. For my part, I'll stick with the shorter, slightly more readable version at the cost of performance.
+</p>
+
+<p>
+Still no word on a fix from HotJobs to actually return valid XML from their web-service.
+</p>
+
+<p><i>
+This post made possible by the excellent utility <a href='http://www.regexbuddy.com/'>RegexBuddy</a>. Highly recommended.
+</i></p>
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/regex">regex</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

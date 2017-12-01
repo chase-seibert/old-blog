@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Designing a Dimensional Schema for a hierarchy that can change over time</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2014/07/18/dimensional-schema-hierarchy-bridge-slowly-changing.html" />
+
+        <meta property="og:title" content="Designing a Dimensional Schema for a hierarchy that can change over time"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2014/07/18/dimensional-schema-hierarchy-bridge-slowly-changing.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Designing a Dimensional Schema for a hierarchy that can change over time
+                            
+                                <span class="post-date subtitle">18 Jul 2014</span>
+                            
+                        </h1>
+                    
+                    <p>I&#39;ve recently been reading about dimensional schemas, aka star schemas. The whole idea seems to be to optimize for fast queries that are also simple to write, at the expense of extra storage in the form of denormalization. In contrast to standard third normal form relational database schema, there is little to no emphasis on how complicated it will be to write data into the system. This trade-off makes sense, as star schemas are employed primarily for data warehouses, where the user will be a business intelligence analyst writing ad-hoc queries to pull analytics, not an ORM layer or another piece of pre-vetted code hitting previously defined and approved indexes.</p>
+
+<p>The schema itself can be counter intuitive for engineers who have only worked on normal RDMS schemas. First off, data is broken down into fact tables, which are the events that the analytics are aggregating, and dimension tables, which are the attributes that the events will be rolled up by. For example, we are going to use the fact of social media posts as an example, while the dimensions will be the group that the posting user works at in their company, together with that groups place in the company org chart. To up the level of difficulty, we are also going to talk about how to model an org chart that is changing over time.</p>
+
+<h2>The Problem</h2>
+
+<p><img src="/blog/images/hierarchy.png" alt="hierarchy"></p>
+
+<p>Here we have a somewhat complicated org chart, albeit a small one. Group 10 happens to roll up to both the State and Role hierarchies. This is known as a multi-hierarchy system. The company wants to be able to report on posts made by that group from two different perspectives, depending on the specific report they are trying to run.</p>
+
+<p>Two particular challenges talked about in the excellent <a href="http://www.amazon.com/The-Data-WarehouseETL-Toolkit-Techniques/dp/0764567578">The Data Warehouse ETL Toolkit</a> are modeling hierarchies (which are essentially trees, and also difficult to model in traditional RDMS systems) and slowly changing dimensions. For example, what happens if a group moves to a different spot in one of the hierarchies, but the company still wants to report on their posts according to the hierarchy they were actually in at the time? More on that later.</p>
+
+<h2>Test Schema and Data</h2>
+
+<p>Here is one model for the hierarchy information, aka the Region Bridge Table, or <code>test_region_bridge</code>. For each of these tables, I will also give the SQL to create the table and insert the same test data.</p>
+
+<table>
+    <thead>
+        <th>parent_distdict_id</th>
+        <th>parent_distdict_name</th>
+        <th>child_distdict_id</th>
+        <th>child_distdict_name</th>
+        <th>depth_from_parent</th>
+    </thead>
+    <tr>
+        <td>1</td>
+        <td>All Regions</td>
+        <td>2</td>
+        <td>State Hierarchy</td>
+        <td>1</td>
+    </tr>
+    <tr>
+        <td>1</td>
+        <td>All Regions</td>
+        <td>5</td>
+        <td>MA</td>
+        <td>2</td>
+    </tr>
+    <tr>
+        <td>2</td>
+        <td>State Hierarchy</td>
+        <td>5</td>
+        <td>MA</td>
+        <td>1</td>
+    </tr>
+    <tr>
+        <td>1</td>
+        <td>All Regions</td>
+        <td>3</td>
+        <td>Role Hierarchy</td>
+        <td>1</td>
+    </tr>
+    <tr>
+        <td>1</td>
+        <td>All Regions</td>
+        <td>6</td>
+        <td>Sales</td>
+        <td>2</td>
+    </tr>
+    <tr>
+        <td>3</td>
+        <td>Role Hierarchy</td>
+        <td>6</td>
+        <td>Sales</td>
+        <td>1</td>
+    </tr>
+    <tr>
+        <td>1</td>
+        <td>All Regions</td>
+        <td>7</td>
+        <td>Eng</td>
+        <td>2</td>
+    </tr>
+    <tr>
+        <td>3</td>
+        <td>Role Hierarchy</td>
+        <td>7</td>
+        <td>Eng</td>
+        <td>1</td>
+    </tr>
+</table>
+
+<figure class="highlight"><pre><code class="language-sql" data-lang="sql"><span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">test_region_bridge</span> <span class="p">(</span><span class="n">parent_district_id</span> <span class="nb">integer</span> <span class="k">not</span> <span class="k">null</span><span class="p">,</span> <span class="n">parent_district_name</span> <span class="nb">varchar</span><span class="p">(</span><span class="mi">255</span><span class="p">)</span> <span class="k">not</span> <span class="k">null</span><span class="p">,</span> <span class="n">child_district_id</span> <span class="nb">integer</span> <span class="k">not</span> <span class="k">null</span><span class="p">,</span> <span class="n">child_district_name</span> <span class="nb">varchar</span><span class="p">(</span><span class="mi">255</span><span class="p">)</span> <span class="k">not</span> <span class="k">null</span><span class="p">,</span> <span class="n">depth_from_parent</span> <span class="nb">integer</span> <span class="k">not</span> <span class="k">null</span><span class="p">);</span>
+
+<span class="k">INSERT</span> <span class="k">INTO</span> <span class="n">test_region_bridge</span> <span class="p">(</span><span class="n">parent_district_id</span><span class="p">,</span> <span class="n">parent_district_name</span><span class="p">,</span> <span class="n">child_district_id</span><span class="p">,</span> <span class="n">child_district_name</span><span class="p">,</span> <span class="n">depth_from_parent</span><span class="p">)</span>
+           <span class="k">SELECT</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;All Regions&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;State Hierarchy&#39;</span><span class="p">,</span> <span class="mi">1</span>
+<span class="k">UNION</span> <span class="k">ALL</span> <span class="k">SELECT</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;All Regions&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;MA&#39;</span><span class="p">,</span> <span class="mi">2</span>
+<span class="k">UNION</span> <span class="k">ALL</span> <span class="k">SELECT</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;State Hierarchy&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;MA&#39;</span><span class="p">,</span> <span class="mi">1</span>
+<span class="k">UNION</span> <span class="k">ALL</span> <span class="k">SELECT</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;All Regions&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;Role Hierarchy&#39;</span><span class="p">,</span> <span class="mi">1</span>
+<span class="k">UNION</span> <span class="k">ALL</span> <span class="k">SELECT</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;All Regions&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="s1">&#39;Sales&#39;</span><span class="p">,</span> <span class="mi">2</span>
+<span class="k">UNION</span> <span class="k">ALL</span> <span class="k">SELECT</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;Role Hierarchy&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="s1">&#39;Sales&#39;</span><span class="p">,</span> <span class="mi">1</span>
+<span class="k">UNION</span> <span class="k">ALL</span> <span class="k">SELECT</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;All Regions&#39;</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="s1">&#39;Eng&#39;</span><span class="p">,</span> <span class="mi">2</span>
+<span class="k">UNION</span> <span class="k">ALL</span> <span class="k">SELECT</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;Role Hierarchy&#39;</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="s1">&#39;Eng&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">;</span></code></pre></figure>
+
+<p>Notice that every node has a row for each of their children, whether they are direct children (depth 1) or further down. This is intended to make it possible to query for all groups under a certain level without explicitly listing all the children in a dependent sub-query. The parent and child names are given just to make it easier to see what your queries are doing.</p>
+
+<p>Here is the <code>test_post</code> table. Notice that it has a <code>group_id</code>, but not a <code>district_id</code>.</p>
+
+<table>
+    <thead>
+        <th>post_id</th>
+        <th>group_id</th>
+        <th>text</th>
+        <th>date</th>
+    </thead>
+    <tr>
+        <td>1</td>
+        <td>8</td>
+        <td>foo</td>
+        <td>2014-06-01</td>
+    </tr>
+    <tr>
+        <td>2</td>
+        <td>9</td>
+        <td>bar</td>
+        <td>2014-06-05</td>
+    </tr>
+    <tr>
+        <td>3</td>
+        <td>11</td>
+        <td>bat</td>
+        <td>2014-06-20</td>
+    </tr>
+    <tr>
+        <td>4</td>
+        <td>11</td>
+        <td>baz</td>
+        <td>2014-06-30</td>
+    </tr>
+    <tr>
+        <td>5</td>
+        <td>10</td>
+        <td>far</td>
+        <td>2014-06-10</td>
+    </tr>
+</table>
+
+<figure class="highlight"><pre><code class="language-sql" data-lang="sql"><span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">test_post</span> <span class="p">(</span><span class="n">hss_post_id</span> <span class="nb">integer</span> <span class="k">not</span> <span class="k">null</span><span class="p">,</span> <span class="n">group_id</span> <span class="nb">integer</span> <span class="k">not</span> <span class="k">null</span><span class="p">,</span> <span class="nb">text</span> <span class="nb">varchar</span><span class="p">(</span><span class="mi">255</span><span class="p">)</span> <span class="k">not</span> <span class="k">null</span><span class="p">,</span> <span class="nb">date</span> <span class="k">timestamp</span> <span class="k">not</span> <span class="k">null</span><span class="p">);</span>
+
+<span class="k">INSERT</span> <span class="k">INTO</span> <span class="n">test_post</span> <span class="p">(</span><span class="n">hss_post_id</span><span class="p">,</span> <span class="n">group_id</span><span class="p">,</span> <span class="nb">text</span><span class="p">,</span> <span class="nb">date</span><span class="p">)</span>
+           <span class="k">SELECT</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="s1">&#39;foo&#39;</span><span class="p">,</span> <span class="nb">DATE</span><span class="p">(</span><span class="s1">&#39;2014-06-01&#39;</span><span class="p">)</span>
+<span class="k">UNION</span> <span class="k">ALL</span> <span class="k">SELECT</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="s1">&#39;bar&#39;</span><span class="p">,</span> <span class="nb">DATE</span><span class="p">(</span><span class="s1">&#39;2014-06-05&#39;</span><span class="p">)</span>
+<span class="k">UNION</span> <span class="k">ALL</span> <span class="k">SELECT</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="s1">&#39;bat&#39;</span><span class="p">,</span> <span class="nb">DATE</span><span class="p">(</span><span class="s1">&#39;2014-06-20&#39;</span><span class="p">)</span>
+<span class="k">UNION</span> <span class="k">ALL</span> <span class="k">SELECT</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="s1">&#39;baz&#39;</span><span class="p">,</span> <span class="nb">DATE</span><span class="p">(</span><span class="s1">&#39;2014-06-30&#39;</span><span class="p">)</span>
+<span class="k">UNION</span> <span class="k">ALL</span> <span class="k">SELECT</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;far&#39;</span><span class="p">,</span> <span class="nb">DATE</span><span class="p">(</span><span class="s1">&#39;2014-06-10&#39;</span><span class="p">);</span></code></pre></figure>
+
+<p>Finally, here is the <code>test_group_region_bridge</code> table, which joins <code>group_id</code> to <code>district_id</code>:</p>
+
+<table>
+    <thead>
+        <th>group_id</th>
+        <th>district_id</th>
+    </thead>
+    <tr>
+        <td>8</td>
+        <td>5</td>
+    </tr>
+    <tr>
+        <td>9</td>
+        <td>6</td>
+    </tr>
+    <tr>
+        <td>10</td>
+        <td>5</td>
+    </tr>
+    <tr>
+        <td>10</td>
+        <td>6</td>
+    </tr>
+    <tr>
+        <td>11</td>
+        <td>7</td>
+    </tr>
+</table>
+
+<figure class="highlight"><pre><code class="language-sql" data-lang="sql"><span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">test_group_region_bridge</span><span class="p">(</span><span class="n">group_id</span> <span class="nb">integer</span> <span class="k">not</span> <span class="k">null</span><span class="p">,</span> <span class="n">district_id</span> <span class="nb">integer</span> <span class="k">not</span> <span class="k">null</span><span class="p">);</span>
+
+<span class="k">INSERT</span> <span class="k">INTO</span> <span class="n">test_group_region_bridge</span> <span class="p">(</span><span class="n">group_id</span><span class="p">,</span> <span class="n">district_id</span><span class="p">)</span>
+           <span class="k">SELECT</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">5</span>
+<span class="k">UNION</span> <span class="k">ALL</span> <span class="k">SELECT</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">6</span>
+<span class="k">UNION</span> <span class="k">ALL</span> <span class="k">SELECT</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">5</span>
+<span class="k">UNION</span> <span class="k">ALL</span> <span class="k">SELECT</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">6</span>
+<span class="k">UNION</span> <span class="k">ALL</span> <span class="k">SELECT</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">7</span><span class="p">;</span></code></pre></figure>
+
+<h2>Example Queries</h2>
+
+<p>Given this schema, how would we write a query to answer the question <em>How many posts were there in each region under the Role Hierarchy between Jun 1, 2014 and Jun 30, 2014?</em></p>
+
+<figure class="highlight"><pre><code class="language-sql" data-lang="sql"><span class="k">SELECT</span> <span class="n">r</span><span class="p">.</span><span class="n">child_district_name</span><span class="p">,</span>
+       <span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">)</span>
+  <span class="k">FROM</span> <span class="n">test_post</span> <span class="n">p</span>
+ <span class="k">INNER</span> <span class="k">JOIN</span> <span class="n">test_group_region_bridge</span> <span class="n">gr</span>
+    <span class="k">ON</span> <span class="n">gr</span><span class="p">.</span><span class="n">group_id</span> <span class="o">=</span> <span class="n">p</span><span class="p">.</span><span class="n">group_id</span>
+ <span class="k">INNER</span> <span class="k">JOIN</span> <span class="n">test_region_bridge</span> <span class="n">r</span>
+    <span class="k">ON</span> <span class="n">r</span><span class="p">.</span><span class="n">child_district_id</span> <span class="o">=</span> <span class="n">gr</span><span class="p">.</span><span class="n">district_id</span>
+ <span class="k">WHERE</span> <span class="n">r</span><span class="p">.</span><span class="n">parent_district_name</span> <span class="o">=</span> <span class="s1">&#39;Role Hierarchy&#39;</span>
+   <span class="k">AND</span> <span class="n">r</span><span class="p">.</span><span class="n">depth_from_parent</span> <span class="o">=</span> <span class="mi">1</span>
+   <span class="k">AND</span> <span class="n">p</span><span class="p">.</span><span class="nb">date</span> <span class="k">BETWEEN</span> <span class="s1">&#39;2014-06-01&#39;</span> <span class="k">AND</span> <span class="s1">&#39;2014-06-30&#39;</span>
+ <span class="k">GROUP</span> <span class="k">BY</span> <span class="n">r</span><span class="p">.</span><span class="n">child_district_name</span><span class="p">;</span></code></pre></figure>
+
+<p>Note that I&#39;m including a <code>depth_from_parent = 1</code>, otherwise my <code>JOIN</code> would include a row for any regions that might be under either Sales or Eng, and count posts in the parent regions multiple times.</p>
+
+<table>
+    <thead>
+        <th>child_district_name</th>
+        <th>COUNT(*)</th>
+    </thead>
+    <tr>
+        <td>Eng</td>
+        <td>2</td>
+    </tr>
+    <tr>
+        <td>Sales</td>
+        <td>2</td>
+    </tr>
+</table>
+
+<p>We could also ask <em>How many posts per day were there under the State Hierarchy?</em></p>
+
+<figure class="highlight"><pre><code class="language-sql" data-lang="sql"><span class="k">SELECT</span> <span class="nb">DATE</span><span class="p">(</span><span class="n">p</span><span class="p">.</span><span class="nb">date</span><span class="p">),</span>
+       <span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">)</span>
+  <span class="k">FROM</span> <span class="n">test_post</span> <span class="n">p</span>
+ <span class="k">INNER</span> <span class="k">JOIN</span> <span class="n">test_group_region_bridge</span> <span class="n">gr</span>
+    <span class="k">ON</span> <span class="n">gr</span><span class="p">.</span><span class="n">group_id</span> <span class="o">=</span> <span class="n">p</span><span class="p">.</span><span class="n">group_id</span>
+ <span class="k">INNER</span> <span class="k">JOIN</span> <span class="n">test_region_bridge</span> <span class="n">r</span>
+    <span class="k">ON</span> <span class="n">r</span><span class="p">.</span><span class="n">child_district_id</span> <span class="o">=</span> <span class="n">gr</span><span class="p">.</span><span class="n">district_id</span>
+ <span class="k">WHERE</span> <span class="n">r</span><span class="p">.</span><span class="n">parent_district_name</span> <span class="o">=</span> <span class="s1">&#39;State Hierarchy&#39;</span>
+ <span class="k">GROUP</span> <span class="k">BY</span> <span class="nb">DATE</span><span class="p">(</span><span class="n">p</span><span class="p">.</span><span class="nb">date</span><span class="p">);</span></code></pre></figure>
+
+<p>Which results in:</p>
+
+<table>
+    <thead>
+        <th>date</th>
+        <th>COUNT(*)</th>
+    </thead>
+    <tr>
+        <td>2014-06-01</td>
+        <td>1</td>
+    </tr>
+    <tr>
+        <td>2014-06-10</td>
+        <td>1</td>
+    </tr>
+</table>
+
+<p>Also, <em>Which posts were there under both Sales and MA?</em></p>
+
+<figure class="highlight"><pre><code class="language-sql" data-lang="sql"><span class="k">SElECT</span> <span class="n">p</span><span class="p">.</span><span class="o">*</span>
+  <span class="k">FROM</span> <span class="n">test_post</span> <span class="n">p</span>
+ <span class="k">INNER</span> <span class="k">JOIN</span> <span class="n">test_group_region_bridge</span> <span class="n">gr</span>
+    <span class="k">ON</span> <span class="n">gr</span><span class="p">.</span><span class="n">group_id</span> <span class="o">=</span> <span class="n">p</span><span class="p">.</span><span class="n">group_id</span>
+ <span class="k">INNER</span> <span class="k">JOIN</span> <span class="n">test_region_bridge</span> <span class="n">r</span>
+    <span class="k">ON</span> <span class="n">r</span><span class="p">.</span><span class="n">child_district_id</span> <span class="o">=</span> <span class="n">gr</span><span class="p">.</span><span class="n">district_id</span>
+   <span class="k">AND</span> <span class="n">r</span><span class="p">.</span><span class="n">parent_district_name</span> <span class="o">=</span> <span class="s1">&#39;All Regions&#39;</span>
+ <span class="k">WHERE</span> <span class="n">r</span><span class="p">.</span><span class="n">child_district_name</span> <span class="o">=</span> <span class="s1">&#39;Sales&#39;</span>
+<span class="k">INTERSECT</span>
+<span class="k">SElECT</span> <span class="n">p</span><span class="p">.</span><span class="o">*</span>
+  <span class="k">FROM</span> <span class="n">test_post</span> <span class="n">p</span>
+ <span class="k">INNER</span> <span class="k">JOIN</span> <span class="n">test_group_region_bridge</span> <span class="n">gr</span>
+    <span class="k">ON</span> <span class="n">gr</span><span class="p">.</span><span class="n">group_id</span> <span class="o">=</span> <span class="n">p</span><span class="p">.</span><span class="n">group_id</span>
+ <span class="k">INNER</span> <span class="k">JOIN</span> <span class="n">test_region_bridge</span> <span class="n">r</span>
+    <span class="k">ON</span> <span class="n">r</span><span class="p">.</span><span class="n">child_district_id</span> <span class="o">=</span> <span class="n">gr</span><span class="p">.</span><span class="n">district_id</span>
+   <span class="k">AND</span> <span class="n">r</span><span class="p">.</span><span class="n">parent_district_name</span> <span class="o">=</span> <span class="s1">&#39;All Regions&#39;</span>
+ <span class="k">WHERE</span> <span class="n">r</span><span class="p">.</span><span class="n">child_district_name</span> <span class="o">=</span> <span class="s1">&#39;MA&#39;</span><span class="p">;</span></code></pre></figure>
+
+<p>This one is tricky, but shows the flexibility of SQL. It returns the correct single row.</p>
+
+<table>
+    <thead>
+        <th>post_id</th>
+        <th>group_id</th>
+        <th>text</th>
+        <th>date</th>
+    </thead>
+    <tr>
+        <td>5</td>
+        <td>10</td>
+        <td>far</td>
+        <td>2014-06-10</td>
+    </tr>
+</table>
+
+<h2>Taking it up a notch</h2>
+
+<p>Now, I promised to address what happens when we also need to account for changes in the hierarchy over time. For example, what if group 11 moved from district 7 (Eng) to district 6 (Sales) on 2014-06-18, and then moved back to district 7 (Eng) on 2014-06-22? There should still be four posts, but now there were three in Sales and one in Eng.</p>
+
+<p>In order to record the relevant dates, I&#39;ll add <code>change_effective</code> and <code>change_end</code> dates to the table, as well as a <code>change_current</code> to track whether this is the current state of the group. Here is our new <code>test_group_region_bridge</code> table.</p>
+
+<table>
+    <thead>
+        <th>group_id</th>
+        <th>district_id</th>
+        <th>change_effective</th>
+        <th>change_end</th>
+        <th>change_current</th>
+    </thead>
+    <tr>
+        <td>8</td>
+        <td>5</td>
+        <td>2000-01-01</td>
+        <td>2100-01-01</td>
+        <td>1</td>
+    </tr>
+    <tr>
+        <td>9</td>
+        <td>6</td>
+        <td>2000-01-01</td>
+        <td>2100-01-01</td>
+        <td>1</td>
+    </tr>
+    <tr>
+        <td>10</td>
+        <td>5</td>
+        <td>2000-01-01</td>
+        <td>2100-01-01</td>
+        <td>1</td>
+    </tr>
+    <tr>
+        <td>10</td>
+        <td>6</td>
+        <td>2000-01-01</td>
+        <td>2100-01-01</td>
+        <td>1</td>
+    </tr>
+    <tr>
+        <td>11</td>
+        <td>7</td>
+        <td>2000-01-01</td>
+        <td>2014-06-17</td>
+        <td>0</td>
+    </tr>
+    <tr>
+        <td>11</td>
+        <td>6</td>
+        <td>2014-06-18</td>
+        <td>2014-06-21</td>
+        <td>0</td>
+    </tr>
+    <tr>
+        <td>11</td>
+        <td>7</td>
+        <td>2014-06-22</td>
+        <td>2100-01-01</td>
+        <td>1</td>
+    </tr>
+</table>
+
+<p>Notice that I&#39;m using dates in the far past and far future to denote the beginning of time and the end of time, respectively. This is to make queries easier to write.</p>
+
+<figure class="highlight"><pre><code class="language-sql" data-lang="sql"><span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">test_group_region_bridge</span><span class="p">(</span><span class="n">group_id</span> <span class="nb">integer</span> <span class="k">not</span> <span class="k">null</span><span class="p">,</span> <span class="n">district_id</span> <span class="nb">integer</span> <span class="k">not</span> <span class="k">null</span><span class="p">,</span> <span class="n">change_effective</span> <span class="k">timestamp</span> <span class="k">not</span> <span class="k">null</span><span class="p">,</span> <span class="n">change_end</span> <span class="k">timestamp</span> <span class="k">null</span><span class="p">,</span> <span class="n">change_current</span> <span class="nb">boolean</span> <span class="k">not</span> <span class="k">null</span><span class="p">);</span>
+
+<span class="k">INSERT</span> <span class="k">INTO</span> <span class="n">test_group_region_bridge</span> <span class="p">(</span><span class="n">group_id</span><span class="p">,</span> <span class="n">district_id</span><span class="p">,</span> <span class="n">change_effective</span><span class="p">,</span> <span class="n">change_end</span><span class="p">,</span> <span class="n">change_current</span><span class="p">)</span>
+           <span class="k">SELECT</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="nb">DATE</span><span class="p">(</span><span class="s1">&#39;2000-01-01&#39;</span><span class="p">),</span> <span class="nb">DATE</span><span class="p">(</span><span class="s1">&#39;2100-01-01&#39;</span><span class="p">),</span> <span class="mi">1</span>
+<span class="k">UNION</span> <span class="k">ALL</span> <span class="k">SELECT</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="nb">DATE</span><span class="p">(</span><span class="s1">&#39;2000-01-01&#39;</span><span class="p">),</span> <span class="nb">DATE</span><span class="p">(</span><span class="s1">&#39;2100-01-01&#39;</span><span class="p">),</span> <span class="mi">1</span>
+<span class="k">UNION</span> <span class="k">ALL</span> <span class="k">SELECT</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="nb">DATE</span><span class="p">(</span><span class="s1">&#39;2000-01-01&#39;</span><span class="p">),</span> <span class="nb">DATE</span><span class="p">(</span><span class="s1">&#39;2100-01-01&#39;</span><span class="p">),</span> <span class="mi">1</span>
+<span class="k">UNION</span> <span class="k">ALL</span> <span class="k">SELECT</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="nb">DATE</span><span class="p">(</span><span class="s1">&#39;2000-01-01&#39;</span><span class="p">),</span> <span class="nb">DATE</span><span class="p">(</span><span class="s1">&#39;2100-01-01&#39;</span><span class="p">),</span> <span class="mi">1</span>
+<span class="k">UNION</span> <span class="k">ALL</span> <span class="k">SELECT</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="nb">DATE</span><span class="p">(</span><span class="s1">&#39;2000-01-01&#39;</span><span class="p">),</span> <span class="nb">DATE</span><span class="p">(</span><span class="s1">&#39;2014-06-17&#39;</span><span class="p">),</span> <span class="mi">0</span>
+<span class="k">UNION</span> <span class="k">ALL</span> <span class="k">SELECT</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="nb">DATE</span><span class="p">(</span><span class="s1">&#39;2014-06-18&#39;</span><span class="p">),</span> <span class="nb">DATE</span><span class="p">(</span><span class="s1">&#39;2014-06-21&#39;</span><span class="p">),</span> <span class="mi">0</span>
+<span class="k">UNION</span> <span class="k">ALL</span> <span class="k">SELECT</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="nb">DATE</span><span class="p">(</span><span class="s1">&#39;2014-06-22&#39;</span><span class="p">),</span> <span class="nb">DATE</span><span class="p">(</span><span class="s1">&#39;2100-01-01&#39;</span><span class="p">),</span> <span class="mi">1</span><span class="p">;</span></code></pre></figure>
+
+<p>Now we can run the same region count query as before, but have it take into account that fact that the post has to have been made while the group was still in that region. You can also use the same schema to fall back to the previous behavior of looking at just the current state of the org chart with <code>change_current = 1</code>.</p>
+
+<figure class="highlight"><pre><code class="language-sql" data-lang="sql"><span class="k">SELECT</span> <span class="n">r</span><span class="p">.</span><span class="n">child_district_name</span><span class="p">,</span>
+       <span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">)</span>
+  <span class="k">FROM</span> <span class="n">test_post</span> <span class="n">p</span>
+ <span class="k">INNER</span> <span class="k">JOIN</span> <span class="n">test_group_region_bridge</span> <span class="n">gr</span>
+    <span class="k">ON</span> <span class="n">gr</span><span class="p">.</span><span class="n">group_id</span> <span class="o">=</span> <span class="n">p</span><span class="p">.</span><span class="n">group_id</span>
+ <span class="k">INNER</span> <span class="k">JOIN</span> <span class="n">test_region_bridge</span> <span class="n">r</span>
+    <span class="k">ON</span> <span class="n">r</span><span class="p">.</span><span class="n">child_district_id</span> <span class="o">=</span> <span class="n">gr</span><span class="p">.</span><span class="n">district_id</span>
+ <span class="k">WHERE</span> <span class="n">r</span><span class="p">.</span><span class="n">parent_district_name</span> <span class="o">=</span> <span class="s1">&#39;Role Hierarchy&#39;</span>
+   <span class="k">AND</span> <span class="n">r</span><span class="p">.</span><span class="n">depth_from_parent</span> <span class="o">=</span> <span class="mi">1</span>
+   <span class="k">AND</span> <span class="n">p</span><span class="p">.</span><span class="nb">date</span> <span class="k">BETWEEN</span> <span class="s1">&#39;2014-06-01&#39;</span> <span class="k">AND</span> <span class="s1">&#39;2014-06-30&#39;</span>
+   <span class="k">AND</span> <span class="n">p</span><span class="p">.</span><span class="nb">date</span> <span class="k">BETWEEN</span> <span class="n">gr</span><span class="p">.</span><span class="n">change_effective</span> <span class="k">and</span> <span class="n">gr</span><span class="p">.</span><span class="n">change_end</span>
+ <span class="k">GROUP</span> <span class="k">BY</span> <span class="n">r</span><span class="p">.</span><span class="n">child_district_name</span><span class="p">;</span></code></pre></figure>
+
+<h2>Smoothing out the kinks</h2>
+
+<p>You may have noticed that these queries are all repeating the same <code>JOIN</code> syntax. If you think this is going to be a common query pattern, you can create a view as a shortcut.</p>
+
+<figure class="highlight"><pre><code class="language-sql" data-lang="sql"><span class="k">CREATE</span> <span class="k">VIEW</span> <span class="n">test_post_historical_region</span> <span class="k">AS</span>
+<span class="k">SELECT</span> <span class="n">p</span><span class="p">.</span><span class="o">*</span><span class="p">,</span>
+       <span class="n">r</span><span class="p">.</span><span class="n">parent_district_name</span><span class="p">,</span>
+       <span class="n">r</span><span class="p">.</span><span class="n">child_district_id</span><span class="p">,</span>
+       <span class="n">r</span><span class="p">.</span><span class="n">child_district_name</span>
+  <span class="k">FROM</span> <span class="n">test_post</span> <span class="n">p</span>
+ <span class="k">INNER</span> <span class="k">JOIN</span> <span class="n">test_group_region_bridge</span> <span class="n">gr</span>
+    <span class="k">ON</span> <span class="n">gr</span><span class="p">.</span><span class="n">group_id</span> <span class="o">=</span> <span class="n">p</span><span class="p">.</span><span class="n">group_id</span>
+ <span class="k">INNER</span> <span class="k">JOIN</span> <span class="n">test_region_bridge</span> <span class="n">r</span>
+    <span class="k">ON</span> <span class="n">r</span><span class="p">.</span><span class="n">child_district_id</span> <span class="o">=</span> <span class="n">gr</span><span class="p">.</span><span class="n">district_id</span>
+ <span class="k">WHERE</span> <span class="n">p</span><span class="p">.</span><span class="nb">date</span> <span class="k">BETWEEN</span> <span class="n">gr</span><span class="p">.</span><span class="n">change_effective</span> <span class="k">and</span> <span class="n">gr</span><span class="p">.</span><span class="n">change_end</span><span class="p">;</span></code></pre></figure>
+
+<p>This will make your previous query much simpler.</p>
+
+<figure class="highlight"><pre><code class="language-sql" data-lang="sql"><span class="k">SELECT</span> <span class="nb">DATE</span><span class="p">(</span><span class="n">p</span><span class="p">.</span><span class="nb">date</span><span class="p">),</span>
+       <span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">)</span>
+  <span class="k">FROM</span> <span class="n">test_post_historical_region</span> <span class="n">p</span>
+ <span class="k">WHERE</span> <span class="n">p</span><span class="p">.</span><span class="n">child_district_name</span> <span class="o">=</span> <span class="s1">&#39;Sales&#39;</span>
+   <span class="k">AND</span> <span class="n">r</span><span class="p">.</span><span class="n">depth_from_parent</span> <span class="o">=</span> <span class="mi">1</span>
+ <span class="k">GROUP</span> <span class="k">BY</span> <span class="nb">DATE</span><span class="p">(</span><span class="n">p</span><span class="p">.</span><span class="nb">date</span><span class="p">);</span></code></pre></figure>
+
+<p>This also abstracts the existence of the <code>change_*</code> fields from the user. The hard part is communicating what the view is doing, so query authors know when to use it, and when <em>NOT</em> to use it. If you want to maximize the performance of the system at the cost of extra storage, you can make this a materialized view.</p>
+
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/datawarehouse">datawarehouse</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

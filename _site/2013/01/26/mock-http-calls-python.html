@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Mocking HTTP calls in Python tests</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2013/01/26/mock-http-calls-python.html" />
+
+        <meta property="og:title" content="Mocking HTTP calls in Python tests"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2013/01/26/mock-http-calls-python.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Mocking HTTP calls in Python tests
+                            
+                                <span class="post-date subtitle">26 Jan 2013</span>
+                            
+                        </h1>
+                    
+                    <p>There are at least a few decent libraries out there for mocking out HTTP calls in Python unit tests. The best solution looks like <a href="https://github.com/gabrielfalcao/HTTPretty">HTTPretty</a>. One feature that it does not have, however, is the ability to <a href="https://github.com/gabrielfalcao/HTTPretty/issues/25">specify url parameters</a>. For many applications, such as testing OAuth flows, a lot of the behavior you are trying to validate involves parameters being passed. At the same time, you don&#39;t want to be forced to specify <em>all</em> the parameters. For example, the <code>oauth_timestamp</code> changes for every REST call; it&#39;s dynamic based on the system clock.</p>
+
+<p>Here is a quick class that can mock <code>urllib2</code> requests, and lets you specify some parameters that you want to validate are being passed. Any parametes that you don&#39;t specify are allowed.</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">urllib2</span>
+<span class="kn">from</span> <span class="nn">StringIO</span> <span class="kn">import</span> <span class="n">StringIO</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">httplib</span>
+<span class="kn">import</span> <span class="nn">urlparse</span>
+<span class="kn">import</span> <span class="nn">urllib</span>
+
+
+<span class="k">class</span> <span class="nc">MockHTTPHandler</span><span class="p">(</span><span class="n">urllib2</span><span class="o">.</span><span class="n">HTTPSHandler</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">requests</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">responses</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calls_made</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">hash_args</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; takes an args dict and makes a hashable key, normalizing order &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="n">urllib</span><span class="o">.</span><span class="n">urlencode</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">mock</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">validate_args</span><span class="o">=</span><span class="p">{},</span> <span class="n">status_code</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;data&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">fixture</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;fixture&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">fixture</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fixture</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">json_data</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;json_data&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">json_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">json_data</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;must pass either data or fixture argument&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">url</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">responses</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">responses</span><span class="p">[</span><span class="n">url</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">responses</span><span class="p">[</span><span class="n">url</span><span class="p">][</span><span class="n">MockHTTPHandler</span><span class="o">.</span><span class="n">hash_args</span><span class="p">(</span><span class="n">validate_args</span><span class="p">)]</span> <span class="o">=</span> <span class="p">(</span><span class="n">status_code</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">https_open</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">http_open</span><span class="p">(</span><span class="n">req</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">http_open</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">):</span>
+        <span class="n">url_with_args</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">get_full_url</span><span class="p">()</span>
+        <span class="n">parsed</span> <span class="o">=</span> <span class="n">urlparse</span><span class="o">.</span><span class="n">urlparse</span><span class="p">(</span><span class="n">url_with_args</span><span class="p">)</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="n">url_with_args</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;?&#39;</span> <span class="o">+</span> <span class="n">parsed</span><span class="o">.</span><span class="n">query</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">actual_args</span> <span class="o">=</span> <span class="n">urlparse</span><span class="o">.</span><span class="n">parse_qs</span><span class="p">(</span><span class="n">parsed</span><span class="o">.</span><span class="n">query</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">url</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">responses</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">args_qs</span><span class="p">,</span> <span class="p">(</span><span class="n">status_code</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">responses</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="c"># check if this request matches all the args in a registered call</span>
+                <span class="n">expected_args</span> <span class="o">=</span> <span class="n">urlparse</span><span class="o">.</span><span class="n">parse_qs</span><span class="p">(</span><span class="n">args_qs</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">item</span> <span class="ow">in</span> <span class="n">actual_args</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">expected_args</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+                    <span class="k">continue</span>
+                <span class="n">resp</span> <span class="o">=</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">addinfourl</span><span class="p">(</span><span class="n">StringIO</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="p">{},</span> <span class="n">req</span><span class="o">.</span><span class="n">get_full_url</span><span class="p">())</span>
+                <span class="n">resp</span><span class="o">.</span><span class="n">code</span> <span class="o">=</span> <span class="n">status_code</span>
+                <span class="n">resp</span><span class="o">.</span><span class="n">msg</span> <span class="o">=</span> <span class="n">httplib</span><span class="o">.</span><span class="n">responses</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">status_code</span><span class="p">,</span> <span class="s">&#39;OK&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">calls_made</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">url</span> <span class="o">+</span> <span class="s">&#39;?&#39;</span> <span class="o">+</span> <span class="n">args_qs</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">resp</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&#39;need to mock url </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">req</span><span class="o">.</span><span class="n">get_full_url</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="nf">assert_all_called</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test</span><span class="p">):</span>
+        <span class="n">calls_expected</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">url</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">responses</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">args_qs</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">responses</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
+                <span class="n">calls_expected</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">url</span> <span class="o">+</span> <span class="s">&#39;?&#39;</span> <span class="o">+</span> <span class="n">args_qs</span><span class="p">)</span>
+        <span class="n">test</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">calls_expected</span><span class="p">),</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">calls_made</span><span class="p">))</span>
+
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">patch</span><span class="p">():</span>
+        <span class="n">opener</span> <span class="o">=</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">build_opener</span><span class="p">(</span><span class="n">MockHTTPHandler</span><span class="p">)</span>
+        <span class="n">urllib2</span><span class="o">.</span><span class="n">install_opener</span><span class="p">(</span><span class="n">opener</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">h</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">opener</span><span class="o">.</span><span class="n">handlers</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">MockHTTPHandler</span><span class="p">)][</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">unpatch</span><span class="p">():</span>
+        <span class="n">urllib2</span><span class="o">.</span><span class="n">_opener</span> <span class="o">=</span> <span class="bp">None</span></code></pre></figure>
+
+<p>You can enable this mock in your unit tests as follows. Note the call to <code>unpatch()</code> to remove the mock. Without this, other tests in your test suite may fail if they try to make a HTTP call.</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">unittest</span>
+
+
+<span class="k">class</span> <span class="nc">TwitterOAuthCallsTest</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">requests</span> <span class="o">=</span> <span class="n">MockHTTPHandler</span><span class="o">.</span><span class="n">patch</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">tearDown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">MockHTTPHandler</span><span class="o">.</span><span class="n">unpatch</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">test_http_request</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c"># you can specify json results directly</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">requests</span><span class="o">.</span><span class="n">mock</span><span class="p">(</span><span class="s">&#39;https://api.twitter.com/1/friends/ids.json&#39;</span><span class="p">,</span> <span class="p">{</span>
+            <span class="s">&#39;screen_name&#39;</span><span class="p">:</span> <span class="s">&#39;foobar&#39;</span><span class="p">,</span>
+            <span class="s">&#39;oauth_token&#39;</span><span class="p">:</span> <span class="s">&#39;BAR&#39;</span><span class="p">,</span>
+            <span class="s">&#39;oauth_consumer_key&#39;</span><span class="p">:</span> <span class="s">&#39;dsafsdfdsfsdf&#39;</span><span class="p">},</span>
+            <span class="n">json_data</span><span class="o">=</span><span class="p">{</span>
+                <span class="s">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="mi">38596298</span><span class="p">,</span>
+                    <span class="mi">30516966</span><span class="p">,</span>
+                    <span class="mi">14399709</span><span class="p">,</span>
+                <span class="p">],</span>
+                <span class="s">&quot;next_cursor&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                <span class="s">&quot;next_cursor_str&quot;</span><span class="p">:</span> <span class="s">&quot;0&quot;</span><span class="p">,</span>
+                <span class="s">&quot;previous_cursor&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                <span class="s">&quot;previous_cursor_str&quot;</span><span class="p">:</span> <span class="s">&quot;0&quot;</span>
+            <span class="p">})</span>
+
+        <span class="c"># you can also specify json via an external file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">requests</span><span class="o">.</span><span class="n">mock</span><span class="p">(</span><span class="s">&#39;https://api.twitter.com/1/users/lookup.json&#39;</span><span class="p">,</span> <span class="p">{</span>
+            <span class="s">&#39;user_id&#39;</span><span class="p">:</span> <span class="s">&#39;38596298,30516966,14399709&#39;</span><span class="p">},</span>
+            <span class="n">fixture</span><span class="o">=</span><span class="s">&#39;twitter/fixtures/lookup.json&#39;</span><span class="p">)</span>
+
+        <span class="c"># INVOKE THE TWITTER CODE HERE</span>
+
+        <span class="c"># test that all the urls you registered were called</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">requests</span><span class="o">.</span><span class="n">assert_all_called</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code></pre></figure>
+
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/python">python</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

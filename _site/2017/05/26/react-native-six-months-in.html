@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>React Native Six Months In</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2017/05/26/react-native-six-months-in.html" />
+
+        <meta property="og:title" content="React Native Six Months In"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2017/05/26/react-native-six-months-in.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            React Native Six Months In
+                            
+                                <span class="post-date subtitle">26 May 2017</span>
+                            
+                        </h1>
+                    
+                    <p>NerdWallet released our first cross platform mobile app at the start of 2017,
+about six months ago. We choose to use React Native, and we are still using
+99% of the same code base for the iOS and Android apps. What have we learned
+so far?</p>
+
+<h1>Initial reasoning</h1>
+
+<p>We initially chose React Native because it was the only way to hit our goals. We
+didn&#39;t have any native mobile engineers, and we had been asked to deliver an
+iOS and Android app from scratch in just five weeks. We also happened to have
+very solid React experience on the team. Additionally, the app overlapped very
+nicely with some features we already had on the web, and we thought we could
+get some code re-use there.</p>
+
+<h1>Code Reuse Deep Dive</h1>
+
+<p>In our case, we started with an intuition that 50% of the mobile app codebase
+could actually be NPM modules re-used from our web stack. Plus, we got the
+obvious savings of 100% code re-use between the iOS and Android app code.</p>
+
+<p>After 6 months, we can look at our actual code re-use to get a better sense of
+where we actually ended up. Our current app has 26,000 lines of JavaScript. The
+NPM modules that we include from our web app stack total 40,000 lines of
+JavaScript. In practice, the maintenance of that shared code is virtually 100%
+offloaded to other teams.</p>
+
+<p><img src="https://docs.google.com/drawings/d/1-pqAgRwz9gh66290u3yJQ5Jfevn3hBEqzBFtORpQ9nE/pub?w=960&amp;h=720" alt="react"></p>
+
+<p>Here is what it might look like if we had two separate native app code bases.</p>
+
+<p><img src="https://docs.google.com/drawings/d/1QWus2w-VxQRpIbR_y51DKukeGXIgYKGObWY5eJuQ8Pk/pub?w=480&amp;h=360" alt="native"></p>
+
+<p>If you think of an app codebase as 2 unit of library code and 1 unit UX code,
+our app is about 1.2 units of code that we actually maintain. Writing two
+native apps would be about 6 units. The most interesting learning for me was
+just how much logic in an app is not related directly to the UI, as well as
+how easy it is to re-purpose NPM modules targeted at web.</p>
+
+<p><em>Note: if you&#39;re interested in reading more about leveraging NPM modules in
+React Native, see <a href="https://t.co/tM8CSoZvlk">@parshap&#39;s slides</a>.</em></p>
+
+<h1>Limitations</h1>
+
+<p>We have run into a number of areas where we are making compromises on the user
+experience. It&#39;s not totally clear yet which of these are legitimate things that
+React Native is not good at, and which are due to us as a team not having
+focused on them.</p>
+
+<h2>Performance</h2>
+
+<p>We have seen persistent issues with app performance, particularly around the
+time to switch between tabs in the navigation. That issue seems to be due to a
+bug in our navigation library, <code>react-native-router-flux</code>. But it&#39;s important
+to call out that performance is largely dependent on getting React basics right.
+Performance has been good enough that we have not dedicated time to look
+into it further. In general, we still don&#39;t think there is anything that most
+apps need to do for which React Native will not perform well, except maybe
+custom animations.</p>
+
+<h2>Animations</h2>
+
+<p>Basic stock animations like screen transitions are available and perform well
+out of the box. For custom animations such as fading out a header as the user
+scrolls down on a list view, you need to write the animation yourself. We
+initially tried the naive solution where we control style properties from
+JavaScript. That did not perform well. But it was relatively easy to use the
+actual bridged animation primitives, at least for simple animations. We still
+don&#39;t have a good sense of how difficult complex custom animations will be.</p>
+
+<h2>Fonts</h2>
+
+<p>Initially we did not use the correct default fonts for each platform. It turned
+out to be relatively simple to use either San Francisco or Roboto based on the
+platform. Some font variants that are normally available are not included. This
+ended up being something that probably took more time to get right than a native
+app would, but if you pay attention to it the first time it should be smooth.</p>
+
+<h1>Biggest risks</h1>
+
+<p>The largest risk with React Native is still the immaturity of the platform.
+Releases come every two weeks with potentially breaking changes. But the larger
+risk is more existential; even though it&#39;s still building in popularity, there
+is a chance that React Native fades away in the coming years as the framework
+ecosystem <a href="https://trends.google.com/trends/explore?q=react%20native,phonegap,cordova,Xamarin">continues to evolve</a>.</p>
+
+<p><img src="https://dl.dropboxusercontent.com/spa/sffu0th1cc1sg9q/ellfigls.png" alt="trends"></p>
+
+<p>The second largest risk I see is a little more insidious. As we have ramped up
+the team with engineers who have prior mobile experience, they have begun to
+point out areas where we are not following best UX practices. Some of these are
+intentional. It&#39;s very tempting once you have a cross platform app to make UX
+decisions to optimize for code re-use, not the best user experience. Even more
+troubling is the times when the engineers themselves don&#39;t realize that a
+particular design is not following best practice UX; typically due to many of
+them not having mobile experience.</p>
+
+<h1>Question marks</h1>
+
+<p>In my mind, the biggest open question is around how these mobile native
+platforms continue to evolve. Both Android and iOS have their developer
+conferences this time of year. Neither are expected to announce anything ground
+breaking in terms of how we build apps. This is a natural trend as the platforms
+mature; there is less interesting stuff to do. This happened to the PC operating
+system platforms over the last 30 years. 10 years into mobile, are we starting
+to see the same? This could be the time when putting an abstraction layer on top
+starts to make more sense, and actually becomes a winning strategy.</p>
+
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

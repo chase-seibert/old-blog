@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Hive with HBase Quickstart</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2013/05/10/hive-hbase-quickstart.html" />
+
+        <meta property="og:title" content="Hive with HBase Quickstart"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2013/05/10/hive-hbase-quickstart.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Hive with HBase Quickstart
+                            
+                                <span class="post-date subtitle">10 May 2013</span>
+                            
+                        </h1>
+                    
+                    <p>Though there is some <a href="https://cwiki.apache.org/confluence/display/Hive/HBaseIntegration">decent documentation</a>, I found that setting up Hive with a HBase back-end to be somewhat fiddly. Hopefully this guide will help you get started quicker. This article presumes that you already have HBase set up. If not, see my <a href="http://chase-seibert.github.io/blog/2013/02/01/getting-starting-with-hbase-and-pig.html">HBase quickstart</a>.</p>
+
+<p>Note: these directions are for development. They don&#39;t use HDFS, for example. For a full guide on production deployment, see the excellent <a href="http://www.cloudera.com/content/cloudera-content/cloudera-docs/CDH4/latest/CDH4-Installation-Guide/cdh4ig_topic_18.html">CDH4 directions</a>.</p>
+
+<h2>Linux</h2>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">sudo apt-get install hive
+
+<span class="c"># create directory that Hive stores data in by default</span>
+sudo mkdir -p /user/hive/warehouse
+sudo chown -R myusername:myusername /user/hive/warehouse/
+
+<span class="c"># copy HBase JARs into the Hive lib</span>
+sudo cp /usr/share/hbase/hbase-0.92.1.jar /usr/lib/hive/lib
+sudo cp /usr/share/hadoop-zookeeper/zookeeper-3.4.3.jar /usr/lib/hive/lib</code></pre></figure>
+
+<h2>OSX</h2>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">brew install hive</code></pre></figure>
+
+<h2>Connect to HBase</h2>
+
+<p>Now, you can fire up hive with the <code>hive</code> command and create a table that&#39;s backed by HBase. For this example, my HBase table is called <code>test</code>, and has a column family of integer values called <code>values</code>. Note that the dropping/creating of tables is just effecting Hive meta-data; no actual changes are made in HBase.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">DROP TABLE IF EXISTS <span class="nb">test</span><span class="p">;</span>
+
+CREATE EXTERNAL TABLE
+    <span class="nb">test</span><span class="o">(</span>key string, values map&lt;string, int&gt;<span class="o">)</span>
+STORED BY
+    <span class="s1">&#39;org.apache.hadoop.hive.hbase.HBaseStorageHandler&#39;</span>
+WITH SERDEPROPERTIES <span class="o">(</span>
+    <span class="s2">&quot;hbase.columns.mapping&quot;</span> <span class="o">=</span> <span class="s2">&quot;:key,values:&quot;</span>
+    <span class="o">)</span>
+TBLPROPERTIES <span class="o">(</span>
+    <span class="s2">&quot;hbase.table.name&quot;</span> <span class="o">=</span> <span class="s2">&quot;test&quot;</span>
+    <span class="o">)</span><span class="p">;</span>
+
+SELECT * FROM <span class="nb">test</span><span class="p">;</span>
+
+&gt;c4ca4-0000001-79879483-000000000124-000000000000000000000000000025607621 <span class="o">{</span><span class="s1">&#39;comments&#39;</span>:0, <span class="s1">&#39;likes&#39;</span>:0<span class="o">}</span>
+&gt;c4ca4-0000001-79879483-000000000124-000000000000000000000000000025607622 <span class="o">{</span><span class="s1">&#39;comments&#39;</span>:0, <span class="s1">&#39;likes&#39;</span>:0<span class="o">}</span></code></pre></figure>
+
+<h2>Simple Map Reduce Example</h2>
+
+<p>Give the above raw data in the table, here is example GROUP/SUM map reduce where you sum up the various HBase columns in the values column family. This example creates a view to handle the blowing apart of the HBase rowkey. You can use an <code>INSERT OVERWRITE</code> statement at the end to write the results back into Hbase.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">CREATE VIEW
+    test_view AS
+SELECT
+    substr<span class="o">(</span>key, 0, 36<span class="o">)</span> as org_date_asset_prefix,
+    split<span class="o">(</span>key, <span class="s1">&#39;-&#39;</span><span class="o">)[</span>2<span class="o">]</span> as inverse_date_str,
+    stats<span class="o">[</span><span class="s1">&#39;comments&#39;</span><span class="o">]</span> as comments,
+    stats<span class="o">[</span><span class="s1">&#39;likes&#39;</span><span class="o">]</span> as likes
+FROM
+    <span class="nb">test</span><span class="p">;</span>
+
+SELECT
+    org_date_asset_prefix,
+    map<span class="o">(</span>
+      <span class="s1">&#39;comments&#39;</span>, SUM<span class="o">(</span>comments<span class="o">)</span>,
+      <span class="s1">&#39;likes&#39;</span>, SUM<span class="o">(</span>likes<span class="o">)</span>
+    <span class="o">)</span> as stats
+FROM
+    test_view
+GROUP BY
+    org_date_asset_prefix<span class="p">;</span></code></pre></figure>
+
+<h2>Thrift REST API</h2>
+
+<p>If you want to connect to Hive via thrift, you can start the thrift service with <code>hive --service hiveserver</code>. <a href="https://github.com/tebeka/hiver">Hiver</a> is a nice little Python API wrapper.</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">hiver</span>
+<span class="n">client</span> <span class="o">=</span> <span class="n">hiver</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span>
+<span class="n">client</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&#39;SHOW TABLES&#39;</span><span class="p">)</span>
+<span class="n">rows</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">fetchAll</span><span class="p">()</span></code></pre></figure>
+
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/hbase">hbase</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/hive">hive</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

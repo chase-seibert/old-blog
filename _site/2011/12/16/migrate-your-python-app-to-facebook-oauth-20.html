@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Migrate your Python app to Facebook OAuth 2.0</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2011/12/16/migrate-your-python-app-to-facebook-oauth-20.html" />
+
+        <meta property="og:title" content="Migrate your Python app to Facebook OAuth 2.0"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2011/12/16/migrate-your-python-app-to-facebook-oauth-20.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Migrate your Python app to Facebook OAuth 2.0
+                            
+                                <span class="post-date subtitle">16 Dec 2011</span>
+                            
+                        </h1>
+                    
+                    <p>
+Facebook recently started enforcing OAuth 2.0 on app developers. Supposedly <a href="http://developers.facebook.com/docs/oauth2-https-migration/">this was slated</a> for Oct 1, 2011, but in practice it seems to have not started until Dec 15. If, like me, you didn't realize the change was coming until it was already broken, then you might be scrambling for a fix. Here are the changes I needed to make in our Django app using the Facebook <a href="https://github.com/facebook/python-sdk">python sdk</a> and <a href="http://developers.facebook.com/docs/reference/javascript/">javascript sdk</a>.
+</p>
+
+<p>
+On the javascript side, there are some new <a href="http://developers.facebook.com/docs/reference/javascript/FB.init/">FB.init</a> options. Here is our old code:
+</p>
+
+<pre name="code" class="javascript">
+window.fbAsyncInit = function() {
+ FB.init({appId: window.FACEBOOK_TOKEN, status: true, cookie: true, xfbml: true});
+ FB.Canvas.setAutoResize();
+};
+</pre>
+
+<p>
+And here is the new code:
+</p>
+
+<pre name="code" class="javascript">
+window.fbAsyncInit = function() {
+    FB.init({
+      appId      : window.FACEBOOK_TOKEN,
+      channelUrl : window.SITE_URL + &quot;/static/channel.html&quot;,
+      status     : true,
+      cookie     : true,
+      oauth      : true,
+      xfbml      : false
+    });
+    FB.Canvas.setAutoResize();
+  };
+</pre>
+
+<p>
+Notice the "oauth" setting, and the "channelUrl" setting. channelUrl references a static file on your server, and is used to work-around cross domain scripting issues. It just needs to have the following static content in it:
+</p>
+
+
+<pre name="code" class="html">
+&lt;script src=&quot;//connect.facebook.net/en_US/all.js&quot;&gt;&lt;/script&gt;
+</pre>
+
+<p>
+Besides the init method, the <a href="http://developers.facebook.com/docs/reference/javascript/FB.login/">FB.login</a> changed the name on the permissions attribute from "perms" to "scope":
+</p>
+
+<pre name="code" class="javascript">
+FB.login(function(response) {
+    /* ... do stuff here */
+}, { scope: &quot;publish_stream,offline_access&quot; }); /* used to be &quot;perms&quot;
+</pre>
+
+<p>
+The more troublesome change was on the Python SDK side. Previously, when the javascript sdk authenticated a user, it would add a "_fbs_APP_ID" cookie to the response, which you would use get_user_from_cookie() from the python sdk to parse. With the OAuth 2.0 change, they moved to a new _fb<em>r</em>_APP_ID cookie (note the "r"), with a new format. As of Dec 15, the official <a href="https://github.com/facebook/python-sdk">python sdk</a> has not been updated to support this new format.
+</p>
+
+<p>
+Luckily, I was <a href="http://facebook.stackoverflow.com/questions/7585488/python-oauth-2-0-new-fbsr-facebook-cookie-error-validating-verification-code">able to find</a> a <a href="https://gist.github.com/1190267">community produced version</a>.
+</p>
+
+<pre name="code" class="python">
+#!/usr/bin/env python
+#
+# Copyright 2010 Facebook
+#
+# Licensed under the Apache License, Version 2.0 (the &quot;License&quot;); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an &quot;AS IS&quot; BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+&quot;&quot;&quot;Python client library for the Facebook Platform.
+
+This client library is designed to support the Graph API and the official
+Facebook JavaScript SDK, which is the canonical way to implement
+Facebook authentication. Read more about the Graph API at
+http://developers.facebook.com/docs/api. You can download the Facebook
+JavaScript SDK at http://github.com/facebook/connect-js/.
+
+If your application is using Google AppEngine's webapp framework, your
+usage of this module might look like this:
+
+    user = facebook.get_user_from_cookie(self.request.cookies, key, secret)
+    if user:
+        graph = facebook.GraphAPI(user[&quot;access_token&quot;])
+        profile = graph.get_object(&quot;me&quot;)
+        friends = graph.get_connections(&quot;me&quot;, &quot;friends&quot;)
+
+&quot;&quot;&quot;
+
+import cgi
+import hashlib
+import time
+import urllib
+
+# Find a JSON parser
+try:
+    import json
+    _parse_json = lambda s: json.loads(s)
+except ImportError:
+    try:
+        import simplejson
+        _parse_json = lambda s: simplejson.loads(s)
+    except ImportError:
+        # For Google AppEngine
+        from django.utils import simplejson
+        _parse_json = lambda s: simplejson.loads(s)
+
+
+class GraphAPI(object):
+    &quot;&quot;&quot;A client for the Facebook Graph API.
+
+    See http://developers.facebook.com/docs/api for complete documentation
+    for the API.
+
+    The Graph API is made up of the objects in Facebook (e.g., people, pages,
+    events, photos) and the connections between them (e.g., friends,
+    photo tags, and event RSVPs). This client provides access to those
+    primitive types in a generic way. For example, given an OAuth access
+    token, this will fetch the profile of the active user and the list
+    of the user's friends:
+
+       graph = facebook.GraphAPI(access_token)
+       user = graph.get_object(&quot;me&quot;)
+       friends = graph.get_connections(user[&quot;id&quot;], &quot;friends&quot;)
+
+    You can see a list of all of the objects and connections supported
+    by the API at http://developers.facebook.com/docs/reference/api/.
+
+    You can obtain an access token via OAuth or by using the Facebook
+    JavaScript SDK. See http://developers.facebook.com/docs/authentication/
+    for details.
+
+    If you are using the JavaScript SDK, you can use the
+    get_user_from_cookie() method below to get the OAuth access token
+    for the active user from the cookie saved by the SDK.
+    &quot;&quot;&quot;
+    def __init__(self, access_token=None):
+        self.access_token = access_token
+
+    def get_object(self, id, **args):
+        &quot;&quot;&quot;Fetchs the given object from the graph.&quot;&quot;&quot;
+        return self.request(id, args)
+
+    def get_objects(self, ids, **args):
+        &quot;&quot;&quot;Fetchs all of the given object from the graph.
+
+        We return a map from ID to object. If any of the IDs are invalid,
+        we raise an exception.
+        &quot;&quot;&quot;
+        args[&quot;ids&quot;] = &quot;,&quot;.join(ids)
+        return self.request(&quot;&quot;, args)
+
+    def get_connections(self, id, connection_name, **args):
+        &quot;&quot;&quot;Fetchs the connections for given object.&quot;&quot;&quot;
+        return self.request(id + &quot;/&quot; + connection_name, args)
+
+    def put_object(self, parent_object, connection_name, **data):
+        &quot;&quot;&quot;Writes the given object to the graph, connected to the given parent.
+
+        For example,
+
+            graph.put_object(&quot;me&quot;, &quot;feed&quot;, message=&quot;Hello, world&quot;)
+
+        writes &quot;Hello, world&quot; to the active user's wall. Likewise, this
+        will comment on a the first post of the active user's feed:
+
+            feed = graph.get_connections(&quot;me&quot;, &quot;feed&quot;)
+            post = feed[&quot;data&quot;][0]
+            graph.put_object(post[&quot;id&quot;], &quot;comments&quot;, message=&quot;First!&quot;)
+
+        See http://developers.facebook.com/docs/api#publishing for all of
+        the supported writeable objects.
+
+        Most write operations require extended permissions. For example,
+        publishing wall posts requires the &quot;publish_stream&quot; permission. See
+        http://developers.facebook.com/docs/authentication/ for details about
+        extended permissions.
+        &quot;&quot;&quot;
+        assert self.access_token, &quot;Write operations require an access token&quot;
+        return self.request(parent_object + &quot;/&quot; + connection_name, post_args=data)
+
+    def put_wall_post(self, message, attachment={}, profile_id=&quot;me&quot;):
+        &quot;&quot;&quot;Writes a wall post to the given profile's wall.
+
+        We default to writing to the authenticated user's wall if no
+        profile_id is specified.
+
+        attachment adds a structured attachment to the status message being
+        posted to the Wall. It should be a dictionary of the form:
+
+            {&quot;name&quot;: &quot;Link name&quot;
+             &quot;link&quot;: &quot;http://www.example.com/&quot;,
+             &quot;caption&quot;: &quot;{*actor*} posted a new review&quot;,
+             &quot;description&quot;: &quot;This is a longer description of the attachment&quot;,
+             &quot;picture&quot;: &quot;http://www.example.com/thumbnail.jpg&quot;}
+
+        &quot;&quot;&quot;
+        return self.put_object(profile_id, &quot;feed&quot;, message=message, **attachment)
+
+    def put_comment(self, object_id, message):
+        &quot;&quot;&quot;Writes the given comment on the given post.&quot;&quot;&quot;
+        return self.put_object(object_id, &quot;comments&quot;, message=message)
+
+    def put_like(self, object_id):
+        &quot;&quot;&quot;Likes the given post.&quot;&quot;&quot;
+        return self.put_object(object_id, &quot;likes&quot;)
+
+    def delete_object(self, id):
+        &quot;&quot;&quot;Deletes the object with the given ID from the graph.&quot;&quot;&quot;
+        self.request(id, post_args={&quot;method&quot;: &quot;delete&quot;})
+
+    def request(self, path, args=None, post_args=None):
+        &quot;&quot;&quot;Fetches the given path in the Graph API.
+
+        We translate args to a valid query string. If post_args is given,
+        we send a POST request to the given path with the given arguments.
+        &quot;&quot;&quot;
+        if not args: args = {}
+        if self.access_token:
+            if post_args is not None:
+                post_args[&quot;access_token&quot;] = self.access_token
+            else:
+                args[&quot;access_token&quot;] = self.access_token
+        post_data = None if post_args is None else urllib.urlencode(post_args)
+        file = urllib.urlopen(&quot;https://graph.facebook.com/&quot; + path + &quot;?&quot; +
+                              urllib.urlencode(args), post_data)
+        try:
+            response = _parse_json(file.read())
+        finally:
+            file.close()
+        if response.get(&quot;error&quot;):
+            raise GraphAPIError(response[&quot;error&quot;][&quot;type&quot;],
+                                response[&quot;error&quot;][&quot;message&quot;])
+        return response
+
+
+class GraphAPIError(Exception):
+    def __init__(self, type, message):
+        Exception.__init__(self, message)
+        self.type = type
+
+
+##### NEXT TWO FUNCTIONS PULLED FROM https://github.com/jgorset/facepy/blob/master/facepy/signed_request.py
+
+import base64
+import hmac
+
+
+def urlsafe_b64decode(str):
+    &quot;&quot;&quot;Perform Base 64 decoding for strings with missing padding.&quot;&quot;&quot;
+
+    l = len(str)
+    pl = l % 4
+    return base64.urlsafe_b64decode(str.ljust(l+pl, &quot;=&quot;))
+
+
+def parse_signed_request(signed_request, secret):
+    &quot;&quot;&quot;
+    Parse signed_request given by Facebook (usually via POST),
+    decrypt with app secret.
+
+    Arguments:
+    signed_request -- Facebook's signed request given through POST
+    secret -- Application's app_secret required to decrpyt signed_request
+    &quot;&quot;&quot;
+
+    if &quot;.&quot; in signed_request:
+        esig, payload = signed_request.split(&quot;.&quot;)
+    else:
+        return {}
+
+    sig = urlsafe_b64decode(str(esig))
+    data = _parse_json(urlsafe_b64decode(str(payload)))
+
+    if not isinstance(data, dict):
+        raise SignedRequestError(&quot;Pyload is not a json string!&quot;)
+        return {}
+
+    if data[&quot;algorithm&quot;].upper() == &quot;HMAC-SHA256&quot;:
+        if hmac.new(secret, payload, hashlib.sha256).digest() == sig:
+            return data
+
+    else:
+        raise SignedRequestError(&quot;Not HMAC-SHA256 encrypted!&quot;)
+
+    return {}
+
+
+
+def get_user_from_cookie(cookies, app_id, app_secret):
+    &quot;&quot;&quot;Parses the cookie set by the official Facebook JavaScript SDK.
+
+    cookies should be a dictionary-like object mapping cookie names to
+    cookie values.
+
+    If the user is logged in via Facebook, we return a dictionary with the
+    keys &quot;uid&quot; and &quot;access_token&quot;. The former is the user's Facebook ID,
+    and the latter can be used to make authenticated requests to the Graph API.
+    If the user is not logged in, we return None.
+
+    Download the official Facebook JavaScript SDK at
+    http://github.com/facebook/connect-js/. Read more about Facebook
+    authentication at http://developers.facebook.com/docs/authentication/.
+    &quot;&quot;&quot;
+
+    cookie = cookies.get(&quot;fbsr_&quot; + app_id, &quot;&quot;)
+    if not cookie:
+        return None
+
+    response = parse_signed_request(cookie, app_secret)
+    if not response:
+        return None
+
+    args = dict(
+        code = response['code'],
+        client_id = app_id,
+        client_secret = app_secret,
+        redirect_uri = '',
+    )
+
+    file = urllib.urlopen(&quot;https://graph.facebook.com/oauth/access_token?&quot; + urllib.urlencode(args))
+    try:
+        token_response = file.read()
+    finally:
+        file.close()
+
+    access_token = cgi.parse_qs(token_response)[&quot;access_token&quot;][-1]
+
+    return dict(
+        uid = response[&quot;user_id&quot;],
+        access_token = access_token,
+    )
+</pre>
+
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/facebook">facebook</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/python">python</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/oauth">oauth</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

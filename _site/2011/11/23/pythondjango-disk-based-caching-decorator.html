@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Python/Django&#58; disk based caching decorator</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2011/11/23/pythondjango-disk-based-caching-decorator.html" />
+
+        <meta property="og:title" content="Python/Django&#58; disk based caching decorator"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2011/11/23/pythondjango-disk-based-caching-decorator.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Python/Django&#58; disk based caching decorator
+                            
+                                <span class="post-date subtitle">23 Nov 2011</span>
+                            
+                        </h1>
+                    
+                    <p>
+One of the great things about Django's caching framework is that you can cache complex objects. Say you have a list of dictionaries representing favorite movies from Netflix. You can jam that sucker right into the cache as is. No need to normalize it into a relational database schema, unless you actually need to deal with it relationaly.
+</p>
+
+<p>
+The most popular Django cache back-end is memcached. If you do such caching a lot, you will eventually run into a limit on the maximum size of those objects, <a href="http://code.google.com/p/memcached/wiki/FAQ#Why_are_items_limited_to_1_megabyte_in_size?">which is 1MB</a>. Now, you could just up the configured limit. But you need to worry about potentially kicking other items out of the cache early as you increase the average cached object's size.
+</p>
+
+<p>
+In the case of Netflix movies, maybe the speed of the cache isn't important. If you're just caching them to save an API hit, and you only need the data occasionally, maybe you can get away to caching to disk. This will keep the hit rate on your regular cache high.
+</p>
+
+<p>
+Here is a quick a dirty decorator that takes any object that pickle can serialize, and writes it to a file. Subsequent calls to the decorator just bring backed the cached object for a configurable duration of time.
+</p>
+
+<pre name="code" class="python">
+def cache_disk(seconds = 900, cache_folder=&quot;/tmp&quot;):
+    def doCache(f):
+        def inner_function(*args, **kwargs):
+
+            # calculate a cache key based on the decorated method signature
+            key = sha1(str(f.__module__) + str(f.__name__) + str(args) + str(kwargs)).hexdigest()
+            filepath = os.path.join(cache_folder, key)
+
+            # verify that the cached object exists and is less than $seconds old
+            if os.path.exists(filepath):
+                modified = os.path.getmtime(filepath)
+                age_seconds = time.time() - modified
+                if age_seconds &lt; seconds:
+                    return pickle.load(open(filepath, &quot;rb&quot;))
+
+            # call the decorated function...
+            result = f(*args, **kwargs)
+
+            # ... and save the cached object for next time
+            pickle.dump(result, open(filepath, &quot;wb&quot;))
+
+            return result
+        return inner_function
+    return doCache
+</pre>
+
+<p>
+You can then wrap any function in this decorator to cache the results to disk.
+</p>
+
+<pre name="code" class="python">
+@cache_disk(seconds = 900, cache_folder=&quot;/tmp&quot;):
+def get_netflix_favorites(account_id):
+   ... do somthing really expensive
+   return {
+      "account_id": account_id,
+      "data": {
+           ... more stuff here
+      }
+   }
+</pre>
+
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/django">django</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/python">python</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

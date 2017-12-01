@@ -1,0 +1,19 @@
+Sources:
+chrome://history/
+Wiki recent pages
+PRs
+Podcasts listened to
+https://getpocket.com/a/queue/
+recently changed .txt notes
+OSX notes
+Rands Slack
+
+Ideas:
+celery rant (dupes, tasks stop processing)
+test flight sucks - just go in the app store
+meeting hours/blocks of time ideal world
+  no meeting days vs. bands
+remote team members
+timebox
+max direct reports
+financials: insurance, credit cards vs. debit, 529, 

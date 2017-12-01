@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Mint.com backup</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2009/02/16/mintcom-backup.html" />
+
+        <meta property="og:title" content="Mint.com backup"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2009/02/16/mintcom-backup.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Mint.com backup
+                            
+                                <span class="post-date subtitle">16 Feb 2009</span>
+                            
+                        </h1>
+                    
+                    <p>
+<a href="http://www.mint.com/">Mint.com</a> is a <i>great</i> personal finance tool. I started using it once I made the switch to Linux at home. I used to use Quicken, but I really didn't want to configure WINE for that one application. Besides, Quicken is getting really crusty; it looks like it's still the same codebase from the Windows 95 days.
+</p>
+
+<p>
+My only gripe with Mint is that your data is "in the cloud". I want a local copy! Mint has a handy link that you can use at the bottom of your transaction list to download a CSV copy. But I wanted to automate it...
+</p>
+
+</p>
+Want to backup Mint.com? Here is a quick Python script to download your entire transaction history into a CSV file.
+</p>
+
+<pre name="code" class="python">
+import os
+import urllib
+import urllib2
+import cookielib
+from optparse import OptionParser
+import datetime
+
+class mintlib():
+    
+    def __init__(self):
+        self.opener = urllib2.build_opener(urllib2.HTTPCookieProcessor())  # need cookies for the JSESSION ID
+        urllib2.install_opener(self.opener)
+    
+    def login(self, username, password):
+        request = urllib2.Request(&quot;https://wwws.mint.com/loginUserSubmit.xevent?task=L&quot;,  urllib.urlencode(locals()))
+        request.add_header(&quot;User-Agent&quot;, &quot;Mozilla/5.0&quot;) # Mint kicks to a &quot;Upgrade to IE 7.0&quot; page without this
+        response = self.opener.open(request)
+        
+    def download(self, file):
+        # write CSV file of all Mint transactions for this account to a file
+        response = self.opener.open(&quot;https://wwws.mint.com/transactionDownload.event?&quot;) 
+        open(file, &quot;w&quot;).write(response.read())
+        
+    def logout(self):
+        response = self.opener.open(&quot;https://wwws.mint.com/logout.event&quot;)         
+
+def getOptions():
+    arguments = OptionParser()
+    arguments.add_options([&quot;--username&quot;, &quot;--password&quot;, &quot;--file&quot;])
+    arguments.set_default(&quot;file&quot;, &quot;mint_backup_%s.csv&quot; % str(datetime.date.today()))
+    return arguments.parse_args()[0] # options
+
+if __name__ == '__main__':    
+    options = getOptions()
+    mint = mintlib()
+    mint.login(options.username, options.password)
+    mint.download(options.file)
+    print &quot;Done&quot;
+</pre>
+
+The command to run it looks like:
+
+<pre>
+python mint.py --username=foo --password=bar
+</pre>
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/python">python</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

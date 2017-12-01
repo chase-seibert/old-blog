@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Too cute&#58; Django schema migration tools</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2010/02/05/too-cute-django-schema-migration-tools.html" />
+
+        <meta property="og:title" content="Too cute&#58; Django schema migration tools"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2010/02/05/too-cute-django-schema-migration-tools.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Too cute&#58; Django schema migration tools
+                            
+                                <span class="post-date subtitle">05 Feb 2010</span>
+                            
+                        </h1>
+                    
+                    <p>
+Like Ruby on Rails, Django uses a model API to abstract the database layer. A command-line script creates schema for new object definitions. Unlike Ruby on Rails, Django did not ship with a way to modify existing schema as your models change.
+</p>
+
+<p>
+Many projects have sprung up trying to fill this void. After watching a <a href="http://www.youtube.com/watch?gl=AU&hl=en-GB&v=VSq8m00p1FM">video</a> on a presentation by some of the early contenders, I choose <a href="http://code.google.com/p/django-evolution/">django-evolution</a> for my current project, mainly because the presenter was also a Django core developer, and came off as more of a <a href="http://blogs.microsoft.co.il/blogs/tamir/archive/2008/04/28/computer-languages-and-facial-hair-take-two.aspx">beard developer</a> than the others.
+</p>
+
+<p>
+Getting started was very easy. For the most part, migrations were smooth. But occasionally, I would hit a bug in the evolution framework. Sometimes it would be an unsupported operation, like changing a column from and int to a float. Sometimes it would be a bug related to my particular database (MySQL). Sometimes I had no idea what was wrong. You would just get a stack-trace, and have to track it down from there.
+</p>
+
+<pre name="code" class="python">
+var/lib/python-support/python2.6/MySQLdb/__init__.py:34: DeprecationWarning: the sets module is deprecated
+  from sets import ImmutableSet
+Traceback (most recent call last):
+  File "./manage.py", line 11, in &lt;module&gt;
+    execute_manager(settings)
+  File "/var/lib/python-support/python2.6/django/core/management/__init__.py", line 340, in execute_manager
+    utility.execute()
+  File "/var/lib/python-support/python2.6/django/core/management/__init__.py", line 295, in execute
+    self.fetch_command(subcommand).run_from_argv(self.argv)
+  File "/var/lib/python-support/python2.6/django/core/management/base.py", line 192, in run_from_argv
+    self.execute(*args, **options.__dict__)
+  File "/var/lib/python-support/python2.6/django/core/management/base.py", line 219, in execute
+    output = self.handle(*args, **options)
+  File "/usr/local/lib/python2.6/dist-packages/django_evolution/management/commands/evolve.py", line 87, in handle
+    hinted_evolution = diff.evolution()
+  File "/usr/local/lib/python2.6/dist-packages/django_evolution/diff.py", line 197, in evolution
+    changed_attrs[prop] = current_field_sig.get(prop, ATTRIBUTE_DEFAULTS[prop])
+KeyError: 'field_type'
+</pre>
+
+<p>
+After spending a couple hours tracking down an similar issue that was actually blocking a QA deploy, I noticed that the django-evolution mainline had only had <a href="http://code.google.com/feeds/p/django-evolution/svnchanges/basic">two check-ins</a> in the entire year of 2009. That was when I realised that I picked a winner without looking at which project was actually being actively supported.
+</p>
+
+<p>
+I briefly looked at both <a href="http://south.aeracode.org/">South</a> and <a href="http://code.google.com/p/dmigrations/">dmigrations</a>. But then I thought about the solution we use on non-Django code-bases; manual scripts. Sure, they are a little more work and they were somewhat inelegant. But they can do absolutely any data migration, and I don't remember one ever blocking a QA deploy for more than a few minutes.
+</p>
+
+<p>
+That's the core of my issue with these solutions. They are trying to be "cute", and provide a gee-wiz solution to a problem that is more of an annoyance than anything. But the most critical part of a database migration scheme is reliability. If there is even a small chance that it screws up a deploy or (god forbid) actually messes up data, then it's just not worth the time savings.
+</p>
+
+<p>
+Since moving back to sequential, numbered SQL files, we had no problems deploying schema changes. Of course, we are missing out on true database independence, but I figure we can always use syncdb to generate the entire schema from scratch if we ever do change databases.
+</p>
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>HBase Schema Introduction for Programmers</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2013/04/26/hbase-schema-design.html" />
+
+        <meta property="og:title" content="HBase Schema Introduction for Programmers"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2013/04/26/hbase-schema-design.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            HBase Schema Introduction for Programmers
+                            
+                                <span class="post-date subtitle">26 Apr 2013</span>
+                            
+                        </h1>
+                    
+                    <p>Schema design in NoSQL is very different from schema design in a RDBMS. Once you get something like HBase <a href="http://chase-seibert.github.io/blog/2013/02/01/getting-starting-with-hbase-and-pig.html">up and running</a>, you may find yourself staring blankly at a shell, lost in the possibilities of creating your first table.</p>
+
+<p>You&#39;re probably used to thinking of tables like this:</p>
+
+<table>
+    <thead>
+        <th>rowkey</th>
+        <th>title</th>
+        <th>url</th>
+        <th>clicks</th>
+        <th>clicks_twitter</th>
+        <th>clicks_facebook</th>
+    </thead>
+    <tr>
+        <td>fcb75-bit.ly/Z0pngZ</td>
+        <td>Some Page</td>
+        <td>http://www.example.com</td>
+        <td>16</td>
+        <td>13</td>
+        <td>3</td>
+    </tr>
+    <tr>
+        <td>fb499-bit.ly/15C2TLF</td>
+        <td>null</td>
+        <td>null</td>
+        <td>1</td>
+        <td>null</td>
+        <td>null</td>
+    </tr>
+</table>
+
+<p>In HBase, this is actually modelled like this:</p>
+
+<p><img src="/blog/images/hbase_tables.png" alt="HBase Table Shema"></p>
+
+<p>Notice that each row is basically a linked list, ordered by column family and then column name. This is how it&#39;s laid down on disk, as well. Missing columns are free, because there is no space on disk pre-allocated to a null column. Given that, it&#39;s reasonable to design a schema where rows have hundreds or thousands of columns.</p>
+
+<p>Just as columns are laid down on disk like a linked list, so too are rows. They are put on disk in order by row key. Because row keys can by any collection of bytes, ordering of row keys is <a href="http://en.wikipedia.org/wiki/Lexicographical_order">lexicographical</a>, aka alphabetical. This is in contrast to most RDBMS, where rowkeys are integers and ordered as such.</p>
+
+<p>Consider the following row key order: <code>1 &lt; 256 &lt; 43 &lt; 7</code>. The row key <code>265</code> is actually before <code>43</code>, because <code>2</code> comes before <code>4</code>. This is why it&#39;s common in HBase to make at least parts of your row key fixed width, ex: <code>00000001 &lt; 00000007 &lt; 00000043 &lt; 00000256</code>. However, now we have another problem known as hot spotting.</p>
+
+<p>If all your row keys start with the same value, then they will all be going to the same region, and thus the same server. This could easily happen for monotonically increasing row keys, such as traditional RDBMS auto-incrementing PKs, or for timestamps. This can cause all the load for a big write job to block waiting for a single region server, versus spreading out the writes to the whole cluster. A common way to avoid this is to prefix row keys, for example by the md5 hash of the customer ID.</p>
+
+<p>Rows can most efficiently be read back by scanning for consecutive blocks. Say you have a table with a rowkey of <code>customer-date-user</code>. You can easily read back all the data for a given customer and date range using the prefix <code>customer-first-part-of-date</code>, but you can&#39;t easily read back dates ranges for all users at once without scanning all the rows. If you reverse the row key and use <code>customer-user-date</code>, you have the reverse problem. So you want to think about what your primary read pattern is going to be when designing your keys. </p>
+
+<p>Say your primary read patten is going to be reading off the most recent rows. Depending on the format of the dates in your row keys, you may end up with the more recent data at the end of the table. For example: <code>20130101 &gt; 20130102 &gt; 20130303</code>. Instead, a common pattern is to invert your dates, such as <code>79869898 &gt; 79869897 &gt; 798698986</code>. This may not apply if you will know at run time the range of values that will be the most recent, i.e. the last 30 days.</p>
+
+<p>For more about HBase schema design, I recommend the online <a href="http://hbase.apache.org/book.html">HBase Reference Book</a>, as well as the excellent <a href="http://www.amazon.com/HBase-Definitive-Guide-Lars-George/dp/1449396100">HBase: The Definitive Guide</a>.</p>
+
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/hbase">hbase</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

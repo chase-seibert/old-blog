@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>How to write effective unit tests</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2015/07/02/what-to-unit-test.html" />
+
+        <meta property="og:title" content="How to write effective unit tests"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2015/07/02/what-to-unit-test.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            How to write effective unit tests
+                            
+                                <span class="post-date subtitle">02 Jul 2015</span>
+                            
+                        </h1>
+                    
+                    <p>Unit tests differs from integration testing primarily in terms of what you&#39;re testing for. Where as with integration tests, you testing for whether the entire system behaves as expected when put together, with unit tests, your goal is simply to enable refactoring with confidence. Ideally, when you refactor something and it&#39;s broken, at least one unit test fails. But when you refactor something and it&#39;s working, unit tests pass.</p>
+
+<p>Integration tests are naturally  <em>high leverage</em>; you can typically test a large swath of functionality with not much code. But they also are typically slower to run, test fewer edge cases and tend to not give you a very good idea of what is broken when they fail. To make sure your unit tests are complimentary, you want to make sure they are fast, test many edge cases, and test only one thing so you know what&#39;s broken when they fail.</p>
+
+<h2>What not to do</h2>
+
+<p>It&#39;s common to have a large set of unit tests written that don&#39;t actually add much value. If you have many unit tests testing the same thing implicitly, then they will all fail at the same time. For example, you&#39;re testing all your Flask views, and many of them have a decorator to test if the user is logged in. If you break that decorator, many tests will fail. Ideally, you want to test the decorator itself in one set of tests, and then have the rest of your tests mock that out.</p>
+
+<p>In the later case, what happens when you go to refactor how login works? Hopefully, you only have to update a handful of tests. Going through the process of mocking things out and only testing one unit at a time will also improve the quality of the code itself. You will see how your components could be designed better for separation of concerns, so that they are testable separately.</p>
+
+<p>Some common anti-patterns:</p>
+
+<ul>
+<li>Unit tests for one unit of code allow that code to actually call into all it&#39;s dependencies</li>
+<li>Unit tests load a large database before they start</li>
+<li>Unit tests are slow, so you hate adding more and running them</li>
+<li>Assert on many things in one test, or assert on an entire nested JSON object, which is the same thing
+
+<ul>
+<li>Just think of what will happen if you ever change that JSON schema</li>
+</ul></li>
+<li>Forget to test branches in your code&#39;s logic</li>
+<li>Tests are verbose</li>
+</ul>
+
+<h2>What to do, instead</h2>
+
+<ul>
+<li>Mock other parts of the code base</li>
+<li>Mock database access when you can
+
+<ul>
+<li>or, make sure database access in your tests is fast to setup and reset between tests</li>
+<li>you can leverage database transactions for this</li>
+</ul></li>
+<li>Devise a mechanism to run just one test, or a small set of tests, on demand</li>
+<li>Every logical branch in your code gets its own unit test</li>
+<li>Tests employ same DRY principles as any other code</li>
+</ul>
+
+<h2>Example: a Flask app</h2>
+
+<p>Here is an example Flask app with a fictional ORM layer.</p>
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span>
+<span class="kn">from</span> <span class="nn">flask.json</span> <span class="kn">import</span> <span class="n">jsonify</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s">&#39;/user/&lt;int:user_id&#39;</span><span class="o">&gt;/</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">get_user</span><span class="p">(</span><span class="n">user_id</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s">&#39;error&#39;</span><span class="p">:</span> <span class="s">&#39;You are not logged in&#39;</span><span class="p">})</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="n">User</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">user_id</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">NotFoundError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s">&#39;error&#39;</span><span class="p">:</span> <span class="n">e</span><span class="p">})</span>
+    <span class="k">return</span> <span class="n">jsonify</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">user</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">user</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">email</span><span class="o">=</span><span class="n">user</span><span class="o">.</span><span class="n">email</span><span class="p">))</span>
+</code></pre></div>
+<p>What tests would you want to write for this code, and how would they keep isolated from the rest of your code?</p>
+
+<ul>
+<li>Test that if you make do a <code>GET /user/1</code> that your view is called with a <code>user_id</code> of 1.
+
+<ul>
+<li>You <em>don&#39;t</em> need to test <code>@app.route</code> per say, but you do need to test that the part you have customized (the URL) is working.</li>
+<li>Test what happens when you call this route with a non-integer.</li>
+<li>Just verify that <code>get_user</code> is called with the right parameter, do NOT execute the body in this test. If you did, a breakage there would fail this test as well as subsequent tests.</li>
+<li>For example, what if you misspelled <code>/user</code>, or forgot to specify that <code>user_id</code> was an <code>int</code>.</li>
+</ul></li>
+<li>Test what gets returned if <code>request.user</code> is NOT defined. That&#39;s a branch in your code.
+
+<ul>
+<li>If you turned that into a decorator, you would just want to verify that the decorator executed, but you could defer the testing of the logic to tests for that component. This is an example of improving your component design via testing.</li>
+</ul></li>
+<li>Test what happens if the <code>user_id</code> is not found.</li>
+<li>Test the return value of a successful call.
+
+<ul>
+<li>Again, this could be made better by having a <code>User.to_json()</code> method which is tested separately.</li>
+<li>In that case, you would just assert that the return value is equal to <code>User.to_json()</code>, not what the actual JSON is.</li>
+</ul></li>
+</ul>
+
+<p>For some of these test cases, you will need to actually create a record in the database for that <code>user_id</code> first. Your testing framework should give you a convenient place to do that. Again, the best way to do that is to write code to create just the record you need for this set of tests, versus running your tests against a full database backup. The later can be quite hard to maintain, and is generally slower.</p>
+
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/testing">testing</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>

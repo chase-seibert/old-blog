@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <title>Enabling SOLR autocommit with a custom Haystack backend</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="icon" href="/blog/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/blog/favicon.ico" type="image/x-icon">
+
+        <link href="/blog/css/bootstrap.css" rel="stylesheet">
+        <link href="/blog/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/blog/css/pygments.css" rel="stylesheet">
+
+        <link href="/blog/css/base.css" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
+
+        <link href="/blog/atom.xml" rel="alternate" title="Chase Seibert | blog" type="application/atom+xml" />
+
+        <link rel="canonical" href="/blog/2014/07/02/haystack-solr-autocommit.html" />
+
+        <meta property="og:title" content="Enabling SOLR autocommit with a custom Haystack backend"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:url" content="http://chase-seibert.github.com/blog/2014/07/02/haystack-solr-autocommit.html"/>
+        <meta property="og:site_name" content="Chase Seibert | blog"/>
+        <meta property="fb:admins" content="692280244"/>
+        <meta property="og:description" content="Facts, hacks and attacks from my life as a web application developer" />
+
+    </head>
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="span2">
+                </div>
+
+                <div class="span8 content">
+                    
+                        <h1>
+                            Enabling SOLR autocommit with a custom Haystack backend
+                            
+                                <span class="post-date subtitle">02 Jul 2014</span>
+                            
+                        </h1>
+                    
+                    <p>By default <a href="http://haystacksearch.org/">Django Haystack</a> makes updates to your Solr index available for
+searching immediately. It does this in the simplest way possible, it commits every single update individually.
+That can be quite slow. I have an index with 35 million records, and under heavy write load commits of 1,000
+records can slow down and take up to 5 seconds for each chunk. In extreme cases, Solr can refuse to accept
+that much write load at once, and throw an exception like the following:</p>
+
+<figure class="highlight"><pre><code class="language-xml" data-lang="xml"><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span>
+<span class="nt">&lt;response&gt;</span>
+    <span class="nt">&lt;lst</span> <span class="na">name=</span><span class="s">&quot;responseHeader&quot;</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;int</span> <span class="na">name=</span><span class="s">&quot;status&quot;</span><span class="nt">&gt;</span>503<span class="nt">&lt;/int&gt;</span>
+        <span class="nt">&lt;int</span> <span class="na">name=</span><span class="s">&quot;QTime&quot;</span><span class="nt">&gt;</span>1492<span class="nt">&lt;/int&gt;</span>
+    <span class="nt">&lt;/lst&gt;</span>
+    <span class="nt">&lt;lst</span> <span class="na">name=</span><span class="s">&quot;error&quot;</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;str</span> <span class="na">name=</span><span class="s">&quot;msg&quot;</span><span class="nt">&gt;</span>Error opening new searcher. exceeded limit of maxWarmingSearchers=2, try again later.<span class="nt">&lt;/str&gt;</span>
+        <span class="nt">&lt;int</span> <span class="na">name=</span><span class="s">&quot;code&quot;</span><span class="nt">&gt;</span>503<span class="nt">&lt;/int&gt;</span>
+    <span class="nt">&lt;/lst&gt;</span>
+<span class="nt">&lt;/response&gt;</span></code></pre></figure>
+
+<p>Investigating this error, I turned up a <a href="http://stackoverflow.com/questions/7512945/solr-error-opening-new-searcher-exceeded-limit-of-maxwarmingsearchers-2-try">Stackoverflow post</a>
+basically saying to not make so many commits. That turned up a <a href="https://github.com/toastdriven/django-haystack/pull/624">Haystack pull request</a>
+to make manual commits optional.</p>
+
+<p>You can see the basic issue by looking at the logs that Haystack creates each time it issues a write request to the
+Solr REST API:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">Finished <span class="s1">&#39;http://localhost:8080/solr/my_index/update/?commit=true&#39;</span> <span class="o">(</span>post<span class="o">)</span> with body <span class="s1">&#39;u&#39;</span>&lt;add&gt;...<span class="err">&#39;</span> in 0.010 seconds.</code></pre></figure>
+
+<p>As of Solr 4.0, we have much more performant options for bulk indexing. A <a href="http://wiki.apache.org/solr/NearRealtimeSearch">common setup</a>
+is to use <code>autocommit</code> (set by default to 15 seconds) and abstain from manually committing by passing <code>commit=false</code> on
+the REST API URL. Though Haystack supports passing a commit boolean to the various back-end implementations of <code>update</code>,
+<code>remove</code> and <code>clear</code>, this parameter is never explicitly set. Instead, you can <a href="http://www.wellfireinteractive.com/blog/custom-haystack-elasticsearch-backend/">implement your own</a>
+search back-end subclass to pass this value.</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">haystack.backends.solr_backend</span> <span class="kn">import</span> <span class="n">SolrEngine</span><span class="p">,</span> <span class="n">SolrSearchBackend</span>
+
+
+<span class="k">class</span> <span class="nc">AutoCommitSolrSearchBackend</span><span class="p">(</span><span class="n">SolrSearchBackend</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">iterable</span><span class="p">,</span> <span class="n">commit</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">AutoCommitSolrSearchBackend</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">iterable</span><span class="p">,</span> <span class="n">commit</span><span class="o">=</span><span class="n">commit</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">remove</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj_or_string</span><span class="p">,</span> <span class="n">commit</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">AutoCommitSolrSearchBackend</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">obj_or_string</span><span class="p">,</span> <span class="n">commit</span><span class="o">=</span><span class="n">commit</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">models</span><span class="o">=</span><span class="p">[],</span> <span class="n">commit</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">AutoCommitSolrSearchBackend</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">clear</span><span class="p">(</span><span class="n">models</span><span class="p">,</span> <span class="n">commit</span><span class="o">=</span><span class="n">commit</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">AutoCommitSolrEngine</span><span class="p">(</span><span class="n">SolrEngine</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; the built-in Solr engine in Haystack performs a manual commit after each update/add/remove/clear. This</span>
+<span class="sd">    is really slow. Solr is configured by default to auto-commit changes every 15 seconds, so there is no need to</span>
+<span class="sd">    commit manually on every update.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">backend</span> <span class="o">=</span> <span class="n">AutoCommitSolrSearchBackend</span></code></pre></figure>
+
+<p>Then you can use this new <code>AutoCommitSolrEngine</code> in your <code>HAYSTACK_CONNECTIONS</code> setting.</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">HAYSTACK_CONNECTIONS</span> <span class="o">=</span> <span class="p">{</span>
+     <span class="s">&#39;default&#39;</span><span class="p">:</span> <span class="p">{</span>
+         <span class="s">&#39;ENGINE&#39;</span><span class="p">:</span> <span class="s">&#39;myapp.serach.AutoCommitSolrEngine&#39;</span><span class="p">,</span>
+         <span class="s">&#39;URL&#39;</span><span class="p">:</span> <span class="s">&#39;http://localhost:8080/solr/my_index&#39;</span><span class="p">,</span>
+     <span class="p">}</span>
+<span class="p">}</span></code></pre></figure>
+
+<p><strong>Note: By default, indexed items will not show up in searches right away. That&#39;s what soft-commit is for.</strong></p>
+
+<blockquote>
+<p>Hard commits are about durability, soft commits are about visibility. <a href="http://searchhub.org/2013/08/23/understanding-transaction-logs-softcommit-and-commit-in-sorlcloud/">Understanding Transaction Logs, Soft Commit and Commit in SolrCloud - Erick Erickson</a></p>
+</blockquote>
+
+<p>To make your auto-committed items available to search in a timely fashion, you must set a <code>autoSoftCommit.maxTime</code>
+in your Solr config. This is <em>NOT</em> set by default.</p>
+
+<figure class="highlight"><pre><code class="language-xml" data-lang="xml">    <span class="c">&lt;!-- softAutoCommit is like autoCommit except it causes a</span>
+<span class="c">         &#39;soft&#39; commit which only ensures that changes are visible</span>
+<span class="c">         but does not ensure that data is synced to disk.  This is</span>
+<span class="c">         faster and more near-realtime friendly than a hard commit.</span>
+<span class="c">      --&gt;</span>
+    <span class="nt">&lt;autoSoftCommit&gt;</span>
+      <span class="nt">&lt;maxTime&gt;</span>1000<span class="nt">&lt;/maxTime&gt;</span>
+    <span class="nt">&lt;/autoSoftCommit&gt;</span></code></pre></figure>
+
+<p>Alternately, you can set <code>autoCommit.openSearcher</code> to <code>true</code>, which will cause a new searcher worker to be instantiated
+every time you auto-commit. This could slow down the first searches that come in after an auto commit, however.</p>
+
+
+<br>
+
+<hr>
+
+<p>
+    I'm currently working at <a href='http://www.nerdwallet.com'>NerdWallet</a>, a startup in San Francisco trying to bring clarity to all of life's financial decisions. We're <a href='http://grnh.se/yv3m2c'>hiring like crazy</a>. Hit me up on Twitter, I would love to talk.
+</p>
+
+Follow <a href='https://twitter.com/chase_seibert'>@chase_seibert</a> on Twitter
+
+
+
+                </div>
+
+                <div class="span2">
+
+                    <h2 class="title"><a href="/blog/index.html">Chase Seibert</a></h2>
+                    <p class="sub-title">
+                        Facts, hacks and attacks from my life as a web application developer
+                    </p>
+
+                    <a href="http://stackexchange.com/users/4942/chase-seibert" class="stackoverflow"><img src="http://stackexchange.com/users/flair/4942.png" width="208" height="58" alt="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for Chase Seibert on Stack Exchange, a network of free, community-driven Q&amp;A sites" /></a>
+
+                    <br><br>
+
+                    
+                        <div class="tags">
+                            <h4>Tags</h4>
+                            <ul>
+                                
+                                    <li>
+                                        <a href="/blog/tag/python">python</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/haystack">haystack</a>
+                                    </li>
+                                
+                                    <li>
+                                        <a href="/blog/tag/solr">solr</a>
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div id="favorites">
+                        <h4>My Favorites</h4>
+                        <ul>
+                            <li><a href="/blog/tag/reading-list/">Posts for new team members</a></li>
+                            <li><a href="/blog/tag/manager/">Posts for new managers</a></li>
+                            <li><a href="/blog/tag/newboss/">Posts for new bosses</a></li>
+                            <li><a href="/blog/2015/04/13/reading-list.html">Recommended third party articles</a></li>
+                        </ul>
+                    </div>
+
+                    
+                        <div id="related">
+                            <h4>Related Posts</h4>
+                            <ul class="posts">
+                                
+                                    <li><a href="/blog/2017/11/29/tracking-your-time.html">Tracking Your Time</a></li>
+                                
+                                    <li><a href="/blog/2017/10/06/two-more-weeks-in-qa.html">Two (more) Weeks in QA</a></li>
+                                
+                                    <li><a href="/blog/2017/09/11/say-it-multiple-times.html">Saying the Same Thing Multiple Times</a></li>
+                                
+                            </ul>
+                        </div>
+                    
+
+                    <div class="socials">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li><a href="https://www.linkedin.com/in/chaseseibert">LinkedIn</a></li>
+                            <li><a href="https://www.facebook.com/chase.seibert">Facebook</a></li>
+                            <li><a href="https://twitter.com/chase_seibert">Twitter</a></li>
+                            <li><a href="https://dl.dropbox.com/u/422013/resume.pdf">Resume</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-34759164-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+             })();
+
+        </script>
+    </body>
+</html>
