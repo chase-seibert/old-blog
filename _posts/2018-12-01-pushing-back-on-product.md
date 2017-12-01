@@ -39,7 +39,7 @@ these principles are so widespread; they work.
 
 - Stack rank the work items. Focus your energy on trying to cut items that are
 the lowest priority for the product owner.
-- Have a stable velocity. If you're team has been running for a while, you
+- Have a stable velocity. If your team has been running for a while, you
 hopefully have predictable velocity and accurate estimates. In that case, it's
 simple math as to how many stories you can do. Remember, you can
 [estimate epics](http://chase-seibert.github.io/blog/2017/08/28/epic-story-estimation.html), too.
@@ -83,7 +83,7 @@ to pull people off for? Are you accounting for interrupt driven work?
 ## The Consolidator
 
 If you have more work items than engineers, consider having an engineer
-focus on on task at a time. In many cases it would be better to go deeper on
+focus on one task at a time. In many cases it would be better to go deeper on
 high priority items in the backlog versus doing more discrete items. More
 applicable to roadmap planning than sprint planning.
 
