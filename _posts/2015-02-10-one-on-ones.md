@@ -67,3 +67,16 @@ motivational for you, or counter-productive?
 ## Other ideas
 
 One thing I like to do is change the scenery of a one on one. Taking a walk outside is a great idea. I also like to do a one on one over lunch occasionally. On the other hand, you definitely want to be in a traditional conference room if you need to give hard feedback, or have a tough conversation.
+
+# The Coaching Habit
+
+[Recommended reading](https://www.amazon.com/Coaching-Habit-Less-Change-Forever/dp/0978440749).
+The seven questions they recommend work well for one on ones, too:
+
+- What's on your mind?
+- And what else?
+- What's the real challenge here for you?
+- What do you want?
+- How can I help?
+- If you're saying yes to this, what are you saying no to?
+- What was most useful for you?
